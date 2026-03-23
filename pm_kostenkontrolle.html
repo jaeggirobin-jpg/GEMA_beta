@@ -534,7 +534,7 @@ el('btnDemo').addEventListener('click',()=>{
   state.progress=85;state.showMwst=false;state.print.datum=todayISO();state.print.user='';
   save();render();toast('✓ Demo-Daten geladen');
 });
-el('btnReset').addEventListener('click',()=>{if(!confirm('Wirklich alles zurücksetzen?'))return;_GemaDB.remove(SK);state=structuredClone(DS);save();render();toast('Reset');});
+el('btnReset').addEventListener('click',()=>{if(!confirm('Wirklich alles zurücksetzen?'))return;if(typeof _GemaDB!=='undefined')_GemaDB.remove(SK);state=structuredClone(DS);save();render();toast('Reset');});
 
 if(state.progress===null||state.progress===undefined)state.progress=0;
 render();
