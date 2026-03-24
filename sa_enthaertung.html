@@ -1042,7 +1042,7 @@ function toggleUnit(key, val) {
     const LABEL_DEFAULTS = {lbl_A:'A', lbl_B:'B', lbl_C:'C', lbl_D:'D', lbl_E:'E (Dauerverbraucher)', lbl_F:'F (Osmose)'};
 
     function resetForm() {
-        document.querySelectorAll('input[type="text"], input[type="number"]').forEach(inp => {
+        document.querySelectorAll('input[type="text"]').forEach(inp => {
             if (inp.id === 'salt_price') {
                 inp.value = "0.6";
             } else if (inp.id === 'v_F') {

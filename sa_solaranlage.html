@@ -970,7 +970,7 @@ function initButtons(){
   });
   document.getElementById('btn_reset').addEventListener('click',()=>{
     try{ if(typeof _GemaDB!=='undefined') _GemaDB.remove('gema_solar_v2'); }catch(e){}
-    document.querySelectorAll('input[type="number"]').forEach(el=>el.value='');
+    document.querySelectorAll('input[type="text"]').forEach(el=>el.value='');
     document.getElementById('klimastation').value='';
     recalc();
     toast('Eingaben zurückgesetzt');
