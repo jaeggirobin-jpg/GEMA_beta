@@ -823,6 +823,7 @@ function fixLeadingZero(el){
     <div id="pmBody" style="padding:20px;flex:1;overflow-y:auto"></div>
     <div style="padding:14px 20px;border-top:1.5px solid var(--border,#e2e8f0);display:flex;gap:8px;justify-content:flex-end">
       <button class="g-btn" onclick="document.getElementById('pkModal').style.display='none'">Schliessen</button>
+      <button class="g-btn" style="background:#f59e0b;color:#fff;border-color:#f59e0b" onclick="window._pkOfferteAnfragen()">📨 Offerte anfragen</button>
       <button class="g-btn" style="background:var(--accent,#2563eb);color:#fff;border-color:var(--accent,#2563eb)" onclick="uebernehmeAnlage()">✓ Anlage übernehmen</button>
     </div>
   </div>
@@ -861,20 +862,20 @@ function fixLeadingZero(el){
         inputName.oninput = recalc;
 
         const inputFlow = document.createElement("input");
-        inputFlow.type = "number";
-        inputFlow.step = "0.1";
-        inputFlow.min = "0";
+        inputFlow.type = "text";
+        inputFlow.inputMode = "decimal";
         inputFlow.placeholder = "l/h";
         inputFlow.value = flow;
         inputFlow.oninput = recalc;
+        inputFlow.onblur = function(){ fixLeadingZero(this); };
 
         const inputHours = document.createElement("input");
-        inputHours.type = "number";
-        inputHours.step = "0.1";
-        inputHours.min = "0";
+        inputHours.type = "text";
+        inputHours.inputMode = "decimal";
         inputHours.placeholder = "h/Tag";
         inputHours.value = hours;
         inputHours.oninput = recalc;
+        inputHours.onblur = function(){ fixLeadingZero(this); };
 
         const removeBtn = document.createElement("button");
         removeBtn.type = "button";
@@ -1363,6 +1364,59 @@ document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('osmo
     var t=document.createElement('div');t.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#059669;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
     t.textContent='✓ '+p.lieferantFirma+' '+(d.serie||'')+' '+(d.modell||'')+' übernommen';
     document.body.appendChild(t);setTimeout(function(){t.remove();},3000);
+  };
+
+  // ── Offertanfrage ──
+  window._pkOfferteAnfragen = function(){
+    if(!_selProdId) return;
+    var p = GemaProdukte.getProdukt(_selProdId);
+    if(!p) return;
+    var d = p.daten||{};
+    var projekt = document.getElementById('metaProjekt')?.value || '';
+    var objektId = document.getElementById('metaObjektDropdown')?.value || '';
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:950;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.innerHTML =
+      '<div style="background:var(--surface,#fff);border-radius:16px;max-width:520px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.2);overflow:hidden">' +
+        '<div style="padding:16px 20px;border-bottom:1.5px solid var(--border,#e2e8f0)">' +
+          '<div style="font-size:16px;font-weight:800">📨 Offertanfrage senden</div>' +
+          '<div style="font-size:12px;color:var(--muted,#6b7280);margin-top:4px">'+p.lieferantFirma+' \u00b7 '+(d.serie||'')+' '+(d.modell||'')+'</div>' +
+        '</div>' +
+        '<div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px">' +
+          '<div><label style="font-size:12px;font-weight:700;color:var(--muted,#6b7280);display:block;margin-bottom:4px">Projekt / Bauvorhaben</label>' +
+            '<input type="text" id="_oaProjekt" value="'+projekt.replace(/"/g,'&quot;')+'" style="width:100%;padding:8px 10px;border:1.5px solid var(--border2,#cdd4e4);border-radius:8px;font-size:13px;font-family:inherit"/></div>' +
+          '<div><label style="font-size:12px;font-weight:700;color:var(--muted,#6b7280);display:block;margin-bottom:4px">Frist (Tage)</label>' +
+            '<input type="text" inputmode="decimal" id="_oaFrist" value="14" onblur="fixLeadingZero(this)" style="width:120px;padding:8px 10px;border:1.5px solid var(--border2,#cdd4e4);border-radius:8px;font-size:13px;font-family:inherit"/></div>' +
+          '<div><label style="font-size:12px;font-weight:700;color:var(--muted,#6b7280);display:block;margin-bottom:4px">Nachricht (optional)</label>' +
+            '<textarea id="_oaMsg" rows="3" placeholder="z.B. Bitte Offerte inkl. Montage, Liefertermin..." style="width:100%;padding:8px 10px;border:1.5px solid var(--border2,#cdd4e4);border-radius:8px;font-size:13px;font-family:inherit;resize:vertical"></textarea></div>' +
+          '<div style="background:var(--bg,#f4f6fb);border-radius:8px;padding:10px;font-size:12px;color:var(--muted,#6b7280);line-height:1.5">' +
+            '<strong>Berechnungsergebnis:</strong> Permeat = '+(d.permeatleistung||'\u2014')+' l/h \u00b7 Recovery = '+(d.recovery||'\u2014')+'%</div>' +
+        '</div>' +
+        '<div style="padding:14px 20px;border-top:1.5px solid var(--border,#e2e8f0);display:flex;gap:8px;justify-content:flex-end">' +
+          '<button id="_oaCancel" style="padding:8px 16px;border-radius:8px;border:1.5px solid var(--border2,#cdd4e4);background:var(--surface,#fff);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--text)">Abbrechen</button>' +
+          '<button id="_oaSend" style="padding:8px 16px;border-radius:8px;border:none;background:#f59e0b;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📨 Anfrage senden</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    overlay.querySelector('#_oaCancel').addEventListener('click', function(){ overlay.remove(); });
+    overlay.querySelector('#_oaSend').addEventListener('click', function(){
+      GemaProdukte.createOffertanfrage({
+        lieferantId: p.lieferantId,
+        lieferantFirma: p.lieferantFirma,
+        produktId: p.id,
+        produktName: (d.serie||'')+' '+(d.modell||''),
+        kategorie: 'osmose',
+        berechnungswerte: { permeatleistung: d.permeatleistung, recovery: d.recovery },
+        projekt: { name: document.getElementById('_oaProjekt')?.value || '', ort: '', objektId: objektId },
+        nachricht: document.getElementById('_oaMsg')?.value || '',
+        fristTage: parseInt(document.getElementById('_oaFrist')?.value) || 14
+      });
+      overlay.remove();
+      document.getElementById('pkModal').style.display = 'none';
+      var t=document.createElement('div');t.style.cssText='position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#f59e0b;color:#fff;padding:12px 24px;border-radius:10px;font-size:13px;font-weight:700;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.2)';
+      t.textContent='📨 Offertanfrage an '+p.lieferantFirma+' gesendet';
+      document.body.appendChild(t);setTimeout(function(){t.remove();},4000);
+    });
   };
 
 })();
