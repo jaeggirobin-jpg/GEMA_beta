@@ -74,9 +74,12 @@ body {
 /* ── HERO ── */
 .hero {
   background: linear-gradient(145deg, #0c4a2e 0%, #14532d 30%, #166534 55%, #15803d 80%, #22c55e 100%);
-  padding: 72px 24px 80px;
+  padding: 48px 36px;
   position: relative;
   overflow: hidden;
+  border-radius: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.13), 0 4px 16px rgba(0,0,0,.06);
 }
 .hero::before {
   content: '';
@@ -311,7 +314,7 @@ body {
 
 /* ── RESPONSIVE ── */
 @media(max-width:900px) {
-  .hero { padding: 48px 20px 56px; }
+  .hero { padding: 36px 20px 40px; }
   .hero-badges { display: none; }
   .mod-grid { grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); }
   .timeline { grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -362,6 +365,7 @@ body {
   </div>
 </nav>
 
+<div class="main" style="padding-top:24px;padding-bottom:0;">
 <!-- HERO -->
 <section class="hero">
   <div class="hero-grid"></div>
@@ -393,6 +397,7 @@ body {
     </div>
   </div>
 </section>
+</div>
 
 <!-- FILTER BAR -->
 <div class="filter-bar">

@@ -77,9 +77,12 @@ body {
 /* ── HERO ── */
 .hero {
   background: linear-gradient(160deg, #0f172a 0%, #1e3a5f 55%, #0c4a2e 100%);
-  padding: 72px 24px 80px;
+  padding: 48px 36px;
   position: relative;
   overflow: hidden;
+  border-radius: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.13), 0 4px 16px rgba(0,0,0,.06);
 }
 .hero::before {
   content: '';
@@ -319,7 +322,7 @@ body {
 
 /* ── RESPONSIVE ── */
 @media(max-width:900px) {
-  .hero { padding: 48px 20px 56px; }
+  .hero { padding: 36px 20px 40px; }
   .hero-badges { display: none; }
   .mod-grid { grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); }
 }
@@ -378,6 +381,7 @@ body {
   </div>
 </nav>
 
+<div class="main" style="padding-top:24px;padding-bottom:0;">
 <section class="hero" style="background:linear-gradient(145deg,#451a03 0%,#7c2d12 35%,#b45309 65%,#d97706 90%,#f59e0b 100%);">
   <div class="hero-grid"></div>
   <div class="hero-inner">
@@ -398,6 +402,9 @@ body {
     </div>
   </div>
 </section>
+</div>
+
+<main class="main">
 
 <div class="filter-bar">
   <div class="filter-inner">
@@ -414,7 +421,6 @@ body {
   </div>
 </div>
 
-<main class="main">
   <section class="cat-section">
     <div class="cat-header">
       <div class="cat-icon-wrap ico-aus">&#128188;</div>
