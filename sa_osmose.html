@@ -203,8 +203,7 @@ body {
 @media (max-width: 640px) {
   .g-grid-auto { grid-template-columns: 1fr; }
 }
-.g-main-grid { display: grid; grid-template-columns: 1fr 360px; gap: 18px; align-items: start; }
-@media (max-width: 1000px) { .g-main-grid { grid-template-columns: 1fr; } }
+.g-main-grid { display: grid; grid-template-columns: 1fr; gap: 18px; align-items: start; }
 
 /* ── FORM ELEMENTS ── */
 .g-field { display: flex; flex-direction: column; gap: 5px; }
@@ -442,7 +441,7 @@ body {
   .g-nav-bc a:hover{color:#111;}
   .bc-sep{font-size:11px;color:#d1d5db;margin:0 2px;}
   .bc-cur{font-size:12px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .bc-cat{font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+  .bc-cat{font-size:11px;font-weight:700;color:#9ca3af;letter-spacing:.4px;white-space:nowrap;}
   .g-nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;}
   .g-nav-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:7px;border:1px solid #d1d5db;background:#fff;color:#374151;font-size:11.5px;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s;font-family:inherit;}
   .g-nav-btn:hover{background:#f9fafb;border-color:#9ca3af;}
@@ -497,14 +496,13 @@ body {
 
 /* ── PROJECT BAR ── */
 .project-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
-.pf{background:var(--sur,var(--surface,#fff));border:1px solid var(--brd,var(--border,#e0e4ef));border-radius:9px;padding:9px 13px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
-.pf label{font-size:10px;font-weight:800;color:var(--mut,var(--muted,#64748b));text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4pxdisplay:flex;align-items:center;}
-.pf input{width:100%;border:1.5px solid var(--border2,#cdd4e4);border-radius:8px;outline:none;font-size:13px;font-weight:600;color:var(--txt,var(--text,#0f172a));background:var(--surface,#fff);font-family:inherit}
+.pf{background:var(--surface,#fff);border:1px solid var(--border,#e0e4ef);border-radius:9px;padding:9px 13px;box-shadow:0 1px 3px rgba(0,0,0,.05);display:flex;flex-direction:column;justify-content:space-between;gap:5px}
+.pf label{font-size:10px;font-weight:800;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;}
+.pf input{width:100%;border:1.5px solid var(--border2,#cdd4e4);border-radius:8px;outline:none;font-size:13px;font-weight:600;color:var(--text,#0f172a);background:var(--surface,#fff);font-family:inherit;padding:7px 10px;height:auto}
+.pf input[type="date"]{font-family:var(--sans,inherit);height:auto;padding:7px 10px}
 @media(max-width:700px){.project-bar{grid-template-columns:1fr}}
 input::placeholder,textarea::placeholder{color:#cbd5e1!important}
-
 .pf label a:hover,.fg label a:hover,.field-label a:hover{text-decoration:none!important}
-/* Objekt Combo */
 .obj-combo{display:flex;flex-direction:column;gap:4px}
 .obj-combo-row{display:flex;gap:6px;align-items:center}
 .obj-combo select,.obj-combo input{flex:1;padding:7px 10px;border:1.5px solid var(--border2,#cdd4e4);border-radius:8px;font-size:13px;color:var(--text,#111827);background:var(--surface,#fff);outline:none;transition:.15s;height:auto;font-weight:600}
@@ -512,6 +510,9 @@ input::placeholder,textarea::placeholder{color:#cbd5e1!important}
 .obj-combo select:focus,.obj-combo input:focus{border-color:var(--accent,#2563eb)!important;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
 .obj-combo-toggle{font-size:10px;font-weight:700;color:var(--accent,#2563eb);cursor:pointer;background:none;border:none;padding:0;text-decoration:none;white-space:nowrap;margin-left:auto;text-transform:none;letter-spacing:0}
 .obj-combo-toggle:hover{opacity:.7}
+
+.pf label a:hover,.fg label a:hover,.field-label a:hover{text-decoration:none!important}
+/* Objekt Combo */
 </style>
 
 
@@ -543,7 +544,7 @@ function fixLeadingZero(el){
     </a>
     <div class="g-nav-bc">
       
-      <a href="sb_index.html" style="font-size:12px;font-weight:600;color:var(--muted,#6b7280);text-decoration:none">Sanitärberechnungen</a><span class="bc-sep">›</span>
+      <a class="bc-cat" href="sb_index.html">Sanitärberechnungen</a><span class="bc-sep">›</span>
       <span class="bc-cur">Umkehrosmoseanlage</span>
     </div>
     <div class="g-nav-right">
@@ -591,14 +592,7 @@ function fixLeadingZero(el){
     <div class="pf"><label>Datum</label><input type="date" id="metaDatum"></div>
   </div>
 
-    <!-- Page Header -->
-  
-    <div class="g-ph-actions">
-      <button class="g-btn" onclick="recalc()">⟳ Neu berechnen</button>
-      <button class="g-btn primary" onclick="window.print()">🖨 PDF drucken</button>
-    </div>
-
-  <!-- Two-column layout -->
+  <!-- Eingaben + Ergebnisse -->
   <div class="g-main-grid">
 
     <!-- LEFT: Eingaben -->
@@ -691,10 +685,10 @@ function fixLeadingZero(el){
 
     </div>
 
-    <!-- RIGHT: Ergebnisse sticky -->
+    <!-- Ergebnisse -->
     <div style="display:flex;flex-direction:column;gap:16px;">
 
-      <div class="g-card" style="position:sticky;top:70px;">
+      <div class="g-card">
         <div class="g-card-hd">
           <h2>Ergebnisse &amp; Auslegung</h2>
           <!-- JS sets .ok / .bad on this element -->
@@ -862,20 +856,20 @@ function fixLeadingZero(el){
         inputName.oninput = recalc;
 
         const inputFlow = document.createElement("input");
-        inputFlow.type = "number";
-        inputFlow.step = "0.1";
-        inputFlow.min = "0";
+        inputFlow.type = "text";
+        inputFlow.inputMode = "decimal";
         inputFlow.placeholder = "l/h";
         inputFlow.value = flow;
         inputFlow.oninput = recalc;
+        inputFlow.onblur = function(){ fixLeadingZero(this); };
 
         const inputHours = document.createElement("input");
-        inputHours.type = "number";
-        inputHours.step = "0.1";
-        inputHours.min = "0";
+        inputHours.type = "text";
+        inputHours.inputMode = "decimal";
         inputHours.placeholder = "h/Tag";
         inputHours.value = hours;
         inputHours.oninput = recalc;
+        inputHours.onblur = function(){ fixLeadingZero(this); };
 
         const removeBtn = document.createElement("button");
         removeBtn.type = "button";
@@ -1387,7 +1381,7 @@ document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('osmo
           '<div><label style="font-size:12px;font-weight:700;color:var(--muted,#6b7280);display:block;margin-bottom:4px">Projekt / Bauvorhaben</label>' +
             '<input type="text" id="_oaProjekt" value="'+projekt.replace(/"/g,'&quot;')+'" style="width:100%;padding:8px 10px;border:1.5px solid var(--border2,#cdd4e4);border-radius:8px;font-size:13px;font-family:inherit"/></div>' +
           '<div><label style="font-size:12px;font-weight:700;color:var(--muted,#6b7280);display:block;margin-bottom:4px">Frist (Tage)</label>' +
-            '<input type="number" id="_oaFrist" value="14" min="1" max="90" style="width:120px;padding:8px 10px;border:1.5px solid var(--border2,#cdd4e4);border-radius:8px;font-size:13px;font-family:inherit"/></div>' +
+            '<input type="text" inputmode="decimal" id="_oaFrist" value="14" onblur="fixLeadingZero(this)" style="width:120px;padding:8px 10px;border:1.5px solid var(--border2,#cdd4e4);border-radius:8px;font-size:13px;font-family:inherit"/></div>' +
           '<div><label style="font-size:12px;font-weight:700;color:var(--muted,#6b7280);display:block;margin-bottom:4px">Nachricht (optional)</label>' +
             '<textarea id="_oaMsg" rows="3" placeholder="z.B. Bitte Offerte inkl. Montage, Liefertermin..." style="width:100%;padding:8px 10px;border:1.5px solid var(--border2,#cdd4e4);border-radius:8px;font-size:13px;font-family:inherit;resize:vertical"></textarea></div>' +
           '<div style="background:var(--bg,#f4f6fb);border-radius:8px;padding:10px;font-size:12px;color:var(--muted,#6b7280);line-height:1.5">' +
@@ -1447,5 +1441,6 @@ document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('osmo
 .pk-datenblatt-btn:hover{background:#dbeafe}
 @media(max-width:768px){#typGrid{grid-template-columns:1fr!important}}
 </style>
+<script src="gema_scroll.js"></script>
 </body>
 </html>

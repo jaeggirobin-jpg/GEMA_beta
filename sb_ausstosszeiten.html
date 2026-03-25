@@ -153,7 +153,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .inp-row{display:flex;gap:0;align-items:stretch;}
 .g-inp{padding:8px 10px;border:1.5px solid var(--border2);border-radius:var(--r-sm);background:var(--surface);color:var(--text);font-size:13.5px;font-family:var(--sans);transition:border-color .15s,box-shadow .15s;width:100%;}
 .g-inp:focus{outline:none;border-color:var(--ww);box-shadow:0 0 0 3px rgba(220,38,38,.1);}
-.g-inp.with-unit{border-radius:var(--r-sm) 0 0 var(--r-sm);}
+.g-inp.with-unit{border-radius:var(--r-sm) 0 0 var(--r-sm);border-right:0;}
 .unit-box{padding:8px 10px;background:var(--bg2);border:1.5px solid var(--border2);border-left:0;border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:11.5px;color:var(--muted);white-space:nowrap;font-family:var(--mono);display:flex;align-items:center;}
 
 /* ── SEGMENTS ── */
@@ -238,7 +238,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
   .g-nav-bc a:hover{color:#111;}
   .bc-sep{font-size:11px;color:#d1d5db;margin:0 2px;}
   .bc-cur{font-size:12px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .bc-cat{font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+  .bc-cat{font-size:11px;font-weight:700;color:#9ca3af;letter-spacing:.4px;white-space:nowrap;}
   .g-nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;}
   .g-nav-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:7px;border:1px solid #d1d5db;background:#fff;color:#374151;font-size:11.5px;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s;font-family:inherit;}
   .g-nav-btn:hover{background:#f9fafb;border-color:#9ca3af;}
@@ -286,15 +286,13 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 
 /* ── PROJECT BAR ── */
 .project-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
-.pf{background:var(--sur,var(--surface,#fff));border:1px solid var(--brd,var(--border,#e0e4ef));border-radius:9px;padding:9px 13px;box-shadow:0 1px 3px rgba(0,0,0,.05);display:flex;flex-direction:column;justify-content:space-between;gap:5px}
-.pf label{font-size:10px;font-weight:800;color:var(--mut,var(--muted,#64748b));text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;}
-.pf input{width:100%;border:1.5px solid var(--border2,#cdd4e4);border-radius:8px;outline:none;font-size:13px;font-weight:600;color:var(--txt,var(--text,#0f172a));background:var(--surface,#fff);font-family:inherit;padding:7px 10px;height:auto}
+.pf{background:var(--surface,#fff);border:1px solid var(--border,#e0e4ef);border-radius:9px;padding:9px 13px;box-shadow:0 1px 3px rgba(0,0,0,.05);display:flex;flex-direction:column;justify-content:space-between;gap:5px}
+.pf label{font-size:10px;font-weight:800;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;}
+.pf input{width:100%;border:1.5px solid var(--border2,#cdd4e4);border-radius:8px;outline:none;font-size:13px;font-weight:600;color:var(--text,#0f172a);background:var(--surface,#fff);font-family:inherit;padding:7px 10px;height:auto}
 .pf input[type="date"]{font-family:var(--sans,inherit);height:auto;padding:7px 10px}
 @media(max-width:700px){.project-bar{grid-template-columns:1fr}}
 input::placeholder,textarea::placeholder{color:#cbd5e1!important}
-
 .pf label a:hover,.fg label a:hover,.field-label a:hover{text-decoration:none!important}
-/* Objekt Combo */
 .obj-combo{display:flex;flex-direction:column;gap:4px}
 .obj-combo-row{display:flex;gap:6px;align-items:center}
 .obj-combo select,.obj-combo input{flex:1;padding:7px 10px;border:1.5px solid var(--border2,#cdd4e4);border-radius:8px;font-size:13px;color:var(--text,#111827);background:var(--surface,#fff);outline:none;transition:.15s;height:auto;font-weight:600}
@@ -302,6 +300,15 @@ input::placeholder,textarea::placeholder{color:#cbd5e1!important}
 .obj-combo select:focus,.obj-combo input:focus{border-color:var(--accent,#2563eb)!important;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
 .obj-combo-toggle{font-size:10px;font-weight:700;color:var(--accent,#2563eb);cursor:pointer;background:none;border:none;padding:0;text-decoration:none;white-space:nowrap;margin-left:auto;text-transform:none;letter-spacing:0}
 .obj-combo-toggle:hover{opacity:.7}
+
+.pf label a:hover,.fg label a:hover,.field-label a:hover{text-decoration:none!important}
+/* Objekt Combo */
+.g-section{margin-bottom:18px}
+.g-section-hd{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--surface2,#f8faff);border:1px solid var(--border,#e2e7f0);border-radius:14px 14px 0 0;border-bottom:2px solid var(--accent-bd,#bfcfff)}
+.g-section-num{width:24px;height:24px;border-radius:50%;background:var(--accent,#2563eb);color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.g-section-title{font-size:13.5px;font-weight:700;color:var(--text,#111827)}
+.g-section-sub{font-size:11.5px;color:var(--muted,#6b7280);margin-top:1px}
+.g-section-bd{background:var(--surface,#fff);border:1px solid var(--border,#e2e7f0);border-top:0;border-radius:0 0 14px 14px;padding:18px}
 </style>
 
 
@@ -331,7 +338,7 @@ function fixLeadingZero(el){
     </a>
     <div class="g-nav-bc">
       
-      <a href="sb_index.html" style="font-size:12px;font-weight:600;color:var(--muted,#6b7280);text-decoration:none">Sanitärberechnungen</a><span class="bc-sep">›</span>
+      <a class="bc-cat" href="sb_index.html">Sanitärberechnungen</a><span class="bc-sep">›</span>
       <span class="bc-cur">Ausstosszeiten</span>
     </div>
     <div class="g-nav-right">
@@ -385,14 +392,15 @@ function fixLeadingZero(el){
   </div>
 
   <!-- ═══ ANSCHLUSSSITUATION ═══ -->
-  <div class="card" style="margin-bottom:16px;">
-    <div class="card-hd">
-      <div class="card-hd-left">
-        <div class="card-hd-ic">🔧</div>
-        <div><div class="card-hd-title">Anlagetyp & Verteilsystem (SIA 385/1)</div></div>
+  <div class="g-section">
+    <div class="g-section-hd">
+      <div class="g-section-num">1</div>
+      <div>
+        <div class="g-section-title">Anlagetyp & Verteilsystem</div>
+        <div class="g-section-sub">Warmhaltung und Verteilsystem gemäss SIA 385/1</div>
       </div>
     </div>
-    <div class="card-body">
+    <div class="g-section-bd">
 
       <!-- Warmhaltung Auswahl -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
@@ -511,14 +519,15 @@ function fixLeadingZero(el){
   </div>
 
   <!-- ═══ PARAMETER ═══ -->
-  <div class="card" style="margin-bottom:16px;">
-    <div class="card-hd">
-      <div class="card-hd-left">
-        <div class="card-hd-ic">⚙️</div>
-        <div><div class="card-hd-title">Parameter</div></div>
+  <div class="g-section">
+    <div class="g-section-hd">
+      <div class="g-section-num">2</div>
+      <div>
+        <div class="g-section-title">Parameter</div>
+        <div class="g-section-sub">Entnahmearmatur und Temperaturkorrekturfaktor</div>
       </div>
     </div>
-    <div class="card-body">
+    <div class="g-section-bd">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
         <div class="field">
           <div class="field-label">Entnahmearmatur (bestimmt Volumenstrom)</div>
@@ -544,14 +553,12 @@ function fixLeadingZero(el){
   </div>
 
   <!-- ═══ LEITUNGSABSCHNITTE ═══ -->
-  <div class="card" style="margin-bottom:16px;">
-    <div class="card-hd">
-      <div class="card-hd-left">
-        <div class="card-hd-ic">📐</div>
-        <div>
-          <div class="card-hd-title">Leitungsabschnitte</div>
-          <div class="card-hd-sub">Rohrsystem wählen · Länge eingeben</div>
-        </div>
+  <div class="g-section">
+    <div class="g-section-hd">
+      <div class="g-section-num">3</div>
+      <div>
+        <div class="g-section-title">Leitungsabschnitte</div>
+        <div class="g-section-sub">Rohrsystem wählen · Länge eingeben</div>
       </div>
       <div style="margin-left:auto;display:flex;gap:6px;" class="no-print">
         <button class="g-btn sm" id="btn_add" style="font-weight:700">+ Abschnitt</button>
@@ -559,23 +566,21 @@ function fixLeadingZero(el){
         <button class="g-btn sm danger" id="btn_reset">Reset</button>
       </div>
     </div>
-    <div class="card-body" id="segList">
+    <div class="g-section-bd" id="segList">
       <div class="empty"><div class="empty-ic">📐</div><div class="empty-txt">Noch keine Abschnitte.<br>«+ Abschnitt» klicken.</div></div>
     </div>
   </div>
 
   <!-- ═══ ERGEBNISSE ═══ -->
-  <div class="card">
-    <div class="card-hd">
-      <div class="card-hd-left">
-        <div class="card-hd-ic" style="background:var(--accent-bg);border:1.5px solid var(--accent-bd);">✓</div>
-        <div>
-          <div class="card-hd-title">Ergebnisse</div>
-          <div class="card-hd-sub">Ausstosszeit gemäss SIA 385/1</div>
-        </div>
+  <div class="g-section">
+    <div class="g-section-hd">
+      <div class="g-section-num">4</div>
+      <div>
+        <div class="g-section-title">Ergebnisse</div>
+        <div class="g-section-sub">Ausstosszeit gemäss SIA 385/1</div>
       </div>
     </div>
-    <div class="card-body">
+    <div class="g-section-bd">
       <div class="kpi-row" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
         <div class="kpi">
           <div class="kpi-lbl">Gesamtvolumen</div>
@@ -605,14 +610,15 @@ function fixLeadingZero(el){
   </div>
 
   <!-- Normhinweise -->
-  <div class="card" style="margin-top:16px;">
-    <div class="card-hd">
-      <div class="card-hd-left">
-        <div class="card-hd-ic">📋</div>
-        <div><div class="card-hd-title">Normhinweise</div></div>
+  <div class="g-section">
+    <div class="g-section-hd">
+      <div class="g-section-num">5</div>
+      <div>
+        <div class="g-section-title">Normhinweise</div>
+        <div class="g-section-sub">Relevante Normen und Grenzwerte</div>
       </div>
     </div>
-    <div class="card-body" style="font-size:12px;color:var(--text2);line-height:1.7;">
+    <div class="g-section-bd" style="font-size:12px;color:var(--text2);line-height:1.7;">
       <div style="display:flex;flex-direction:column;gap:8px;">
         <div><strong>SIA 385/1, Ziff. 4.3.2</strong> — Die Ausstosszeit t<sub>aus</sub> für Waschtische, Handwaschbecken, Bidets, Duschanlagen, Badewannen, Spültische (Küche) und Putzausgüsse beträgt:</div>
         <div style="padding:8px 12px;background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:var(--r-sm);display:flex;flex-direction:column;gap:4px;">
@@ -920,5 +926,6 @@ document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('auss
   window.addEventListener('gema-objekte-loaded',function(){populateObjektDropdown();if(typeof GemaAutoSave!=='undefined') GemaAutoSave.init('ausstosszeiten');});
   ['metaProjekt','metaBearbeiter','metaDatum'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',saveMeta);});
 })();</script>
+<script src="gema_scroll.js"></script>
 </body>
 </html>

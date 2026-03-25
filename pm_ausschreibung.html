@@ -77,9 +77,12 @@ body {
 /* ── HERO ── */
 .hero {
   background: linear-gradient(160deg, #0f172a 0%, #1e3a5f 55%, #0c4a2e 100%);
-  padding: 72px 24px 80px;
+  padding: 48px 36px;
   position: relative;
   overflow: hidden;
+  border-radius: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.13), 0 4px 16px rgba(0,0,0,.06);
 }
 .hero::before {
   content: '';
@@ -292,17 +295,16 @@ body {
 .cnt-hyg   { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
 
 /* ── SEARCH ── */
-.search-wrap {
-  position: relative; margin-left: auto; flex-shrink: 0;
-}
+.search-wrap { position: relative; }
 .search-inp {
-  padding: 7px 12px 7px 34px; border: 1.5px solid var(--border2);
-  border-radius: 9px; font-size: 13px; font-family: inherit;
-  background: var(--surface); color: var(--text); width: 210px;
-  outline: none; transition: .15s;
+  width: 100%; padding: 13px 18px 13px 44px;
+  border: 1.5px solid var(--border2); border-radius: 13px;
+  background: var(--surface); color: var(--text); font-size: 14px; font-family: inherit;
+  box-shadow: var(--shadow-sm); outline: none; transition: .15s;
 }
 .search-inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
-.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; pointer-events: none; }
+.search-inp:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(37,99,235,.1); }
+.search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 17px; pointer-events: none; }
 
 /* ── EMPTY STATE ── */
 .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
@@ -319,7 +321,7 @@ body {
 
 /* ── RESPONSIVE ── */
 @media(max-width:900px) {
-  .hero { padding: 48px 20px 56px; }
+  .hero { padding: 36px 20px 40px; }
   .hero-badges { display: none; }
   .mod-grid { grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); }
 }
@@ -349,7 +351,7 @@ body {
   .g-nav-bc a:hover{color:#111;}
   .bc-sep{font-size:11px;color:#d1d5db;margin:0 2px;}
   .bc-cur{font-size:12px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .bc-cat{font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+  .bc-cat{font-size:11px;font-weight:700;color:#9ca3af;letter-spacing:.4px;white-space:nowrap;}
   .g-nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;}
   .g-nav-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:7px;border:1px solid #d1d5db;background:#fff;color:#374151;font-size:11.5px;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s;font-family:inherit;}
   .g-nav-btn:hover{background:#f9fafb;border-color:#9ca3af;}
@@ -374,11 +376,11 @@ body {
     <div class="g-nav-right">
       <a class="g-nav-btn no-print" href="sys_profil.html" title="Einstellungen">⚙️</a>
       <button class="gema-feedback-btn no-print" onclick="GemaFeedback.start()">🔴 Feedback</button>
-      <a class="g-nav-btn" href="index.html">← Alle Module</a>
     </div>
   </div>
 </nav>
 
+<div class="main" style="padding-top:24px;padding-bottom:0;">
 <section class="hero" style="background:linear-gradient(145deg,#451a03 0%,#7c2d12 35%,#b45309 65%,#d97706 90%,#f59e0b 100%);">
   <div class="hero-grid"></div>
   <div class="hero-inner">
@@ -399,23 +401,16 @@ body {
     </div>
   </div>
 </section>
-
-<div class="filter-bar">
-  <div class="filter-inner">
-    <button class="filter-btn active" data-filter="all">Alle <span class="count">7</span></button>
-    <div class="filter-sep"></div>
-    <button class="filter-btn" data-filter="aktiv">&#10003; Aktiv <span class="count">1</span></button>
-    <button class="filter-btn" data-filter="bald">Bald <span class="count">3</span></button>
-    <button class="filter-btn" data-filter="geplant">Geplant <span class="count">3</span></button>
-    <div class="filter-sep" style="margin-left:auto;"></div>
-    <div class="search-wrap">
-      <span class="search-icon">&#128269;</span>
-      <input class="search-inp" type="text" id="searchInp" placeholder="Modul suchen..."/>
-    </div>
-  </div>
 </div>
 
 <main class="main">
+
+<!-- SEARCH -->
+<div class="search-wrap" style="max-width:1340px;margin:0 auto 24px;padding:0 24px;">
+  <span class="search-icon">🔍</span>
+  <input class="search-inp" type="text" id="searchInp" placeholder="Modul suchen, z.B. Kostenkontrolle, Honorar …"/>
+</div>
+
   <section class="cat-section">
     <div class="cat-header">
       <div class="cat-icon-wrap ico-aus">&#128188;</div>
@@ -477,7 +472,6 @@ body {
     <div>
       <div style="font-size:14px;font-weight:800;margin-bottom:6px;">Modul vorschlagen oder priorisieren?</div>
       <div style="font-size:13px;color:var(--muted);line-height:1.6;">Fehlt ein Modul, das du dringend benoeligst? Wir entwickeln nach Bedarf der Nutzer und priorisieren entsprechend.</div>
-      <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:7px 14px;border-radius:8px;background:#fffbeb;border:1.5px solid #fde68a;color:#b45309;font-size:13px;font-weight:700;text-decoration:none;">&#8592; Alle Module ansehen</a>
     </div>
   </div>
 </main>
@@ -491,20 +485,14 @@ body {
 <script>
 function fc(){
   const q=(document.getElementById('searchInp').value||'').trim().toLowerCase();
-  const ab=document.querySelector('.filter-btn.active');
-  const sf=ab?ab.dataset.filter:'all';
   document.querySelectorAll('.mod-card').forEach(c=>{
     const txt=(c.textContent||'').toLowerCase();
-    const s=c.dataset.status||'';
-    c.style.display=((!q||txt.includes(q))&&(sf==='all'||s===sf))?'':'none';
+    c.style.display=(!q||txt.includes(q))?'':'none';
   });
 }
-document.querySelectorAll('.filter-btn').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');fc();
-}));
 document.getElementById('searchInp').addEventListener('input',fc);
 </script>
 <script>document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('ausschreibung_mod', 'Ausschreibung Module');});</script>
+<script src="gema_scroll.js"></script>
 </body>
 </html>

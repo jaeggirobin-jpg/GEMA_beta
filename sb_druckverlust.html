@@ -102,6 +102,10 @@ input,select,button{font-family:var(--sans)}
 .ts-inp{height:32px;padding:0 8px;border:1.5px solid var(--brd2);border-radius:7px;font-size:13px;background:var(--sur);color:var(--txt);outline:none;transition:.15s;width:90px;font-family:var(--mono)}
 .ts-inp:focus{border-color:var(--blue)}
 .ts-inp.wide{width:110px}
+.ts-inp+.ts-label{border-radius:0 7px 7px 0;border:1.5px solid var(--brd2);border-left:none;background:#f1f5f9;padding:0 8px;display:inline-flex;align-items:center;height:32px;margin-left:-1px}
+.ts-inp+.ts-label{font-size:11px;color:var(--mut);font-weight:600;white-space:nowrap}
+.ts-inp:has(+.ts-label){border-radius:7px 0 0 7px}
+.ts-inp:focus+.ts-label{border-color:var(--blue)}
 .ts-label{font-size:11px;color:var(--mut);font-weight:600;white-space:nowrap}
 .ts-sep{width:1px;height:26px;background:var(--brd);flex-shrink:0}
 .ts-del{width:30px;height:30px;border-radius:7px;border:1.5px solid var(--brd2);background:var(--sur);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;color:var(--mut);flex-shrink:0;margin-left:auto}
@@ -200,7 +204,7 @@ input,select,button{font-family:var(--sans)}
   .g-nav-bc a:hover{color:#111;}
   .bc-sep{font-size:11px;color:#d1d5db;margin:0 2px;}
   .bc-cur{font-size:12px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .bc-cat{font-size:11px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+  .bc-cat{font-size:11px;font-weight:700;color:#9ca3af;letter-spacing:.4px;white-space:nowrap;}
   .g-nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0;}
   .g-nav-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:7px;border:1px solid #d1d5db;background:#fff;color:#374151;font-size:11.5px;font-weight:600;cursor:pointer;text-decoration:none;transition:.15s;font-family:inherit;}
   .g-nav-btn:hover{background:#f9fafb;border-color:#9ca3af;}
@@ -247,15 +251,14 @@ input,select,button{font-family:var(--sans)}
 
 
 /* ── PROJECT BAR ── */
-.project-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
-.pf{background:var(--sur);border:1px solid var(--brd);border-radius:8px;padding:9px 13px;box-shadow:var(--sh-sm)}
-.pf label{font-size:10px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4pxdisplay:flex;align-items:center;}
-.pf input{width:100%;border:1.5px solid var(--border2,#cdd4e4);border-radius:8px;outline:none;font-size:13px;font-weight:600;color:var(--txt);background:var(--surface,#fff);font-family:var(--sans)}
+.project-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.pf{background:var(--surface,#fff);border:1px solid var(--border,#e0e4ef);border-radius:9px;padding:9px 13px;box-shadow:0 1px 3px rgba(0,0,0,.05);display:flex;flex-direction:column;justify-content:space-between;gap:5px}
+.pf label{font-size:10px;font-weight:800;color:var(--muted,#64748b);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;}
+.pf input{width:100%;border:1.5px solid var(--border2,#cdd4e4);border-radius:8px;outline:none;font-size:13px;font-weight:600;color:var(--text,#0f172a);background:var(--surface,#fff);font-family:inherit;padding:7px 10px;height:auto}
+.pf input[type="date"]{font-family:var(--sans,inherit);height:auto;padding:7px 10px}
 @media(max-width:700px){.project-bar{grid-template-columns:1fr}}
 input::placeholder,textarea::placeholder{color:#cbd5e1!important}
-
 .pf label a:hover,.fg label a:hover,.field-label a:hover{text-decoration:none!important}
-/* Objekt Combo */
 .obj-combo{display:flex;flex-direction:column;gap:4px}
 .obj-combo-row{display:flex;gap:6px;align-items:center}
 .obj-combo select,.obj-combo input{flex:1;padding:7px 10px;border:1.5px solid var(--border2,#cdd4e4);border-radius:8px;font-size:13px;color:var(--text,#111827);background:var(--surface,#fff);outline:none;transition:.15s;height:auto;font-weight:600}
@@ -263,6 +266,16 @@ input::placeholder,textarea::placeholder{color:#cbd5e1!important}
 .obj-combo select:focus,.obj-combo input:focus{border-color:var(--accent,#2563eb)!important;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
 .obj-combo-toggle{font-size:10px;font-weight:700;color:var(--accent,#2563eb);cursor:pointer;background:none;border:none;padding:0;text-decoration:none;white-space:nowrap;margin-left:auto;text-transform:none;letter-spacing:0}
 .obj-combo-toggle:hover{opacity:.7}
+
+.pf label a:hover,.fg label a:hover,.field-label a:hover{text-decoration:none!important}
+/* Objekt Combo */
+
+.g-section{margin-bottom:18px}
+.g-section-hd{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--surface2,#f8faff);border:1px solid var(--border,#e2e7f0);border-radius:14px 14px 0 0;border-bottom:2px solid var(--accent-bd,#bfcfff)}
+.g-section-num{width:24px;height:24px;border-radius:50%;background:var(--accent,#2563eb);color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.g-section-title{font-size:13.5px;font-weight:700;color:var(--text,#111827)}
+.g-section-sub{font-size:11.5px;color:var(--muted,#6b7280);margin-top:1px}
+.g-section-bd{background:var(--surface,#fff);border:1px solid var(--border,#e2e7f0);border-top:0;border-radius:0 0 14px 14px;padding:18px}
 </style>
 
 
@@ -292,7 +305,7 @@ function fixLeadingZero(el){
     </a>
     <div class="g-nav-bc">
       
-      <a href="sb_index.html" style="font-size:12px;font-weight:600;color:var(--muted,#6b7280);text-decoration:none">Sanitärberechnungen</a><span class="bc-sep">›</span>
+      <a class="bc-cat" href="sb_index.html">Sanitärberechnungen</a><span class="bc-sep">›</span>
       <span class="bc-cur">Druckverlust</span>
     </div>
     <div class="g-nav-right">
@@ -388,12 +401,9 @@ function fixLeadingZero(el){
     <div style="display:flex;flex-direction:column;gap:10px">
 
       <!-- Projektdaten -->
-      <div class="card">
-        <div class="card-hd">
-          <div class="card-hd-ic">🏗</div>
-          <div class="card-hd-title">Projekt</div>
-        </div>
-        <div class="card-body">
+      <div class="g-section">
+        <div class="g-section-hd"><div class="g-section-num">1</div><div><div class="g-section-title">Projekt</div><div class="g-section-sub">Projektdaten und Berechnungsparameter</div></div></div>
+        <div class="g-section-bd">
           <div class="fg"><label>Projekt / Anlage</label><input id="inp_project" placeholder="z.B. MFH Musterstrasse 12"/></div>
           <div class="fg"><label>Sachbearbeiter</label><input id="inp_owner" placeholder="Name"/></div>
           <div class="grid2">
@@ -411,12 +421,9 @@ function fixLeadingZero(el){
       </div>
 
       <!-- Hinweise -->
-      <div class="card">
-        <div class="card-hd">
-          <div class="card-hd-ic" style="background:#7c3aed">💡</div>
-          <div class="card-hd-title">Hinweise</div>
-        </div>
-        <div class="card-body">
+      <div class="g-section">
+        <div class="g-section-hd"><div class="g-section-num">2</div><div><div class="g-section-title">Hinweise</div><div class="g-section-sub">Bedienung und Formeln</div></div></div>
+        <div class="g-section-bd">
           <div style="font-size:11.5px;color:var(--txt2);line-height:1.7">
             • Pro Teilstrecke <b>Rohrsystem → Dimension</b> wählen<br>
             • Fittings-Button öffnet Dialog mit passenden Formstücken für das gewählte Rohrsystem<br>
@@ -1239,5 +1246,6 @@ document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('druc
   ['metaProjekt','metaBearbeiter','metaDatum'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',saveMeta);});
 })();
 </script>
+<script src="gema_scroll.js"></script>
 </body>
 </html>
