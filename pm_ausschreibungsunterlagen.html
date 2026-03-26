@@ -256,6 +256,13 @@ input,select,textarea,button{font-family:inherit}
   <div class="ml-ft" id="dlgFt"></div>
 </div></div>
 
+<!-- Lieferung BKP Dialog -->
+<div class="mo" id="mLieferung"><div class="ml" style="max-width:560px">
+  <div class="ml-hd"><h2 id="liefTitle">🔗 Lieferung</h2><button class="cl-btn" onclick="cM('mLieferung')">✕</button></div>
+  <div class="ml-bd" id="liefBody"></div>
+  <div class="ml-ft" id="liefFt"></div>
+</div></div>
+
 <!-- Brutto-Offerte Upload Modal -->
 <div class="mo" id="mBrutto"><div class="ml" style="max-width:480px">
   <div class="ml-hd"><h2 id="brTitle">Brutto-Offerte</h2><button class="cl-btn" onclick="cM('mBrutto')">✕</button></div>
@@ -523,14 +530,15 @@ VIEWS.paus=function(){
   h+=S.ausschreibungen.map(a=>{
     const nE=S.einreichungen.filter(e=>e.ausId===a.id).length;const nV=S.verteilungen.filter(v=>v.ausId===a.id).length;
     const nUp=(a.bkp||[]).reduce((s,b)=>s+(b.unterpositionen||[]).length,0);
-    return `<div class="ac" onclick="S.activeAusId='${a.id}';save();nav('pdet')" style="cursor:pointer">
+    var bkpInfo='';if(a.lose&&a.lose.length){var allP=a.lose.reduce(function(s,l){return s.concat(l.positionen||[]);},[]);var ch=allP.filter(function(p){return p.checked;});var er=ch.filter(function(p){return p.status==='erledigt';});if(ch.length)bkpInfo=' · BKP '+er.length+'/'+ch.length;}
+    return `<div class="ac" onclick="S.activeAusId='${a.id}';save();nav('pbkp')" style="cursor:pointer">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
         <strong style="font-size:15px">${E(a.name)}</strong>
         <span class="tag ${a.typ==='crbx'?'t-pu':'t-ac'}">${a.typ==='crbx'?'CRBX':'Funktional'}</span>
         <span class="tag t-gy">${(a.modelle||[a.modell]).join(' + ')}</span>
         <span class="ml-a tag ${a.status==='vergeben'?'t-gr':a.status==='aktiv'?'t-bl':'t-am'}">${a.status==='vergeben'?'Vergeben':a.status==='aktiv'?'Aktiv':'Entwurf'}</span>
       </div>
-      <div style="font-size:12px;color:var(--mut)">${E(a.objekt||'')} · Frist: ${a.frist||'—'} · ${nUp} Positionen · ${nV} verteilt · ${nE} Offerten</div>
+      <div style="font-size:12px;color:var(--mut)">${E(a.objekt||'')} · Frist: ${a.frist||'—'} · ${nUp} Positionen · ${nV} verteilt · ${nE} Offerten${bkpInfo}</div>
     </div>`;
   }).join('');
   return h;
@@ -641,7 +649,8 @@ function renderBKPTree(positionen,losId){
       // Status icon
       h+='<span style="font-size:14px;font-weight:900;'+statusCl+';cursor:pointer;width:20px;text-align:center" onclick="cycleBKPStatus(\''+losId+'\','+i+')" title="Status wechseln">'+statusIc+'</span>';
       // Module link if Lieferung
-      if(p.modulUrl)h+='<a href="'+p.modulUrl+'" target="_blank" style="font-size:11px;color:var(--acc);text-decoration:none;white-space:nowrap" title="Berechnungsmodul öffnen">🔗</a>';
+      if(p.istLieferung)h+='<button onclick="event.stopPropagation();openLieferungDialog(\''+losId+'\','+i+')" style="background:none;border:none;font-size:11px;color:var(--acc);cursor:pointer;padding:2px;white-space:nowrap" title="Lieferung & Offerte">🔗 Offerte</button>';
+      else if(p.modulUrl)h+='<a href="'+p.modulUrl+'" target="_blank" style="font-size:11px;color:var(--acc);text-decoration:none;white-space:nowrap" title="Berechnungsmodul öffnen">🔗</a>';
       // Delete
       h+='<button onclick="rmBKPPos(\''+losId+'\','+i+')" style="background:none;border:none;color:var(--mut2);cursor:pointer;font-size:12px;padding:2px" title="Entfernen">✕</button>';
       h+='</div>';
@@ -679,10 +688,170 @@ function toggleBKP(losId,idx,checked){
   var a=curA();if(!a)return;
   var l=a.lose.find(function(x){return x.id===losId;});
   if(!l)return;
-  l.positionen[idx].checked=checked;
-  if(!checked)l.positionen[idx].status='offen';
+  var p=l.positionen[idx];
+  p.checked=checked;
+  if(!checked)p.status='offen';
+  // Schritt 5: Auto-Montage-BKP wenn Lieferung angewählt
+  if(checked&&p.istLieferung&&p.lieferungTyp){
+    autoMontage(l,p,idx);
+    // Open Lieferung dialog
+    setTimeout(function(){openLieferungDialog(losId,idx);},100);
+  }
   sv();nav('pbkp');
 }
+
+// Auto-Montage: Wenn "Lieferung XXX" angehakt wird, Montage-Position ergänzen
+function autoMontage(los,pos,idx){
+  // Check if a montage position already exists for this Lieferung
+  var montageTitel='Montage '+pos.titel.replace(/^Lieferung\s*/i,'');
+  var bkpBase=pos.bkp.split('.');
+  var nextBkp='';
+  if(bkpBase.length===2){
+    nextBkp=bkpBase[0]+'.'+(parseInt(bkpBase[1])+1);
+  } else {
+    nextBkp=pos.bkp+'m';
+  }
+  // Check if already exists
+  var exists=los.positionen.find(function(p){return p.bkp===nextBkp||p.titel===montageTitel;});
+  if(exists){
+    // Just make sure it's checked too
+    exists.checked=true;
+    return;
+  }
+  // Insert after current position
+  var montage={bkp:nextBkp,titel:montageTitel,checked:true,status:'offen',istLieferung:false,lieferungTyp:null,modulUrl:null,offerte:null,montagePosition:null};
+  los.positionen.splice(idx+1,0,montage);
+  pos.montagePosition={bkp:nextBkp,titel:montageTitel,checked:true};
+}
+// Schritt 6: Dialog "Lieferung BKP"
+var _liefLosId=null,_liefIdx=null;
+function openLieferungDialog(losId,idx){
+  var a=curA();if(!a)return;
+  var l=a.lose.find(function(x){return x.id===losId;});
+  if(!l)return;
+  var p=l.positionen[idx];
+  if(!p||!p.istLieferung)return;
+  _liefLosId=losId;_liefIdx=idx;
+  var mk=p.lieferungTyp;
+  var mm=MODUL_MAP[mk]||{};
+  document.getElementById('liefTitle').textContent='🔗 BKP '+p.bkp+' — '+p.titel;
+
+  var h='';
+  // Berechnungsdaten
+  h+='<div style="margin-bottom:14px">';
+  h+='<div style="font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Berechnung</div>';
+  if(mm.modul){
+    // Try to read calculation data from localStorage
+    var calcData=readCalcData(mk);
+    if(calcData){
+      h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">';
+      Object.keys(calcData).forEach(function(k){
+        h+='<div style="padding:6px 10px;background:var(--bg2);border-radius:6px;font-size:12px">';
+        h+='<span style="color:var(--mut)">'+E(k)+':</span> <strong>'+E(String(calcData[k]))+'</strong>';
+        h+='</div>';
+      });
+      h+='</div>';
+    } else {
+      h+='<div style="padding:10px 14px;background:var(--bg2);border-radius:8px;font-size:12.5px;color:var(--mut)">Noch keine Berechnungsdaten vorhanden.</div>';
+    }
+    h+='<a href="'+mm.modul+'" target="_blank" style="display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-size:12px;font-weight:700;color:var(--acc);text-decoration:none">→ '+E(mm.label)+' öffnen</a>';
+  } else {
+    h+='<div style="padding:10px 14px;background:var(--bg2);border-radius:8px;font-size:12.5px;color:var(--mut)">Kein Berechnungsmodul verknüpft.</div>';
+  }
+  h+='</div>';
+
+  // Offerte
+  h+='<div style="margin-bottom:14px">';
+  h+='<div style="font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">Bruttoofferte</div>';
+  if(p.offerte&&p.offerte.lieferantFirma){
+    h+='<div style="padding:10px 14px;background:var(--grn-bg,#f0fdf4);border:1px solid var(--grn-bd,#bbf7d0);border-radius:8px">';
+    h+='<div style="font-size:13px;font-weight:700">'+E(p.offerte.lieferantFirma)+'</div>';
+    if(p.offerte.produktName)h+='<div style="font-size:12px;color:var(--txt2)">'+E(p.offerte.produktName)+'</div>';
+    if(p.offerte.offertPdfName)h+='<div style="font-size:11px;color:var(--mut);margin-top:4px">📄 '+E(p.offerte.offertPdfName)+' ('+new Date(p.offerte.uploadDatum||'').toLocaleDateString('de-CH')+')</div>';
+    if(p.offerte.bruttoPreis)h+='<div style="font-size:16px;font-weight:800;color:var(--grn);margin-top:6px">CHF '+Number(p.offerte.bruttoPreis).toLocaleString('de-CH')+'</div>';
+    h+='</div>';
+  } else {
+    h+='<div style="padding:10px 14px;background:var(--amb-bg,#fffbeb);border:1px solid var(--amb-bd,#fde68a);border-radius:8px;font-size:12.5px;color:var(--amb)">⚠ Noch keine Offerte vorhanden</div>';
+    h+='<div style="margin-top:8px"><label style="font-size:11px;font-weight:700;color:var(--mut);display:block;margin-bottom:4px">PDF-Offerte hochladen</label>';
+    h+='<input type="file" id="liefOffertFile" accept=".pdf" style="font-size:12px"/></div>';
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">';
+    h+='<div><label style="font-size:11px;font-weight:700;color:var(--mut);display:block;margin-bottom:4px">Lieferant</label><input type="text" id="liefFirma" class="fc" placeholder="z.B. BWT" style="font-size:13px"/></div>';
+    h+='<div><label style="font-size:11px;font-weight:700;color:var(--mut);display:block;margin-bottom:4px">Produkt</label><input type="text" id="liefProdukt" class="fc" placeholder="z.B. AQA perla 20" style="font-size:13px"/></div>';
+    h+='</div>';
+    h+='<div style="margin-top:8px"><label style="font-size:11px;font-weight:700;color:var(--mut);display:block;margin-bottom:4px">Bruttopreis CHF</label><input type="text" inputmode="decimal" id="liefPreis" class="fc" placeholder="optional" onblur="fixLeadingZero(this)" style="font-size:13px;width:160px"/></div>';
+  }
+  h+='</div>';
+
+  document.getElementById('liefBody').innerHTML=h;
+
+  // Footer buttons
+  var ft='<button class="btn btn-g" onclick="cM(\'mLieferung\')">Schliessen</button>';
+  if(mm.modul)ft+='<a class="btn btn-s" href="'+mm.modul+'" target="_blank">Berechnung bearbeiten</a>';
+  if(!p.offerte||!p.offerte.lieferantFirma){
+    ft+='<button class="btn btn-p" onclick="saveLiefOfferte()">Offerte speichern</button>';
+  } else {
+    ft+='<button class="btn btn-p" onclick="liefSetErledigt()">✓ Erledigt</button>';
+  }
+  document.getElementById('liefFt').innerHTML=ft;
+  oM('mLieferung');
+}
+
+function readCalcData(modulKey){
+  // Try to read saved data from known localStorage keys
+  var keyMap={
+    'enthaertung':'gema_meta_sa_enthaertung',
+    'osmose':'gema_meta_sa_osmose',
+    'druckerhoehung':'gema_meta_sb_druckerhoehung',
+    'frischwasserstation':'gema_meta_sa_frischwasserstation',
+    'hebeanlage':'gema_meta_sa_abwasserhebeanlage',
+    'fettabscheider':'gema_meta_sa_fettabscheider',
+    'oelabscheider':'gema_meta_sa_oelabscheider',
+    'schlammsammler':'gema_meta_sa_schlammsammler',
+    'solaranlage':'gema_meta_sa_solaranlage'
+  };
+  var sk=keyMap[modulKey];
+  if(!sk)return null;
+  try{
+    var d=JSON.parse(localStorage.getItem(sk));
+    if(d&&d.p)return{Projekt:d.p,Bearbeiter:d.b||'',Datum:d.d||''};
+  }catch(e){}
+  return null;
+}
+
+function saveLiefOfferte(){
+  var a=curA();if(!a)return;
+  var l=a.lose.find(function(x){return x.id===_liefLosId;});
+  if(!l)return;
+  var p=l.positionen[_liefIdx];
+  if(!p)return;
+  var firma=(document.getElementById('liefFirma')||{}).value||'';
+  var produkt=(document.getElementById('liefProdukt')||{}).value||'';
+  var preis=(document.getElementById('liefPreis')||{}).value||'';
+  var fileInput=document.getElementById('liefOffertFile');
+  var pdfName=fileInput&&fileInput.files&&fileInput.files[0]?fileInput.files[0].name:'';
+  if(!firma){toast('Bitte Lieferant angeben','error');return;}
+  p.offerte={
+    lieferantId:'',lieferantFirma:firma,produktName:produkt,
+    bruttoPreis:preis?parseFloat(preis):null,
+    offertPdfName:pdfName,offertPdfDataUrl:null,
+    uploadDatum:new Date().toISOString(),offertanfrageId:null,
+    berechnungsdaten:null
+  };
+  p.status='erledigt';
+  sv();lg('📄','Offerte erfasst',firma+' — '+p.titel);
+  cM('mLieferung');nav('pbkp');
+  toast('Offerte für '+p.titel+' gespeichert');
+}
+
+function liefSetErledigt(){
+  var a=curA();if(!a)return;
+  var l=a.lose.find(function(x){return x.id===_liefLosId;});
+  if(!l)return;
+  l.positionen[_liefIdx].status='erledigt';
+  sv();cM('mLieferung');nav('pbkp');
+  toast('BKP als erledigt markiert');
+}
+
 function editBKPField(losId,idx,field,val){
   var a=curA();if(!a)return;
   var l=a.lose.find(function(x){return x.id===losId;});
