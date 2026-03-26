@@ -298,6 +298,7 @@ input,select,textarea,button{font-family:inherit}
 // GEMA Ausschreibungsunterlagen v4 — Full Feature
 // ═══════════════════════════════════════════════
 const SK='gema_ausschreibung_v4',_m={};
+const SK_BKP='gema_ausschreibung_bkp'; // + '__' + objektId for per-object BKP data
 
 // ── DEFAULT ABZUGSSTRUKTUR ──
 const DEF_ABZUEGE=[
@@ -463,14 +464,38 @@ function newAusschreibung(opts){
   };
 }
 
-function sv(){try{const j=JSON.stringify(S);if(typeof _GemaDB!=='undefined')_GemaDB.put(SK,j).catch(()=>{});try{localStorage.setItem(SK,j)}catch(e){_m[SK]=j}}catch(e){}}
+function sv(){try{const j=JSON.stringify(S);if(typeof _GemaDB!=='undefined')_GemaDB.put(SK,j).catch(()=>{});try{localStorage.setItem(SK,j)}catch(e){_m[SK]=j}}catch(e){}
+  // Per-object BKP storage
+  svBKP();
+}
+function svBKP(){
+  try{
+    S.ausschreibungen.forEach(function(a){
+      if(!a.lose||!a.objektId)return;
+      var key=SK_BKP+'__'+(a.objektId||a.id);
+      var data=JSON.stringify({lose:a.lose,crbxVergleich:a.crbxVergleich||null});
+      try{localStorage.setItem(key,data);}catch(e){_m[key]=data;}
+      if(typeof _GemaDB!=='undefined')try{_GemaDB.put(key,data).catch(function(){});}catch(e){}
+    });
+  }catch(e){}
+}
+function ldBKP(a){
+  if(!a)return;
+  var key=SK_BKP+'__'+(a.objektId||a.id);
+  try{
+    var r=localStorage.getItem(key)||_m[key]||null;
+    if(r){var d=JSON.parse(r);if(d.lose)a.lose=d.lose;if(d.crbxVergleich)a.crbxVergleich=d.crbxVergleich;}
+  }catch(e){}
+}
 function ld(){try{let r;try{r=localStorage.getItem(SK)}catch(e){r=_m[SK]||null}if(r)Object.assign(S,JSON.parse(r))}catch(e){}
   if(!S.beteiligte)S.beteiligte=[];if(!S.ausschreibungen)S.ausschreibungen=[];
   if(!S.verteilungen)S.verteilungen=[];if(!S.anfragen)S.anfragen=[];if(!S.nettoAnfragen)S.nettoAnfragen=[];
   if(!S.marktplatzOfferten)S.marktplatzOfferten=[];if(!S.einreichungen)S.einreichungen=[];
-  if(!S.emails)S.emails=[];
+  if(!S.emails)S.emails=[];if(!S.log)S.log=[];
   // Set active ausschreibung
   if(!S.ausschreibung&&S.ausschreibungen.length)S.ausschreibung=S.ausschreibungen[0];
+  // Load per-object BKP data
+  S.ausschreibungen.forEach(function(a){ldBKP(a);});
 }
 function lg(i,a,d){S.log=(S.log||[]);let who=S.currentRole;try{if(typeof GemaAuth!=='undefined'){const u=GemaAuth.getCurrentUser();if(u)who=(u.name||u.username||S.currentRole);}}catch(e){}var ausId=S.activeAusId||'';var ausName='';if(ausId){var ax=S.ausschreibungen.find(function(x){return x.id===ausId;});if(ax)ausName=ax.name||'';}S.log.unshift({icon:i,action:a,detail:d||'',who,when:new Date().toISOString(),ausId:ausId,ausName:ausName});if(S.log.length>200)S.log.length=200;sv();}
 function A(){return S.ausschreibungen?.find(a=>a.id===S.activeAusId)||null;}
@@ -536,7 +561,7 @@ VIEWS.paus=function(){
         <strong style="font-size:15px">${E(a.name)}</strong>
         <span class="tag ${a.typ==='crbx'?'t-pu':'t-ac'}">${a.typ==='crbx'?'CRBX':'Funktional'}</span>
         <span class="tag t-gy">${(a.modelle||[a.modell]).join(' + ')}</span>
-        <span class="ml-a tag ${a.status==='vergeben'?'t-gr':a.status==='aktiv'?'t-bl':'t-am'}">${a.status==='vergeben'?'Vergeben':a.status==='aktiv'?'Aktiv':'Entwurf'}</span>
+        <span class="ml-a tag ${a.status==='vergeben'?'t-gr':a.status==='aktiv'||a.status==='crbx_geprueft'?'t-bl':'t-am'}">${a.status==='vergeben'?'Vergeben':a.status==='crbx_geprueft'?'Freigegeben':a.status==='aktiv'?'Aktiv':'Entwurf'}</span>
       </div>
       <div style="font-size:12px;color:var(--mut)">${E(a.objekt||'')} · Frist: ${a.frist||'—'} · ${nUp} Positionen · ${nV} verteilt · ${nE} Offerten${bkpInfo}</div>
     </div>`;
@@ -1286,7 +1311,14 @@ VIEWS.pvrt=function(){
   const a=curA();if(!a)return '<div class="wp">Zuerst eine Ausschreibung wählen.</div>';
   const insts=S.beteiligte.filter(b=>b.rolle==='installateur');
   let h=`<h2 style="font-size:20px;font-weight:700;margin-bottom:16px">📤 Verteilen — ${E(a.name)}</h2>`;
-  if(a.typ==='crbx'&&!a.crbx?.lv){h+=`<div class="wp">Zuerst CRBX hochladen.</div>`;return h;}
+  // Prüfe ob BKP-Checkliste und CRBX-Abgleich erledigt sind
+  if(!a.crbxVergleich||!a.crbxVergleich.bestaetigt){
+    h+=`<div style="padding:16px 20px;background:var(--amb-bg);border:1.5px solid var(--amb-bd);border-radius:10px;margin-bottom:16px;font-size:13px;color:var(--amb);line-height:1.6">`;
+    h+=`<strong>⚠ Ausschreibung noch nicht freigegeben</strong><br/>`;
+    h+=`Bitte zuerst die <button class="btn btn-s btn-sm" onclick="nav('pbkp')" style="margin:0 4px">☑ BKP-Checkliste</button> bearbeiten und den <button class="btn btn-s btn-sm" onclick="nav('pcrbx')" style="margin:0 4px">📦 CRBX-Abgleich</button> bestätigen.`;
+    h+=`</div>`;
+  }
+  if(a.typ==='crbx'&&!a.crbx?.lv){h+=`<div class="wp">Zuerst CRBX hochladen im Tab «CRBX-Abgleich».</div>`;return h;}
   if(a.typ==='funktional'&&!(a.bkp||[]).length){h+=`<div class="wp">Zuerst BKP-Positionen anlegen.</div>`;return h;}
   h+=`<div class="card"><div class="card-hd"><h3>Installateure</h3><button class="btn btn-g btn-sm" onclick="document.getElementById('apR').value='installateur';oM('mPerson')">+</button></div><div class="card-bd">`;
   if(!insts.length)h+=`<p style="color:var(--mut)">Keine Installateure erfasst.</p>`;
@@ -1670,7 +1702,7 @@ VIEWS.aub=function(){
   let h=`<h2 style="font-size:20px;font-weight:700;margin-bottom:16px">🏛 Projektstatus</h2>`;
   if(!S.ausschreibungen.length){h+=`<div class="es"><p>Noch keine Ausschreibungen im Projekt.</p></div>`;return h;}
   h+=`<table class="dt"><thead><tr><th>Ausschreibung</th><th>Typ</th><th>Objekt</th><th>Frist</th><th>Status</th></tr></thead><tbody>`;
-  h+=S.ausschreibungen.map(a=>`<tr><td><strong>${E(a.name)}</strong></td><td><span class="tag ${a.typ==='crbx'?'t-pu':'t-ac'}">${a.typ==='crbx'?'CRBX':'Funktional'}</span></td><td>${E(a.objekt)}</td><td>${a.frist||'—'}</td><td><span class="tag ${a.status==='vergeben'?'t-gr':a.status==='aktiv'?'t-bl':'t-am'}">${a.status==='vergeben'?'Vergeben':a.status==='aktiv'?'Aktiv':'Entwurf'}</span></td></tr>`).join('');
+  h+=S.ausschreibungen.map(a=>`<tr><td><strong>${E(a.name)}</strong></td><td><span class="tag ${a.typ==='crbx'?'t-pu':'t-ac'}">${a.typ==='crbx'?'CRBX':'Funktional'}</span></td><td>${E(a.objekt)}</td><td>${a.frist||'—'}</td><td><span class="tag ${a.status==='vergeben'?'t-gr':a.status==='aktiv'||a.status==='crbx_geprueft'?'t-bl':'t-am'}">${a.status==='vergeben'?'Vergeben':a.status==='crbx_geprueft'?'Freigegeben':a.status==='aktiv'?'Aktiv':'Entwurf'}</span></td></tr>`).join('');
   h+=`</tbody></table>`;
   h+=`<div class="ip" style="margin-top:16px"><strong>Hinweis:</strong> Als Architekt siehst du den Status pro Gewerk. Preise und Offertdetails sind nicht einsehbar.</div>`;
   return h;
@@ -1750,7 +1782,8 @@ function createAusschreibung(){
     {code:'255',name:'Dämmungen',unterpositionen:[],materialSpec:[]},
     {code:'259',name:'Übriges',unterpositionen:[],materialSpec:[]}
   ]:[];
-  S.ausschreibungen.push({id,name,typ,modelle,modell:modelle[0],objekt,region,frist,status:'entwurf',bkp:stdBKP,abzuege:JSON.parse(JSON.stringify(DEF_ABZUEGE)),crbx:{lv:null},beilagen,plaene,unterlagen,vorbedingungen:{modus:'gema',kapitel:{},pdfName:''},materialSpec:{},vergabe:null});
+  var objektId=objSel.value||'';
+  S.ausschreibungen.push({id,name,typ,modelle,modell:modelle[0],objekt,objektId,region,frist,status:'entwurf',bkp:stdBKP,abzuege:JSON.parse(JSON.stringify(DEF_ABZUEGE)),crbx:{lv:null},beilagen,plaene,unterlagen,vorbedingungen:{modus:'gema',kapitel:{},pdfName:''},materialSpec:{},vergabe:null,lose:[],crbxVergleich:null});
   S.activeAusId=id;save();lg('📋','Ausschreibung erstellt',name+' ('+typ+', '+modelle.join('+')+')');
   cM('mNewA');toast('Ausschreibung erstellt');buildTabs();nav('pdet');
 }
