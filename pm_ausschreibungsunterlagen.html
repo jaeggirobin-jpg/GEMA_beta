@@ -300,20 +300,90 @@ const DEF_ABZUEGE=[
   {id:'pau',name:'Pauschalabzug',typ:'fix',wert:0,aktiv:false}
 ];
 
-// ── BKP ──
+// ── BKP-STANDARD-BAUM (Sanitär 25x) ──
+var BKP_STANDARD = {
+  id: '25', titel: 'Sanitäranlagen', kinder: [
+    { id: '251', titel: 'Apparate', kinder: [
+      { id: '251.0', titel: 'Allgemeine Apparate' },
+      { id: '251.1', titel: 'Kücheneinrichtungen' },
+      { id: '251.2', titel: 'Waschtische und Lavabos' },
+      { id: '251.3', titel: 'WC-Anlagen' },
+      { id: '251.4', titel: 'Badewannen und Duschen' },
+      { id: '251.5', titel: 'Diverse Sanitärapparate' }
+    ]},
+    { id: '252', titel: 'Abwasseranlagen', kinder: [
+      { id: '252.0', titel: 'Abwasserleitungen' },
+      { id: '252.1', titel: 'Lieferung Fettabscheider', modulKey: 'fettabscheider', modulUrl: 'sa_fettabscheider.html' },
+      { id: '252.2', titel: 'Montage Fettabscheider' },
+      { id: '252.3', titel: 'Lieferung Abwasserhebeanlage', modulKey: 'hebeanlage', modulUrl: 'sa_abwasserhebeanlage.html' },
+      { id: '252.4', titel: 'Montage Abwasserhebeanlage' },
+      { id: '252.5', titel: 'Lieferung Ölabscheider', modulKey: 'oelabscheider', modulUrl: 'sa_oelabscheider.html' },
+      { id: '252.6', titel: 'Montage Ölabscheider' },
+      { id: '252.7', titel: 'Lieferung Schlammsammler', modulKey: 'schlammsammler', modulUrl: 'sa_schlammsammler.html' },
+      { id: '252.8', titel: 'Montage Schlammsammler' }
+    ]},
+    { id: '253', titel: 'Wassererwärmung', kinder: [
+      { id: '253.0', titel: 'Warmwasserleitungen' },
+      { id: '253.1', titel: 'Lieferung Frischwasserstation', modulKey: 'frischwasserstation', modulUrl: 'sa_frischwasserstation.html' },
+      { id: '253.2', titel: 'Montage Frischwasserstation' },
+      { id: '253.3', titel: 'Lieferung Zirkulationspumpe', modulKey: 'zirkulation' },
+      { id: '253.4', titel: 'Montage Zirkulationspumpe' },
+      { id: '253.5', titel: 'Lieferung Solaranlage', modulKey: 'solaranlage', modulUrl: 'sa_solaranlage.html' },
+      { id: '253.6', titel: 'Montage Solaranlage' }
+    ]},
+    { id: '254', titel: 'Wasseraufbereitung', kinder: [
+      { id: '254.0', titel: 'Kaltwasserleitungen' },
+      { id: '254.1', titel: 'Lieferung Druckerhöhungsanlage', modulKey: 'druckerhoehung', modulUrl: 'sb_druckerhoehung.html' },
+      { id: '254.2', titel: 'Montage Druckerhöhungsanlage' },
+      { id: '254.3', titel: 'Lieferung Enthärtungsanlage', modulKey: 'enthaertung', modulUrl: 'sa_enthaertung.html' },
+      { id: '254.4', titel: 'Montage Enthärtungsanlage' },
+      { id: '254.5', titel: 'Lieferung Osmoseanlage', modulKey: 'osmose', modulUrl: 'sa_osmose.html' },
+      { id: '254.6', titel: 'Montage Osmoseanlage' }
+    ]},
+    { id: '255', titel: 'Isolierungen', kinder: [
+      { id: '255.0', titel: 'Rohrisolierungen kalt' },
+      { id: '255.1', titel: 'Rohrisolierungen warm' },
+      { id: '255.2', titel: 'Armaturenisolierungen' }
+    ]},
+    { id: '256', titel: 'Brandschutz Sanitär', kinder: [
+      { id: '256.0', titel: 'Brandschutzabschottungen' },
+      { id: '256.1', titel: 'Brandschutzklappen' }
+    ]},
+    { id: '259', titel: 'Honorare Sanitär', kinder: [
+      { id: '259.0', titel: 'Planungshonorare' },
+      { id: '259.1', titel: 'Bauleitungshonorare' }
+    ]}
+  ]
+};
+
+// Legacy BKP flat array (für bestehende Funktional-Ausschreibungen)
 const BKP=[
   {c:'25',n:'Sanitäranlagen',ch:[
-    {c:'251',n:'Allg. Sanitärapparate',ch:[{c:'251.0',n:'Lieferung'},{c:'251.1',n:'Montage'}]},
-    {c:'252',n:'Spez. Sanitärapparate',ch:[{c:'252.0',n:'Lief. Wasserzähler'},{c:'252.1',n:'Mont. Wasserzähler'},{c:'252.2',n:'Lief. Abluftventilatoren'},{c:'252.3',n:'Mont. Abluftventilatoren'}]},
-    {c:'253',n:'Ver-/Entsorgungsapparate'},
-    {c:'254',n:'Leitungen',ch:[{c:'254.0',n:'Kalt-/Warmwasser'},{c:'254.1',n:'Schmutzwasser'},{c:'254.2',n:'Regenwasser'},{c:'254.3',n:'Lüftungsleitungen'},{c:'254.4',n:'Armaturen'}]},
-    {c:'255',n:'Dämmungen',ch:[{c:'255.0',n:'KW-Dämmung'},{c:'255.1',n:'SW-Dämmung'},{c:'255.2',n:'RW-Dämmung'}]},
-    {c:'256',n:'Installationselemente'},
-    {c:'259',n:'Übriges',ch:[{c:'259.0',n:'Ausführungsplanung/Fachbauleitung'},{c:'259.1',n:'Revisionspläne'},{c:'259.2',n:'Aussparungen/Bohrungen'},{c:'259.3',n:'Wasserhygiene (Spülen)'},{c:'259.4',n:'Technische Mithilfe'}]}
+    {c:'251',n:'Apparate',ch:[{c:'251.0',n:'Allgemeine Apparate'},{c:'251.1',n:'Montage'}]},
+    {c:'252',n:'Abwasseranlagen',ch:[{c:'252.0',n:'Abwasserleitungen'},{c:'252.1',n:'Lieferung Fettabscheider'},{c:'252.2',n:'Montage Fettabscheider'}]},
+    {c:'253',n:'Wassererwärmung',ch:[{c:'253.0',n:'Warmwasserleitungen'},{c:'253.1',n:'Lieferung Frischwasserstation'},{c:'253.2',n:'Montage Frischwasserstation'}]},
+    {c:'254',n:'Wasseraufbereitung',ch:[{c:'254.0',n:'Kaltwasserleitungen'},{c:'254.1',n:'Lieferung Druckerhöhungsanlage'},{c:'254.2',n:'Montage Druckerhöhungsanlage'},{c:'254.3',n:'Lieferung Enthärtungsanlage'},{c:'254.4',n:'Montage Enthärtungsanlage'},{c:'254.5',n:'Lieferung Osmoseanlage'},{c:'254.6',n:'Montage Osmoseanlage'}]},
+    {c:'255',n:'Isolierungen',ch:[{c:'255.0',n:'Rohrisolierungen kalt'},{c:'255.1',n:'Rohrisolierungen warm'},{c:'255.2',n:'Armaturenisolierungen'}]},
+    {c:'256',n:'Brandschutz Sanitär',ch:[{c:'256.0',n:'Brandschutzabschottungen'},{c:'256.1',n:'Brandschutzklappen'}]},
+    {c:'259',n:'Honorare Sanitär',ch:[{c:'259.0',n:'Planungshonorare'},{c:'259.1',n:'Bauleitungshonorare'}]}
   ]},
   {c:'24',n:'Heizungsanlagen',ch:[{c:'242',n:'Wärmeerzeugung'},{c:'243',n:'Wärmeverteilung'},{c:'244',n:'Wärmeabgabe'}]},
   {c:'23',n:'Elektroanlagen',ch:[{c:'232',n:'Starkstrom'},{c:'233',n:'Schwachstrom'}]}
 ];
+
+// Modul-Mapping: BKP-Lieferung → GEMA-Berechnungsmodul
+var MODUL_MAP = {
+  'enthaertung':       { modul: 'sa_enthaertung.html',          label: 'Enthärtungsanlage',       kategorie: 'enthaertung' },
+  'osmose':            { modul: 'sa_osmose.html',               label: 'Osmoseanlage',            kategorie: 'osmose' },
+  'druckerhoehung':    { modul: 'sb_druckerhoehung.html',       label: 'Druckerhöhungsanlage',    kategorie: null },
+  'frischwasserstation':{ modul: 'sa_frischwasserstation.html', label: 'Frischwasserstation',     kategorie: null },
+  'hebeanlage':        { modul: 'sa_abwasserhebeanlage.html',   label: 'Abwasserhebeanlage',      kategorie: 'hebeanlage' },
+  'fettabscheider':    { modul: 'sa_fettabscheider.html',       label: 'Fettabscheider',          kategorie: null },
+  'oelabscheider':     { modul: 'sa_oelabscheider.html',        label: 'Ölabscheider',            kategorie: null },
+  'schlammsammler':    { modul: 'sa_schlammsammler.html',        label: 'Schlammsammler',          kategorie: null },
+  'solaranlage':       { modul: 'sa_solaranlage.html',          label: 'Solaranlage',             kategorie: null },
+  'zirkulation':       { modul: null,                            label: 'Zirkulationspumpe',       kategorie: 'zirkulation' }
+};
 function fBKP(t,d){let r=[];for(const n of t){r.push({...n,depth:d||0});if(n.ch)r=r.concat(fBKP(n.ch,(d||0)+1));}return r;}
 
 // ── ABOS ──
@@ -426,7 +496,7 @@ function defP(){return{planer:'pub',installateur:'iub',lieferant:'lub',architekt
 
 function buildTabs(){
   const b=document.getElementById('tabBar');let t=[];const nE=S.einreichungen.filter(e=>e.ausId===S.activeAusId).length;
-  if(S.currentRole==='planer'){const nAnf=S.anfragen.filter(x=>x.status==='interessiert').length;t=[{id:'pub',ic:'◫',l:'Übersicht'},{id:'paus',ic:'📋',l:'Ausschreibungen',bg:S.ausschreibungen.length},{id:'pdet',ic:'📝',l:'Detail'},{id:'panf',ic:'🤝',l:'Interesse-Anfragen',bg:nAnf},{id:'pvrt',ic:'📤',l:'Verteilen'},{id:'pein',ic:'💰',l:'Offerten',bg:nE},{id:'pvgl',ic:'📊',l:'Vergleich'},{id:'pbet',ic:'👥',l:'Beteiligte'}];}
+  if(S.currentRole==='planer'){const nAnf=S.anfragen.filter(x=>x.status==='interessiert').length;t=[{id:'pub',ic:'◫',l:'Übersicht'},{id:'paus',ic:'📋',l:'Ausschreibungen',bg:S.ausschreibungen.length},{id:'pbkp',ic:'☑',l:'BKP-Checkliste'},{id:'pdet',ic:'📝',l:'Detail'},{id:'panf',ic:'🤝',l:'Interesse-Anfragen',bg:nAnf},{id:'pvrt',ic:'📤',l:'Verteilen'},{id:'pein',ic:'💰',l:'Offerten',bg:nE},{id:'pvgl',ic:'📊',l:'Vergleich'},{id:'pbet',ic:'👥',l:'Beteiligte'}];}
   else if(S.currentRole==='installateur'){const nIA=S.anfragen.filter(x=>x.installateurId===S.currentUserId&&x.status==='angefragt').length;t=[{id:'iub',ic:'◫',l:'Übersicht'},{id:'ianf',ic:'🤝',l:'Interesse-Anfragen',bg:nIA},{id:'iaus',ic:'📋',l:'Ausschreibungen'},{id:'idet',ic:'📝',l:'Offerte ausfüllen'},{id:'ipro',ic:'👤',l:'Profil'},{id:'ina',ic:'🔄',l:'Netto-Anfragen',bg:S.nettoAnfragen.filter(x=>x.installateurId===S.currentUserId).length},{id:'iin',ic:'📨',l:'Eingegangene',bg:S.marktplatzOfferten.filter(x=>!x.installateurId||x.installateurId===S.currentUserId).length}];}
   else if(S.currentRole==='lieferant'){t=[{id:'lub',ic:'◫',l:'Übersicht'},{id:'lab',ic:'⭐',l:'Mein Abo'},{id:'lmk',ic:'🏪',l:'Marktplatz'},{id:'lan',ic:'📨',l:'Anfragen',bg:S.nettoAnfragen.filter(x=>x.lieferantId===S.currentUserId&&x.status==='angefragt').length}];}
   else{t=[{id:'aub',ic:'◫',l:'Projektstatus'}];}
@@ -465,6 +535,186 @@ VIEWS.paus=function(){
   }).join('');
   return h;
 };
+
+// ═══════════════════════════════════════════════
+// BKP-CHECKLISTE (Schritt 2+3: LOS + Baum)
+// ═══════════════════════════════════════════════
+
+// Initialize LOS structure on ausschreibung if missing
+function ensureLose(a){
+  if(!a.lose||!a.lose.length){
+    a.lose=[{id:'los_'+Date.now(),name:'LOS 1',positionen:initBKPPositionen(BKP_STANDARD)}];
+    sv();
+  }
+}
+function initBKPPositionen(node){
+  var pos=[];
+  function walk(n,depth){
+    var p={bkp:n.id,titel:n.titel,checked:false,status:'offen',istLieferung:!!n.modulKey,lieferungTyp:n.modulKey||null,modulUrl:n.modulUrl||null,offerte:null,montagePosition:null};
+    pos.push(p);
+    if(n.kinder)n.kinder.forEach(function(k){walk(k,depth+1);});
+  }
+  walk(node,0);
+  // Remove root node (25) from positionen — only children
+  return pos.filter(function(p){return p.bkp!=='25';});
+}
+function getCurLos(a){
+  if(!a._activeLosId&&a.lose.length)a._activeLosId=a.lose[0].id;
+  return a.lose.find(function(l){return l.id===a._activeLosId;})||a.lose[0];
+}
+
+VIEWS.pbkp=function(){
+  var a=curA();if(!a)return '<div class="wp">Zuerst eine Ausschreibung wählen.</div>';
+  ensureLose(a);
+  var los=getCurLos(a);
+  var checked=los.positionen.filter(function(p){return p.checked;});
+  var erledigt=checked.filter(function(p){return p.status==='erledigt';});
+
+  var h='<h2 style="font-size:20px;font-weight:700;margin-bottom:16px">☑ BKP-Checkliste — '+E(a.name)+'</h2>';
+
+  // Fortschrittsbalken
+  var pct=checked.length?Math.round(erledigt.length/checked.length*100):0;
+  h+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px;background:var(--sur);border:1.5px solid var(--brd);border-radius:10px">';
+  h+='<span style="font-size:13px;font-weight:700">'+erledigt.length+'/'+checked.length+' BKP erledigt</span>';
+  h+='<div style="flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--grn);border-radius:4px;transition:width .3s"></div></div>';
+  h+='<span style="font-size:12px;font-weight:700;color:var(--grn)">'+pct+'%</span>';
+  h+='</div>';
+
+  // LOS-Tabs
+  h+='<div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;align-items:center">';
+  a.lose.forEach(function(l){
+    var isAct=l.id===los.id;
+    h+='<button class="btn '+(isAct?'btn-p':'btn-g')+' btn-sm" onclick="curA()._activeLosId=\''+l.id+'\';save();nav(\'pbkp\')" style="'+(isAct?'':'opacity:.7')+'">'+E(l.name)+'</button>';
+  });
+  h+='<button class="btn btn-g btn-sm" onclick="addLos()">+ LOS</button>';
+  if(a.lose.length>1)h+='<button class="btn btn-d btn-sm" onclick="dlgConfirm(\'LOS löschen?\',\''+E(los.name)+' wird gelöscht.\',function(){rmLos(\''+los.id+'\')})">✕ '+E(los.name)+'</button>';
+  // LOS-Name editieren
+  h+='<span style="margin-left:auto;font-size:11px;color:var(--mut)">Name:</span> <input type="text" value="'+E(los.name).replace(/"/g,'&quot;')+'" onchange="renameLos(\''+los.id+'\',this.value)" style="padding:4px 8px;border:1.5px solid var(--brd2);border-radius:6px;font-size:12px;font-weight:600;width:180px;font-family:var(--sans)"/>';
+  h+='</div>';
+
+  // BKP-Baum
+  h+='<div class="card"><div class="card-hd"><h3>BKP-Positionen</h3><button class="btn btn-g btn-sm" onclick="addBKPPos(\''+los.id+'\')">+ Position</button></div><div class="card-bd" style="padding:0">';
+  h+=renderBKPTree(los.positionen,los.id);
+  h+='</div></div>';
+
+  return h;
+};
+
+function renderBKPTree(positionen,losId){
+  // Group by BKP prefix (first 3 chars = Hauptgruppe)
+  var groups={};
+  positionen.forEach(function(p,i){
+    var prefix=p.bkp.substring(0,3);
+    if(!groups[prefix])groups[prefix]={titel:'',items:[]};
+    // Use the 3-char BKP as group title if it matches
+    if(p.bkp.length===3)groups[prefix].titel=p.titel;
+    groups[prefix].items.push({pos:p,idx:i});
+  });
+  var h='';
+  Object.keys(groups).sort().forEach(function(prefix){
+    var g=groups[prefix];
+    var parentBkp=positionen.find(function(p){return p.bkp===prefix;});
+    var gTitle=g.titel||prefix;
+    var checkedInGroup=g.items.filter(function(x){return x.pos.checked;}).length;
+    var totalInGroup=g.items.length;
+
+    h+='<div class="bkp-group">';
+    h+='<div class="bkp-group-hd" onclick="this.parentElement.classList.toggle(\'open\')" style="display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--brd);cursor:pointer;user-select:none">';
+    h+='<span class="bkp-arrow" style="font-size:10px;color:var(--mut);transition:transform .2s">▶</span>';
+    h+='<span style="font-weight:800;color:var(--acc);font-size:13px;min-width:32px">'+E(prefix)+'</span>';
+    h+='<span style="font-weight:700;font-size:13px;flex:1">'+E(gTitle)+'</span>';
+    h+='<span style="font-size:11px;color:var(--mut);background:var(--sur);padding:2px 8px;border-radius:10px;border:1px solid var(--brd)">'+checkedInGroup+'/'+totalInGroup+'</span>';
+    h+='</div>';
+    h+='<div class="bkp-group-bd" style="display:none">';
+    g.items.forEach(function(item){
+      var p=item.pos,i=item.idx;
+      if(p.bkp.length===3)return; // Skip group header row
+      var statusIc=p.status==='erledigt'?'✓':p.status==='in_bearbeitung'?'⟳':'?';
+      var statusCl=p.status==='erledigt'?'color:var(--grn)':p.status==='in_bearbeitung'?'color:var(--amb)':'color:var(--mut2)';
+      h+='<div style="display:flex;align-items:center;gap:8px;padding:7px 16px 7px 40px;border-bottom:1px solid var(--brd);font-size:13px'+(p.checked?'':';opacity:.5')+'">';
+      // Checkbox
+      h+='<input type="checkbox" '+(p.checked?'checked':'')+' onchange="toggleBKP(\''+losId+'\','+i+',this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--acc);flex-shrink:0"/>';
+      // BKP number (inline edit)
+      h+='<input type="text" value="'+E(p.bkp)+'" onchange="editBKPField(\''+losId+'\','+i+',\'bkp\',this.value)" style="width:50px;padding:2px 4px;border:1px solid transparent;border-radius:4px;font-size:12px;font-weight:800;color:var(--acc);background:transparent;font-family:var(--sans)" onfocus="this.style.borderColor=\'var(--acc)\'" onblur="this.style.borderColor=\'transparent\'"/>';
+      // Title (inline edit)
+      h+='<input type="text" value="'+E(p.titel).replace(/"/g,'&quot;')+'" onchange="editBKPField(\''+losId+'\','+i+',\'titel\',this.value)" style="flex:1;padding:2px 6px;border:1px solid transparent;border-radius:4px;font-size:13px;font-weight:600;background:transparent;font-family:var(--sans)" onfocus="this.style.borderColor=\'var(--brd2)\'" onblur="this.style.borderColor=\'transparent\'"/>';
+      // Status icon
+      h+='<span style="font-size:14px;font-weight:900;'+statusCl+';cursor:pointer;width:20px;text-align:center" onclick="cycleBKPStatus(\''+losId+'\','+i+')" title="Status wechseln">'+statusIc+'</span>';
+      // Module link if Lieferung
+      if(p.modulUrl)h+='<a href="'+p.modulUrl+'" target="_blank" style="font-size:11px;color:var(--acc);text-decoration:none;white-space:nowrap" title="Berechnungsmodul öffnen">🔗</a>';
+      // Delete
+      h+='<button onclick="rmBKPPos(\''+losId+'\','+i+')" style="background:none;border:none;color:var(--mut2);cursor:pointer;font-size:12px;padding:2px" title="Entfernen">✕</button>';
+      h+='</div>';
+    });
+    h+='</div></div>';
+  });
+  // CSS for accordion
+  h+='<style>.bkp-group.open .bkp-group-bd{display:block!important}.bkp-group.open .bkp-arrow{transform:rotate(90deg)}</style>';
+  return h;
+}
+
+// LOS CRUD
+function addLos(){
+  var a=curA();if(!a)return;
+  var n=a.lose.length+1;
+  a.lose.push({id:'los_'+Date.now(),name:'LOS '+n,positionen:initBKPPositionen(BKP_STANDARD)});
+  a._activeLosId=a.lose[a.lose.length-1].id;
+  sv();lg('📦','LOS erstellt','LOS '+n);nav('pbkp');
+}
+function rmLos(losId){
+  var a=curA();if(!a)return;
+  a.lose=a.lose.filter(function(l){return l.id!==losId;});
+  if(a._activeLosId===losId)a._activeLosId=a.lose.length?a.lose[0].id:null;
+  sv();lg('🗑','LOS gelöscht','');nav('pbkp');
+}
+function renameLos(losId,name){
+  var a=curA();if(!a)return;
+  var l=a.lose.find(function(x){return x.id===losId;});
+  if(l)l.name=name;
+  sv();
+}
+
+// BKP Position CRUD
+function toggleBKP(losId,idx,checked){
+  var a=curA();if(!a)return;
+  var l=a.lose.find(function(x){return x.id===losId;});
+  if(!l)return;
+  l.positionen[idx].checked=checked;
+  if(!checked)l.positionen[idx].status='offen';
+  sv();nav('pbkp');
+}
+function editBKPField(losId,idx,field,val){
+  var a=curA();if(!a)return;
+  var l=a.lose.find(function(x){return x.id===losId;});
+  if(!l)return;
+  l.positionen[idx][field]=val;
+  sv();
+}
+function cycleBKPStatus(losId,idx){
+  var a=curA();if(!a)return;
+  var l=a.lose.find(function(x){return x.id===losId;});
+  if(!l)return;
+  var p=l.positionen[idx];
+  if(!p.checked)return;
+  var states=['offen','in_bearbeitung','erledigt'];
+  var ci=states.indexOf(p.status);
+  p.status=states[(ci+1)%3];
+  sv();nav('pbkp');
+}
+function addBKPPos(losId){
+  var a=curA();if(!a)return;
+  var l=a.lose.find(function(x){return x.id===losId;});
+  if(!l)return;
+  l.positionen.push({bkp:'',titel:'Neue Position',checked:false,status:'offen',istLieferung:false,lieferungTyp:null,modulUrl:null,offerte:null,montagePosition:null});
+  sv();nav('pbkp');
+}
+function rmBKPPos(losId,idx){
+  var a=curA();if(!a)return;
+  var l=a.lose.find(function(x){return x.id===losId;});
+  if(!l)return;
+  l.positionen.splice(idx,1);
+  sv();nav('pbkp');
+}
 
 VIEWS.pdet=function(){
   const a=curA();if(!a)return '<div class="es"><p>Keine Ausschreibung gewählt. → <button class="btn btn-s btn-sm" onclick="nav(\'paus\')">Zurück</button></p></div>';
