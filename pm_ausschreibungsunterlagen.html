@@ -450,20 +450,71 @@ var BKP_KOMPLETT = [
   {id:'3',titel:'Betriebseinrichtungen',kinder:[
     {id:'30',titel:'Baugrube'},{id:'31',titel:'Rohbau 1'},{id:'32',titel:'Rohbau 2'},
     {id:'33',titel:'Elektroanlagen',lizenz:'elektro',kinder:[
-      {id:'331',titel:'Apparate Starkstrom'},{id:'332',titel:'Starkstrominstallationen'},
-      {id:'333',titel:'Leuchten'},{id:'335',titel:'Apparate Schwachstrom'},
-      {id:'337',titel:'Gebäudeautomation'},{id:'339',titel:'Übriges'}
+      {id:'331',titel:'Apparate Starkstrom',kinder:[
+        {id:'331.0',titel:'Lieferung Schaltgeräte'},{id:'331.1',titel:'Montage Schaltgeräte'}
+      ]},
+      {id:'332',titel:'Starkstrominstallationen',kinder:[
+        {id:'332.0',titel:'Kabeltrassen'},{id:'332.1',titel:'Kabel und Leitungen'},{id:'332.2',titel:'Schalter und Steckdosen'}
+      ]},
+      {id:'333',titel:'Leuchten',kinder:[
+        {id:'333.0',titel:'Lieferung Leuchten'},{id:'333.1',titel:'Montage Leuchten'},{id:'333.2',titel:'Notbeleuchtung'}
+      ]},
+      {id:'335',titel:'Apparate Schwachstrom',kinder:[
+        {id:'335.0',titel:'Telefonanlagen'},{id:'335.1',titel:'EDV-Installationen'}
+      ]},
+      {id:'337',titel:'Gebäudeautomation',kinder:[
+        {id:'337.0',titel:'Leitsystem'},{id:'337.1',titel:'Automationsstationen'}
+      ]},
+      {id:'339',titel:'Übriges',kinder:[
+        {id:'339.0',titel:'Planungshonorar'},{id:'339.4',titel:'Unvorhergesehenes'}
+      ]}
     ]},
     {id:'34',titel:'HLKK-Anlagen',lizenz:'hlkk',kinder:[
-      {id:'341',titel:'Zulieferung Energieträger'},{id:'342',titel:'Wärmeerzeugung'},
-      {id:'343',titel:'Wärmeverteilung'},{id:'344',titel:'Lüftungsanlagen'},
-      {id:'345',titel:'Klimaanlagen'},{id:'346',titel:'Kälteanlagen'},
-      {id:'348',titel:'Dämmungen'},{id:'349',titel:'Übriges'}
+      {id:'341',titel:'Zulieferung Energieträger',kinder:[
+        {id:'341.0',titel:'Brennstofflager'},{id:'341.1',titel:'Gasanschluss'}
+      ]},
+      {id:'342',titel:'Wärmeerzeugung',kinder:[
+        {id:'342.0',titel:'Lieferung Wärmeerzeuger'},{id:'342.1',titel:'Montage Wärmeerzeuger'}
+      ]},
+      {id:'343',titel:'Wärmeverteilung',kinder:[
+        {id:'343.0',titel:'Heizungsleitungen'},{id:'343.1',titel:'Verteiler und Pumpen'},{id:'343.2',titel:'Armaturen'}
+      ]},
+      {id:'344',titel:'Lüftungsanlagen',kinder:[
+        {id:'344.0',titel:'Lieferung Lüftungsgerät'},{id:'344.1',titel:'Montage Lüftungsgerät'},
+        {id:'344.2',titel:'Kanäle'},{id:'344.3',titel:'Luftauslässe'}
+      ]},
+      {id:'345',titel:'Klimaanlagen',kinder:[
+        {id:'345.0',titel:'Lieferung Klimagerät'},{id:'345.1',titel:'Montage Klimagerät'}
+      ]},
+      {id:'346',titel:'Kälteanlagen',kinder:[
+        {id:'346.0',titel:'Lieferung Kälteanlage'},{id:'346.1',titel:'Montage Kälteanlage'}
+      ]},
+      {id:'348',titel:'Dämmungen',kinder:[
+        {id:'348.0',titel:'Heizungsdämmungen'},{id:'348.1',titel:'Lüftungsdämmungen'},{id:'348.2',titel:'Kältedämmungen'}
+      ]},
+      {id:'349',titel:'Übriges',kinder:[
+        {id:'349.0',titel:'Planungshonorar'},{id:'349.4',titel:'Unvorhergesehenes'}
+      ]}
     ]},
     {id:'35',titel:'Sanitäranlagen',lizenz:'sanitaer',kinder:[
-      {id:'351',titel:'Allgemeine Sanitärapparate'},{id:'352',titel:'Spezielle Sanitärapparate'},
-      {id:'353',titel:'Ver- und Entsorgungsapparate'},{id:'354',titel:'Sanitärleitungen'},
-      {id:'355',titel:'Dämmungen'},{id:'359',titel:'Übriges'}
+      {id:'351',titel:'Allgemeine Sanitärapparate',kinder:[
+        {id:'351.0',titel:'Lieferung Apparate'},{id:'351.1',titel:'Montage Apparate'}
+      ]},
+      {id:'352',titel:'Spezielle Sanitärapparate',kinder:[
+        {id:'352.0',titel:'Lieferung Spezialapparate'},{id:'352.1',titel:'Montage Spezialapparate'}
+      ]},
+      {id:'353',titel:'Ver- und Entsorgungsapparate',kinder:[
+        {id:'353.0',titel:'Lieferung Ver-/Entsorgung'},{id:'353.1',titel:'Montage Ver-/Entsorgung'}
+      ]},
+      {id:'354',titel:'Sanitärleitungen',kinder:[
+        {id:'354.0',titel:'Kalt- und Warmwasser'},{id:'354.1',titel:'Schmutzwasser'},{id:'354.2',titel:'Regenwasser'}
+      ]},
+      {id:'355',titel:'Dämmungen',kinder:[
+        {id:'355.0',titel:'Kalt- und Warmwasser'},{id:'355.1',titel:'Schmutzwasser'}
+      ]},
+      {id:'359',titel:'Übriges',kinder:[
+        {id:'359.0',titel:'Planungshonorar'},{id:'359.4',titel:'Unvorhergesehenes'}
+      ]}
     ]},
     {id:'36',titel:'Transportanlagen'},{id:'37',titel:'Ausbau 1'},{id:'38',titel:'Ausbau 2'},{id:'39',titel:'Honorare'}
   ]},
