@@ -382,27 +382,11 @@ function fixLeadingZero(el){
     <div class="pf"><label>Datum</label><input type="date" id="metaDatum"></div>
   </div>
 
-    <!-- HERO -->
-  <div class="hero">
-    <div class="hero-in">
-      <div class="hero-left">
-        <div class="hero-ic">☀️</div>
-        <div>
-          <div class="hero-title">Thermische Solaranlage</div>
-          <div class="hero-sub">Ertrag · Deckungsgrad · Dimensionierung Kollektor, Speicher, Wärmetauscher</div>
-          <div class="hero-pills">
-            <span class="hero-pill">SIA 384/3</span>
-            <span class="hero-pill">Darcy-LOOKUP</span>
-            <span class="hero-pill">Monatswerte</span>
-          </div>
-        </div>
-      </div>
-      <div class="hero-stats">
-        <div class="hero-stat"><div class="hero-stat-val" id="hs_area">–</div><div class="hero-stat-lbl">Kollektorfläche m²</div></div>
-        <div class="hero-stat"><div class="hero-stat-val" id="hs_cover">–</div><div class="hero-stat-lbl">Deckungsgrad</div></div>
-        <div class="hero-stat"><div class="hero-stat-val" id="hs_yield">–</div><div class="hero-stat-lbl">kWh/m²·a</div></div>
-      </div>
-    </div>
+  <!-- Live-Stats -->
+  <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;">
+    <div class="g-kpi blue"><div class="g-kpi-label">Kollektorfläche</div><div class="g-kpi-val" id="hs_area">–</div><div class="g-kpi-unit">m²</div></div>
+    <div class="g-kpi"><div class="g-kpi-label">Deckungsgrad</div><div class="g-kpi-val" id="hs_cover">–</div><div class="g-kpi-unit">%</div></div>
+    <div class="g-kpi"><div class="g-kpi-label">Ertrag</div><div class="g-kpi-val" id="hs_yield">–</div><div class="g-kpi-unit">kWh/m²·a</div></div>
   </div>
 
   <div class="main-grid">
