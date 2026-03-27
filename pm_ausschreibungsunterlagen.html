@@ -708,7 +708,7 @@ function buildTabs(){
   else{t=[{id:'aub',ic:'◫',l:'Projektstatus'}];}
   b.innerHTML=t.map(x=>`<button class="tab-btn" data-tab="${x.id}" onclick="nav('${x.id}')"><span>${x.ic}</span> ${x.l}${x.bg?`<span class="tab-badge">${x.bg}</span>`:''}</button>`).join('');
 }
-function nav(p){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.tab-btn[data-tab="${p}"]`)?.classList.add('active');const el=document.getElementById('PA');const fn=VIEWS[p];el.innerHTML=fn?fn():'<div class="es"><p>Seite nicht gefunden.</p></div>';setTimeout(initDropZones,50);}
+function nav(p){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.tab-btn[data-tab="${p}"]`)?.classList.add('active');const el=document.getElementById('PA');const fn=VIEWS[p];el.innerHTML=fn?fn():'<div class="es"><p>Seite nicht gefunden.</p></div>';setTimeout(initDropZones,50);if(p==='pbkp')setTimeout(restoreBKPOpenState,10);}
 const VIEWS={};
 
 // ═══════════════════════════════════════════════
@@ -825,9 +825,9 @@ VIEWS.pbkp=function(){
   // Fortschrittsbalken
   var pct=checked.length?Math.round(erledigt.length/checked.length*100):0;
   h+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 16px;background:var(--sur);border:1.5px solid var(--brd);border-radius:10px">';
-  h+='<span style="font-size:13px;font-weight:700">'+erledigt.length+'/'+checked.length+' BKP erledigt</span>';
-  h+='<div style="flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--grn);border-radius:4px;transition:width .3s"></div></div>';
-  h+='<span style="font-size:12px;font-weight:700;color:var(--grn)">'+pct+'%</span>';
+  h+='<span id="bkpProgress" style="font-size:13px;font-weight:700">'+erledigt.length+'/'+checked.length+' BKP erledigt</span>';
+  h+='<div style="flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden"><div id="bkpProgressBar" style="height:100%;width:'+pct+'%;background:var(--grn);border-radius:4px;transition:width .3s"></div></div>';
+  h+='<span id="bkpProgressPct" style="font-size:12px;font-weight:700;color:var(--grn)">'+pct+'%</span>';
   h+='</div>';
 
   // LOS-Tabs
@@ -902,7 +902,7 @@ function renderBKPTree(positionen,losId){
       // Title (inline edit)
       h+='<input type="text" value="'+E(p.titel).replace(/"/g,'&quot;')+'" onchange="editBKPField(\''+losId+'\','+i+',\'titel\',this.value)" style="flex:1;padding:2px 6px;border:1px solid transparent;border-radius:4px;font-size:13px;font-weight:600;background:transparent;font-family:var(--sans)" onfocus="this.style.borderColor=\'var(--brd2)\'" onblur="this.style.borderColor=\'transparent\'"/>';
       // Status icon
-      h+='<span style="font-size:14px;font-weight:900;'+statusCl+';cursor:pointer;width:20px;text-align:center" onclick="cycleBKPStatus(\''+losId+'\','+i+')" title="Status wechseln">'+statusIc+'</span>';
+      h+='<span style="font-size:14px;font-weight:900;'+statusCl+';cursor:pointer;width:20px;text-align:center" onclick="event.stopPropagation();cycleBKPStatus(\''+losId+'\','+i+',this)" title="Status wechseln">'+statusIc+'</span>';
       // Module link if Lieferung
       if(p.istLieferung)h+='<button onclick="event.stopPropagation();openLieferungDialog(\''+losId+'\','+i+')" style="background:none;border:none;font-size:11px;color:var(--acc);cursor:pointer;padding:2px;white-space:nowrap" title="Lieferung & Offerte">🔗 Offerte</button>';
       else if(p.modulUrl)h+='<a href="'+p.modulUrl+'" target="_blank" style="font-size:11px;color:var(--acc);text-decoration:none;white-space:nowrap" title="Berechnungsmodul öffnen">🔗</a>';
@@ -952,7 +952,23 @@ function toggleBKP(losId,idx,checked){
     // Open Lieferung dialog
     setTimeout(function(){openLieferungDialog(losId,idx);},100);
   }
-  sv();nav('pbkp');
+  sv();saveBKPOpenState();nav('pbkp');
+}
+
+// Speichere/Restore offene BKP-Gruppen
+var _bkpOpenGroups={};
+function saveBKPOpenState(){
+  _bkpOpenGroups={};
+  document.querySelectorAll('.bkp-group.open').forEach(function(el){
+    var hd=el.querySelector('.bkp-group-hd span:nth-child(2)');
+    if(hd)_bkpOpenGroups[hd.textContent.trim()]=true;
+  });
+}
+function restoreBKPOpenState(){
+  document.querySelectorAll('.bkp-group').forEach(function(el){
+    var hd=el.querySelector('.bkp-group-hd span:nth-child(2)');
+    if(hd&&_bkpOpenGroups[hd.textContent.trim()])el.classList.add('open');
+  });
 }
 
 // Auto-Montage: Wenn "Lieferung XXX" angehakt wird, Montage-Position ergänzen
@@ -1185,10 +1201,20 @@ function openLieferungDialog(losId,idx){
 }
 
 function renderOffertForm(){
+  var lieferanten=S.beteiligte.filter(function(b){return b.rolle==='lieferant';});
   var h='<div style="margin-top:8px"><label style="font-size:11px;font-weight:700;color:var(--mut);display:block;margin-bottom:4px">PDF-Offerte hochladen</label>';
   h+='<input type="file" id="liefOffertFile" accept=".pdf" style="font-size:12px"/></div>';
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">';
-  h+='<div><label style="font-size:11px;font-weight:700;color:var(--mut);display:block;margin-bottom:4px">Lieferant</label><input type="text" id="liefFirma" class="fc" placeholder="z.B. BWT" style="font-size:13px"/></div>';
+  h+='<div><label style="font-size:11px;font-weight:700;color:var(--mut);display:block;margin-bottom:4px">Lieferant</label>';
+  h+='<select id="liefFirmaSelect" class="fc" style="font-size:13px" onchange="var v=this.value;var fi=document.getElementById(\'liefFirmaFrei\');if(v===\'__frei__\'){fi.style.display=\'block\';fi.focus();}else{fi.style.display=\'none\';fi.value=\'\';}">';
+  h+='<option value="">— Lieferant wählen —</option>';
+  lieferanten.forEach(function(l){
+    h+='<option value="'+E(l.firma)+'">'+E(l.firma)+' ('+E(l.person)+')</option>';
+  });
+  h+='<option value="__frei__">✎ Freier Lieferant…</option>';
+  h+='</select>';
+  h+='<input type="text" id="liefFirmaFrei" class="fc" placeholder="Firma eingeben" style="font-size:13px;margin-top:4px;display:none"/>';
+  h+='</div>';
   h+='<div><label style="font-size:11px;font-weight:700;color:var(--mut);display:block;margin-bottom:4px">Produkt</label><input type="text" id="liefProdukt" class="fc" placeholder="z.B. AQA perla 20" style="font-size:13px"/></div>';
   h+='</div>';
   h+='<div style="margin-top:8px"><label style="font-size:11px;font-weight:700;color:var(--mut);display:block;margin-bottom:4px">Bruttopreis CHF</label><input type="text" inputmode="decimal" id="liefPreis" class="fc" placeholder="optional" onblur="fixLeadingZero(this)" style="font-size:13px;width:160px"/></div>';
@@ -1270,7 +1296,8 @@ function saveLiefOfferte(){
   if(!l)return;
   var p=l.positionen[_liefIdx];
   if(!p)return;
-  var firma=(document.getElementById('liefFirma')||{}).value||'';
+  var selVal=(document.getElementById('liefFirmaSelect')||{}).value||'';
+  var firma=selVal==='__frei__'?((document.getElementById('liefFirmaFrei')||{}).value||''):selVal;
   var produkt=(document.getElementById('liefProdukt')||{}).value||'';
   var preis=(document.getElementById('liefPreis')||{}).value||'';
   var fileInput=document.getElementById('liefOffertFile');
@@ -1305,30 +1332,37 @@ function editBKPField(losId,idx,field,val){
   l.positionen[idx][field]=val;
   sv();
 }
-function cycleBKPStatus(losId,idx){
+function cycleBKPStatus(losId,idx,el){
   var a=curA();if(!a)return;
   var l=a.lose.find(function(x){return x.id===losId;});
   if(!l)return;
   var p=l.positionen[idx];
   if(!p.checked)return;
   var states=['offen','in_bearbeitung','erledigt'];
+  var icons={'offen':'?','in_bearbeitung':'⟳','erledigt':'✓'};
+  var colors={'offen':'var(--mut2)','in_bearbeitung':'var(--amb)','erledigt':'var(--grn)'};
   var ci=states.indexOf(p.status);
   p.status=states[(ci+1)%3];
-  sv();nav('pbkp');
+  sv();
+  // Update icon inline without re-rendering the whole view
+  if(el){el.textContent=icons[p.status];el.style.color=colors[p.status];}
+  // Update progress bar
+  var progEl=document.getElementById('bkpProgress');
+  if(progEl){var los=getCurLos(a);var ch=los.positionen.filter(function(x){return x.checked;});var er=ch.filter(function(x){return x.status==='erledigt';});var pct=ch.length?Math.round(er.length/ch.length*100):0;progEl.innerHTML=er.length+'/'+ch.length+' BKP erledigt';var bar=document.getElementById('bkpProgressBar');if(bar)bar.style.width=pct+'%';var pctEl=document.getElementById('bkpProgressPct');if(pctEl)pctEl.textContent=pct+'%';}
 }
 function addBKPPos(losId){
   var a=curA();if(!a)return;
   var l=a.lose.find(function(x){return x.id===losId;});
   if(!l)return;
   l.positionen.push({bkp:'',titel:'Neue Position',checked:false,status:'offen',istLieferung:false,lieferungTyp:null,modulUrl:null,offerte:null,montagePosition:null});
-  sv();nav('pbkp');
+  sv();saveBKPOpenState();nav('pbkp');
 }
 function rmBKPPos(losId,idx){
   var a=curA();if(!a)return;
   var l=a.lose.find(function(x){return x.id===losId;});
   if(!l)return;
   l.positionen.splice(idx,1);
-  sv();nav('pbkp');
+  sv();saveBKPOpenState();nav('pbkp');
 }
 
 VIEWS.pdet=function(){
