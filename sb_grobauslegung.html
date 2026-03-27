@@ -1299,7 +1299,6 @@ if (typeof _GemaDB !== 'undefined') await _GemaDB.init('grobauslegung', [_sk]);
     $("txtOverall").textContent = overallOk ? "Bereit ✓" : "Unvollständig";
   }
 
-  var _sk = (typeof GemaObjekte!=='undefined') ? GemaObjekte.storageKey('startseite_grobauslegung_sanitaer_v2') : 'startseite_grobauslegung_sanitaer_v2';
   const LS_KEY = _sk;
 
   function saveToLocal(showToast=false){

@@ -893,15 +893,16 @@ let manualGZ = false;
 let state = {};
 
 // ══════════════════════════════════════════════════════
+// Per-object storage helper
+// ══════════════════════════════════════════════════════
+var _FWS_BASE = 'gema_fws';
+function _fwsKey(){var sel=document.getElementById('metaObjektDropdown');var oid=(sel&&sel.value)?sel.value:((typeof GemaObjekte!=='undefined')?GemaObjekte.getActiveId():'');return oid?_FWS_BASE+'__'+oid:_FWS_BASE;}
+
+// ══════════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', async () => {
 try{if(typeof _GemaDB!=='undefined')await Promise.race([_GemaDB.init('frischwasserstation',['gema_fws']),new Promise((_,r)=>setTimeout(()=>r('timeout'),3000))]);}catch(e){console.warn('GemaDB:',e);}
-
-  // Per-object storage helper
-  var _FWS_BASE = 'gema_fws';
-  function _fwsKey(){var sel=document.getElementById('metaObjektDropdown');var oid=(sel&&sel.value)?sel.value:((typeof GemaObjekte!=='undefined')?GemaObjekte.getActiveId():'');return oid?_FWS_BASE+'__'+oid:_FWS_BASE;}
-  window._fwsKey = _fwsKey;
 
   // Load saved state
   var _initKey = _fwsKey();
@@ -1306,7 +1307,7 @@ document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('fris
   }
   function onObjektSelect(){
     var sel=document.getElementById('metaObjektDropdown'),inp=document.getElementById('metaProjekt');if(!sel||!inp)return;
-    if(_prevObjektId){try{saveState();}catch(e){}}
+    if(_prevObjektId&&_prevObjektId!==sel.value){try{var _nv=sel.value;sel.value=_prevObjektId;saveState();sel.value=_nv;}catch(e){}}
     if(sel.value&&typeof GemaObjekte!=='undefined'){var o=GemaObjekte.getAll().find(function(x){return x.id===sel.value;});if(o){var p=[o.name];if(o.strasse)p.push(o.strasse);if(o.plz||o.ort)p.push([o.plz,o.ort].filter(Boolean).join(' '));inp.value=p.join(', ');}}else{inp.value='';}
     _prevObjektId=sel.value;saveMeta();
     // Load data for new object

@@ -1128,6 +1128,7 @@ document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('enth
     var sel=document.getElementById('metaObjektDropdown');
     var inp=document.getElementById('metaProjekt');
     if(!sel||!inp) return;
+    if(_prevObjektId&&_prevObjektId!==sel.value){try{var _nv=sel.value;sel.value=_prevObjektId;saveLabels();sel.value=_nv;}catch(e){}}
     if(sel.value && typeof GemaObjekte!=='undefined'){
       var o=GemaObjekte.getAll().find(function(x){return x.id===sel.value;});
       if(o){var parts=[o.name];if(o.strasse)parts.push(o.strasse);if(o.plz||o.ort)parts.push([o.plz,o.ort].filter(Boolean).join(' '));inp.value=parts.join(', ');}
