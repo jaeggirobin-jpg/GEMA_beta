@@ -365,9 +365,9 @@ function fixLeadingZero(el){
     <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px">Temperatur</span><div style="display:flex"><input id="inp_temp" type="text" inputmode="decimal" value="10" onblur="fixLeadingZero(this)" style="padding:7px 10px;border:1.5px solid var(--brd2);border-radius:8px 0 0 8px;border-right:0;width:55px;font-size:13px"/><span style="padding:7px 8px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:0 8px 8px 0;font-size:12px;color:var(--mut)">°C</span></div></div>
     <div style="display:flex;flex-direction:column;gap:2px;min-width:120px"><span style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px">Durchfluss</span><select id="inp_flowmode" style="padding:7px 10px;border:1.5px solid var(--brd2);border-radius:8px;font-size:13px"><option value="lu">LU (nach W3)</option><option value="direct">Q direkt [l/s]</option></select></div>
     <div style="height:1px;width:1px"></div>
-    <div style="display:flex;flex-direction:column;gap:2px;align-items:center"><span style="font-size:10px;font-weight:700;color:var(--mut)">ρ</span><div style="padding:7px 10px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:8px;font-size:12px;font-weight:600;color:var(--txt);white-space:nowrap" id="out_rho_display">—</div></div>
-    <div style="display:flex;flex-direction:column;gap:2px;align-items:center"><span style="font-size:10px;font-weight:700;color:var(--mut)">ν</span><div style="padding:7px 10px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:8px;font-size:12px;font-weight:600;color:var(--txt);white-space:nowrap" id="out_nu_display">—</div></div>
-    <div style="display:flex;flex-direction:column;gap:2px;margin-left:auto"><span style="font-size:10px;color:transparent">.</span><button id="togDetails" onclick="toggleDetails()" style="padding:7px 14px;border-radius:8px;border:1.5px solid var(--brd2);background:var(--sur);color:var(--mut);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:.15s">Details</button></div>
+    <div style="display:flex;flex-direction:column;gap:2px;align-items:center"><span style="font-size:10px;font-weight:700;color:var(--mut)">ρ</span><div style="padding:7px 10px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:8px;font-size:13px;font-weight:600;color:var(--txt);white-space:nowrap;line-height:1.2" id="out_rho_display">—</div></div>
+    <div style="display:flex;flex-direction:column;gap:2px;align-items:center"><span style="font-size:10px;font-weight:700;color:var(--mut)">ν</span><div style="padding:7px 10px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:8px;font-size:13px;font-weight:600;color:var(--txt);white-space:nowrap;line-height:1.2" id="out_nu_display">—</div></div>
+    <div style="display:flex;flex-direction:column;gap:2px;margin-left:auto"><span style="font-size:10px;color:transparent">.</span><button id="togDetails" onclick="toggleDetails()" style="padding:7px 14px;border-radius:8px;border:1.5px solid #c8cfdf;background:#fff;color:#64748b;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Details</button></div>
     <input id="out_rho" type="hidden"/><input id="out_nu" type="hidden"/>
   </div>
 
@@ -1234,8 +1234,8 @@ function toggleDetails(){
   _detailsOn=!_detailsOn;
   var pg=document.querySelector('.pg');
   var btn=$('togDetails');
-  if(_detailsOn){pg.classList.add('show-details');btn.style.cssText='padding:7px 14px;border-radius:8px;border:1.5px solid var(--acc);background:var(--acc);color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap';}
-  else{pg.classList.remove('show-details');btn.style.cssText='padding:7px 14px;border-radius:8px;border:1.5px solid var(--brd2);background:var(--sur);color:var(--mut);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap';}
+  if(_detailsOn){pg.classList.add('show-details');btn.style.cssText='padding:7px 14px;border-radius:8px;border:1.5px solid #1d4ed8;background:#1d4ed8;color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap';}
+  else{pg.classList.remove('show-details');btn.style.cssText='padding:7px 14px;border-radius:8px;border:1.5px solid #c8cfdf;background:#fff;color:#64748b;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap';}
 }
 function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>el.classList.remove('show'),2200);}
 
