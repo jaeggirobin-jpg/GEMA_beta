@@ -829,7 +829,7 @@ function render(){
 
     const flowCell=row.flowMode==='direct'
       ? `<label class="ts-label">Q direkt</label><input class="ts-inp" type="text" inputmode="decimal" value="${row.q_direct}" data-k="q_direct" onblur="fixLeadingZero(this)"/><label class="ts-label">l/s</label>`
-      : `<label class="ts-label">Anzahl LU</label><input class="ts-inp" type="text" inputmode="decimal" value="${row.lu}" data-k="lu" onblur="fixLeadingZero(this)"/><label class="ts-label">gr. LU</label><input class="ts-inp" style="width:55px" type="text" inputmode="decimal" value="${row.grLU}" data-k="grLU" onblur="fixLeadingZero(this)"/>`;
+      : `<label class="ts-label">Anzahl LU</label><input class="ts-inp" type="text" inputmode="decimal" value="${row.lu}" data-k="lu" onblur="fixLeadingZero(this)"/><label class="ts-label" style="background:transparent;border:none;margin-left:8px">gr. LU</label><input class="ts-inp" style="width:55px" type="text" inputmode="decimal" value="${row.grLU}" data-k="grLU" onblur="fixLeadingZero(this)"/>`;
 
     div.innerHTML=`
       <div class="ts-head">
