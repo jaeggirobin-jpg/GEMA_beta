@@ -124,10 +124,11 @@ input,select,button{font-family:var(--sans)}
 
 .ts-fittings{padding:9px 13px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:40px}
 .fit-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;background:var(--blue-bg);border:1px solid var(--blue-bd);font-size:11.5px;font-weight:700;color:var(--blue-dk);cursor:pointer;transition:.15s}
-.fit-chip-inline{display:inline-flex;align-items:center;gap:2px;padding:2px 7px;border-radius:5px;background:var(--bg2);border:1px solid var(--brd);font-size:11px;cursor:pointer;user-select:none;transition:.12s;color:var(--mut)}
+.fit-chip-inline{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:7px;background:var(--bg2);border:1.5px solid var(--brd);font-size:11.5px;font-weight:600;cursor:pointer;user-select:none;transition:.12s;color:var(--mut)}
 .fit-chip-inline:hover{border-color:var(--blue-bd);background:var(--blue-bg)}
-.fit-chip-inline.active{background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue-dk)}
-.fit-chip-inline b{font-weight:800;color:var(--blue);font-size:12px}
+.fit-chip-inline.active{background:var(--blue-bg);border-color:var(--blue-bd);color:var(--blue-dk);font-weight:700}
+.fit-chip-inline b{font-weight:800;color:var(--blue);font-size:12px;margin-left:2px}
+.fit-chip-inline img{width:18px;height:18px;border-radius:3px;object-fit:contain}
 .fit-sort-btn{padding:5px 12px;border-radius:7px;border:1.5px solid var(--brd2);background:var(--sur);color:var(--mut);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
 .fit-sort-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
 .fit-chip:hover{background:var(--blue-bg2)}
@@ -463,6 +464,8 @@ const SYSTEMS = [
 
 // ═══════════════════════════════════════════════════════════
 // FITTINGS DATABASE - per system, per DN group
+// Jedes Fitting kann ein optionales `img` Feld haben (URL/base64)
+// das vom Lieferanten hochgeladen wird und im Chip angezeigt wird.
 // ═══════════════════════════════════════════════════════════
 const FITTING_ICONS = {
   'Bogen 90°':'↩️', 'Bogen 45°':'↪', 'Winkel 90°':'↩️', 'Winkel 45°':'↪',
@@ -485,7 +488,9 @@ function renderInlineFitChips(row, sys){
   return sysFits.map(function(f){
     var count=(row.fittings||{})[f.name]||0;
     var active=count>0;
-    return '<span class="fit-chip-inline'+(active?' active':'')+'" onclick="incFit(\''+row.id+'\',\''+f.name.replace(/'/g,"\\'")+'\',1)" oncontextmenu="event.preventDefault();incFit(\''+row.id+'\',\''+f.name.replace(/'/g,"\\'")+'\', -1)" title="'+f.name+' (Klick: +1, Rechtsklick: -1)">'+fitIcon(f.name)+(count>0?' <b>'+count+'</b>':'')+'</span>';
+    var imgHtml=f.img?'<img src="'+f.img+'" alt=""/>':'';
+    var nameShort=f.name;
+    return '<span class="fit-chip-inline'+(active?' active':'')+'" onclick="incFit(\''+row.id+'\',\''+f.name.replace(/'/g,"\\'")+'\',1)" oncontextmenu="event.preventDefault();incFit(\''+row.id+'\',\''+f.name.replace(/'/g,"\\'")+'\', -1)" title="'+f.name+' · ζ abhängig von DN (Klick: +1, Rechtsklick: -1)">'+imgHtml+fitIcon(f.name)+' '+nameShort+(count>0?' <b>'+count+'</b>':'')+'</span>';
   }).join('');
 }
 function incFit(rowId,fitName,delta){
@@ -889,6 +894,13 @@ function render(){
         ${ltBtns}
         <button class="ts-del" data-del="${row.id}" title="Teilstrecke löschen">✕</button>
       </div>
+      <div class="ts-fittings">
+        <span style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.3px;margin-right:2px">Formstücke</span>
+        ${renderInlineFitChips(row, sys)}
+        <span style="width:1px;height:20px;background:var(--brd);margin:0 4px;flex-shrink:0"></span>
+        <button class="fit-open${armCount>0?' has-fittings':''}" data-fit="${row.id}">🔧 Armaturen${armCount>0?' ('+armCount+')':''}</button>
+        ${armSummary}
+      </div>
       <div class="ts-results">
         <div class="res-item"><div class="res-lbl">Q</div><div class="res-val">${fmt(calc2.Q,3)}<small style="font-size:10px;color:var(--mut)"> l/s</small></div></div>
         <div class="res-div"></div>
@@ -913,13 +925,6 @@ function render(){
         <div class="res-item"><div class="res-lbl">Δp TS</div><div class="res-big">${fmt(calc2.dp_ts,2)}<small style="font-size:11px;font-weight:700;color:var(--blue)"> kPa</small></div></div>
         <div class="res-div"></div>
         <div class="res-item"><div class="res-lbl">Δp kum.</div><div class="res-val" style="color:var(--blue)">${fmt(cum,2)}<small style="font-size:10px"> kPa</small></div></div>
-      </div>
-      <div class="ts-fittings">
-        <span style="font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.3px;margin-right:4px">Formstücke</span>
-        ${renderInlineFitChips(row, sys)}
-        <span style="width:1px;height:20px;background:var(--brd);margin:0 4px;flex-shrink:0"></span>
-        <button class="fit-open${armCount>0?' has-fittings':''}" data-fit="${row.id}">🔧 Armaturen${armCount>0?' ('+armCount+')':''}</button>
-        ${armSummary}
       </div>
     `;
 
