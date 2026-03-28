@@ -792,11 +792,11 @@ function defP(){return{planer:'pub',installateur:'iub',lieferant:'lub',architekt
 
 function buildTabs(){
   const b=document.getElementById('tabBar');let t=[];const nE=S.einreichungen.filter(e=>e.ausId===S.activeAusId).length;
-  if(S.currentRole==='planer'){const nAnf=S.anfragen.filter(x=>x.status==='interessiert').length;t=[{id:'pub',ic:'◫',l:'Übersicht'},{id:'paus',ic:'📋',l:'Ausschreibungen',bg:S.ausschreibungen.length},{id:'pbkp',ic:'☑',l:'BKP-Checkliste'},{id:'pcrbx',ic:'📦',l:'CRBX-Abgleich'},{id:'pdet',ic:'📝',l:'Detail'},{id:'panf',ic:'🤝',l:'Interesse-Anfragen',bg:nAnf},{id:'pvrt',ic:'📤',l:'Verteilen'},{id:'pein',ic:'💰',l:'Offerten',bg:nE},{id:'pvgl',ic:'📊',l:'Vergleich'},{id:'pbet',ic:'👥',l:'Beteiligte'}];}
+  if(S.currentRole==='planer'){const nAnf=S.anfragen.filter(x=>x.status==='interessiert').length;var curA_=S.ausschreibungen.find(function(a){return a.id===S.activeAusId;});var isCrbx=curA_&&curA_.typ==='crbx';t=[{id:'pub',ic:'◫',l:'Übersicht'},{id:'paus',ic:'📋',l:'Ausschreibungen',bg:S.ausschreibungen.length},{id:'pbkp',ic:'☑',l:'BKP-Checkliste'},{id:'pcrbx',ic:'📦',l:'CRBX-Abgleich',disabled:!isCrbx},{id:'pdet',ic:'📝',l:'Detail'},{id:'panf',ic:'🤝',l:'Interesse-Anfragen',bg:nAnf},{id:'pvrt',ic:'📤',l:'Verteilen'},{id:'pein',ic:'💰',l:'Offerten',bg:nE},{id:'pvgl',ic:'📊',l:'Vergleich'},{id:'pbet',ic:'👥',l:'Beteiligte'}];}
   else if(S.currentRole==='installateur'){const nIA=S.anfragen.filter(x=>x.installateurId===S.currentUserId&&x.status==='angefragt').length;t=[{id:'iub',ic:'◫',l:'Übersicht'},{id:'ianf',ic:'🤝',l:'Interesse-Anfragen',bg:nIA},{id:'iaus',ic:'📋',l:'Ausschreibungen'},{id:'idet',ic:'📝',l:'Offerte ausfüllen'},{id:'ipro',ic:'👤',l:'Profil'},{id:'ina',ic:'🔄',l:'Netto-Anfragen',bg:S.nettoAnfragen.filter(x=>x.installateurId===S.currentUserId).length},{id:'iin',ic:'📨',l:'Eingegangene',bg:S.marktplatzOfferten.filter(x=>!x.installateurId||x.installateurId===S.currentUserId).length}];}
   else if(S.currentRole==='lieferant'){t=[{id:'lub',ic:'◫',l:'Übersicht'},{id:'lab',ic:'⭐',l:'Mein Abo'},{id:'lmk',ic:'🏪',l:'Marktplatz'},{id:'lan',ic:'📨',l:'Anfragen',bg:S.nettoAnfragen.filter(x=>x.lieferantId===S.currentUserId&&x.status==='angefragt').length}];}
   else{t=[{id:'aub',ic:'◫',l:'Projektstatus'}];}
-  b.innerHTML=t.map(x=>`<button class="tab-btn" data-tab="${x.id}" onclick="nav('${x.id}')"><span>${x.ic}</span> ${x.l}${x.bg?`<span class="tab-badge">${x.bg}</span>`:''}</button>`).join('');
+  b.innerHTML=t.map(x=>`<button class="tab-btn${x.disabled?' disabled':''}" data-tab="${x.id}" onclick="${x.disabled?'toast(\'Nur bei CRBX-Ausschreibungen\',\'info\')':'nav(\''+x.id+'\')'}" ${x.disabled?'style="opacity:.4;cursor:not-allowed"':''}><span>${x.ic}</span> ${x.l}${x.bg?`<span class="tab-badge">${x.bg}</span>`:''}</button>`).join('');
 }
 function nav(p){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.tab-btn[data-tab="${p}"]`)?.classList.add('active');const el=document.getElementById('PA');const fn=VIEWS[p];el.innerHTML=fn?fn():'<div class="es"><p>Seite nicht gefunden.</p></div>';setTimeout(initDropZones,50);if(p==='pbkp')setTimeout(restoreBKPOpenState,10);}
 const VIEWS={};
@@ -994,9 +994,9 @@ function renderBKPTree(positionen,losId){
       // Checkbox
       h+='<input type="checkbox" '+(p.checked?'checked':'')+' onchange="toggleBKP(\''+losId+'\','+i+',this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--acc);flex-shrink:0"/>';
       // BKP number (inline edit)
-      h+='<input type="text" value="'+E(p.bkp)+'" onchange="editBKPField(\''+losId+'\','+i+',\'bkp\',this.value)" style="width:50px;padding:2px 4px;border:1px solid transparent;border-radius:4px;font-size:12px;font-weight:800;color:var(--acc);background:transparent;font-family:var(--sans)" onfocus="this.style.borderColor=\'var(--acc)\'" onblur="this.style.borderColor=\'transparent\'"/>';
+      h+='<input type="text" value="'+E(p.bkp)+'" onchange="editBKPField(\''+losId+'\','+i+',\'bkp\',this.value)" style="width:50px;padding:3px 5px;border:1.5px solid #c8cfdf;border-radius:5px;font-size:12px;font-weight:800;color:#1d4ed8;background:#fff;font-family:var(--sans)" onfocus="this.style.borderColor=\'#1d4ed8\'" onblur="this.style.borderColor=\'#c8cfdf\'"/>';
       // Title (inline edit)
-      h+='<input type="text" value="'+E(p.titel).replace(/"/g,'&quot;')+'" onchange="editBKPField(\''+losId+'\','+i+',\'titel\',this.value)" style="flex:1;padding:2px 6px;border:1px solid transparent;border-radius:4px;font-size:13px;font-weight:600;background:transparent;font-family:var(--sans)" onfocus="this.style.borderColor=\'var(--brd2)\'" onblur="this.style.borderColor=\'transparent\'"/>';
+      h+='<input type="text" value="'+E(p.titel).replace(/"/g,'&quot;')+'" onchange="editBKPField(\''+losId+'\','+i+',\'titel\',this.value)" style="flex:1;padding:3px 6px;border:1.5px solid #c8cfdf;border-radius:5px;font-size:13px;font-weight:600;background:#fff;font-family:var(--sans)" onfocus="this.style.borderColor=\'#1d4ed8\'" onblur="this.style.borderColor=\'#c8cfdf\'"/>';
       // Status icon
       h+='<span style="font-size:14px;font-weight:900;'+statusCl+';cursor:pointer;width:20px;text-align:center" onclick="event.stopPropagation();cycleBKPStatus(\''+losId+'\','+i+',this)" title="Status wechseln">'+statusIc+'</span>';
       // Module link if Lieferung
@@ -1495,32 +1495,36 @@ VIEWS.pdet=function(){
       h+=`</div></div>`;
     }
   } else {
-    // Funktional mode — BKP groups + Unterpositionen
-    h+=`<div class="card"><div class="card-hd"><h3>⬡ BKP-Positionen</h3><button class="btn btn-s btn-sm" onclick="addBKPGruppe()">+ BKP-Gruppe</button></div><div class="card-bd">`;
-    if(!(a.bkp||[]).length)h+=`<p style="color:var(--mut)">Noch keine BKP-Gruppen. Klicke «+ BKP-Gruppe» um zu starten.</p>`;
-    else h+=(a.bkp||[]).map((bg,bi)=>{
-      const ups=bg.unterpositionen||[];
-      return `<div style="margin-bottom:16px;border:1.5px solid var(--brd);border-radius:var(--r);overflow:hidden">
-        <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg2)">
-          <input type="text" class="fc" style="width:60px;font-weight:800;color:var(--acc);text-align:center;padding:4px" value="${E(bg.code)}" onchange="a=curA();a.bkp[${bi}].code=this.value;save();nav('pdet')"/>
-          <input type="text" class="fc" style="flex:1;font-weight:700" value="${E(bg.name)}" onchange="a=curA();a.bkp[${bi}].name=this.value;save()"/>
-          <button class="btn btn-s btn-sm" onclick="addUp(${bi})">+ Position</button>
-          <button class="btn btn-s btn-sm" onclick="editMatSpec(${bi})">🔧 Material</button>
-          <button class="btn btn-s btn-sm" onclick="openBrutto('${bg.code}')">📄 Offerte</button>
-          <button class="btn btn-d btn-sm" onclick="dlgConfirm('BKP-Gruppe entfernen?','${E(bg.code)} ${E(bg.name)} und alle Unterpositionen werden gelöscht.',()=>{rmBKPG(${bi})})">✕</button>
-        </div>
-        ${ups.map((up,ui)=>`<div class="up-row" style="margin:6px 10px">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-            <strong style="font-size:13px">${E(up.name||'Position '+(ui+1))}</strong>
-            ${up.menge?`<span class="tag t-gy" style="font-size:10px">${up.menge} ${E(up.einheit||'')}</span>`:''}
-            ${up.liefRef?`<span class="tag t-am" style="font-size:10px">📎 ${E(up.liefRef)}</span>`:''}
-            <span class="ml-a flex gap-8"><button class="btn btn-g btn-sm" onclick="editUp(${bi},${ui})">✎</button><button class="btn btn-d btn-sm" onclick="rmUp(${bi},${ui})">✕</button></span>
-          </div>
-          ${up.beschrieb?`<p style="font-size:12px;color:var(--txt2);white-space:pre-line;max-height:60px;overflow:hidden">${E(up.beschrieb)}</p>`:''}
-        </div>`).join('')}
-        ${bg.materialSpec?.length?`<div style="padding:8px 14px;border-top:1px solid var(--brd)"><div style="font-size:11px;font-weight:700;color:var(--mut);margin-bottom:4px">MATERIALSPEZIFIKATION</div><table class="dt" style="font-size:11px"><tr><th>Position</th><th>Lieferant</th><th>Vorschlag UN</th></tr>${bg.materialSpec.map(m=>`<tr><td>${E(m.pos)}</td><td>${E(m.lieferant)}</td><td style="color:var(--mut)">${E(m.vorschlag||'—')}</td></tr>`).join('')}</table></div>`:''}
-      </div>`;
-    }).join('');
+    // Funktional mode — read-only view of checked BKP from Checkliste
+    ensureLose(a);
+    h+=`<div class="card"><div class="card-hd"><h3>⬡ BKP-Positionen (aus Checkliste)</h3><button class="btn btn-s btn-sm" onclick="nav('pbkp')">☑ Checkliste bearbeiten</button></div><div class="card-bd" style="padding:0">`;
+    var allChecked=[];
+    (a.lose||[]).forEach(function(l){
+      (l.positionen||[]).forEach(function(p){if(p.checked)allChecked.push(p);});
+    });
+    if(!allChecked.length)h+=`<p style="padding:16px;color:var(--mut)">Noch keine BKP-Positionen angehakt. → <button class="btn btn-s btn-sm" onclick="nav('pbkp')">Checkliste öffnen</button></p>`;
+    else{
+      var lastGewerk='';
+      allChecked.forEach(function(p){
+        var gw=p.bkp.substring(0,2);
+        if(gw!==lastGewerk){
+          var gwColor=GEWERK_COLORS[gw]||'var(--mut)';var gwLabel=GEWERK_LABELS[gw]||'';
+          if(gwLabel)h+='<div style="padding:8px 16px;background:'+gwColor+';color:#fff;font-size:11px;font-weight:800;letter-spacing:.4px">'+gwLabel+'</div>';
+          lastGewerk=gw;
+        }
+        var statusIc=p.status==='erledigt'?'<span style="color:#16a34a;font-weight:900">✓</span>':p.status==='in_bearbeitung'?'<span style="color:#d97706;font-weight:900">⟳</span>':'<span style="color:#9ca3af">?</span>';
+        var offertBadge='';
+        if(p.offerte&&p.offerte.lieferantFirma)offertBadge='<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;font-weight:700">📄 '+E(p.offerte.lieferantFirma)+'</span>';
+        else if(p.istLieferung)offertBadge='<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;font-weight:700">⚠ Offerte fehlt</span>';
+        h+='<div style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-bottom:1px solid var(--brd);font-size:13px">';
+        h+=statusIc;
+        h+='<span style="font-weight:800;color:#1d4ed8;min-width:45px">'+E(p.bkp)+'</span>';
+        h+='<span style="flex:1;font-weight:600">'+E(p.titel)+'</span>';
+        h+=offertBadge;
+        if(p.modulUrl)h+='<a href="'+p.modulUrl+'" target="_blank" style="font-size:11px;color:#1d4ed8;text-decoration:none">🔗</a>';
+        h+='</div>';
+      });
+    }
     h+=`</div></div>`;
   }
 
