@@ -144,6 +144,7 @@ textarea.fc{resize:vertical;min-height:60px;line-height:1.5}
     <div class="tab active" data-tab="uebersicht">Übersicht</div>
     <div class="tab" data-tab="produkte">Meine Produkte</div>
     <div class="tab" data-tab="anfragen">Offertanfragen <span id="oaBadge" style="background:#f59e0b;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:800;margin-left:4px;display:none">0</span></div>
+    <div class="tab" data-tab="rohrsysteme">Rohrsysteme & Armaturen</div>
     <div class="tab" data-tab="profil">Firmenprofil</div>
   </div>
 
@@ -190,6 +191,22 @@ textarea.fc{resize:vertical;min-height:60px;line-height:1.5}
       </select>
     </div>
     <div id="oaList"></div>
+  </div>
+
+  <!-- Tab: Rohrsysteme & Armaturen -->
+  <div class="tab-body" id="tb-rohrsysteme">
+    <div class="card">
+      <div class="card-hd"><h3>🔧 Meine Rohrsysteme</h3></div>
+      <div class="card-bd" id="rsListe" style="padding:0">
+        <p style="padding:16px;color:var(--mut);font-size:13px">Wird geladen...</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-hd"><h3>⌥ Meine Armaturen</h3></div>
+      <div class="card-bd" id="armListe" style="padding:0">
+        <p style="padding:16px;color:var(--mut);font-size:13px">Wird geladen...</p>
+      </div>
+    </div>
   </div>
 
   <!-- Tab: Firmenprofil -->
@@ -285,6 +302,7 @@ textarea.fc{resize:vertical;min-height:60px;line-height:1.5}
 <script src="gema_db.js"></script>
 <script src="gema_feedback.js"></script>
 <script src="gema_produktkatalog_api.js"></script>
+<script src="gema_armaturen_api.js"></script>
 <script>
 'use strict';
 var _lief = null; // current lieferant
@@ -345,6 +363,7 @@ function renderAll(){
   renderUebersicht();
   renderProdukte();
   renderAnfragen();
+  renderRohrsysteme();
   fillProfil();
 }
 
@@ -718,6 +737,62 @@ function quickReject(oaId){
 }
 
 // ── Profil ──
+function renderRohrsysteme(){
+  var el=document.getElementById('rsListe');if(!el)return;
+  // Rohrsystem-Produkte aus Produktkatalog
+  var rs=[];
+  if(typeof GemaProdukte!=='undefined'){rs=GemaProdukte.getProdukte('rohrsystem').filter(function(p){return p.lieferantId===_lief?.id||p.lieferantFirma===_lief?.firma;});}
+  // Formstücke
+  var fs=[];
+  if(typeof GemaProdukte!=='undefined'){fs=GemaProdukte.getProdukte('formstuecke').filter(function(p){return p.lieferantId===_lief?.id||p.lieferantFirma===_lief?.firma;});}
+  var h='';
+  if(rs.length){
+    h+=rs.map(function(p){
+      var d=p.daten||{};
+      return '<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--brd)"><div style="flex:1"><strong style="font-size:13px">'+(d.serie||p.lieferantFirma)+'</strong><div style="font-size:11px;color:var(--mut)">'+(d.material||'')+(d.rauhigkeit?' · k='+d.rauhigkeit+' mm':'')+'</div></div><span style="font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;'+(p.status==='verifiziert'?'background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0':'background:#fef2f2;color:#dc2626;border:1px solid #fecaca')+'">'+(p.status==='verifiziert'?'✓ Verifiziert':'⚠ Prüfen')+'</span></div>';
+    }).join('');
+  } else {
+    h='<div style="padding:16px;text-align:center;color:var(--mut);font-size:13px">Noch keine Rohrsysteme erfasst. Erfassen Sie diese unter «Meine Produkte» mit Kategorie «Rohrsystem».</div>';
+  }
+  if(fs.length){
+    h+='<div style="padding:8px 16px;background:var(--bg2);font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.4px">Formstücke ('+fs.length+')</div>';
+    h+=fs.map(function(p){
+      var d=p.daten||{};
+      return '<div style="display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--brd);font-size:12px"><span style="flex:1"><strong>'+(d.serie||'Formstück')+'</strong> · '+(d.fittingTyp||'')+(d.rohrsystem?' · '+d.rohrsystem:'')+'</span><span style="font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700;'+(p.status==='verifiziert'?'background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0':'background:#fef2f2;color:#dc2626;border:1px solid #fecaca')+'">'+(p.status==='verifiziert'?'✓':'⚠')+'</span></div>';
+    }).join('');
+  }
+  el.innerHTML=h;
+
+  // Armaturen aus GemaArmaturen
+  var armEl=document.getElementById('armListe');if(!armEl)return;
+  var armH='';
+  if(typeof GemaArmaturen!=='undefined'){
+    var myArm=GemaArmaturen.getAll().filter(function(a){return a.hersteller===_lief?.firma;});
+    if(myArm.length){
+      armH+=myArm.map(function(a){
+        return '<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--brd)"><div style="flex:1"><strong style="font-size:13px">'+a.name+'</strong><div style="font-size:11px;color:var(--mut)">'+a.typ+(a.serie&&a.serie!=='—'?' · '+a.serie:'')+'</div></div><button onclick="verifyArmatur(\''+a.id+'\')" style="font-size:10px;padding:3px 10px;border-radius:8px;border:1px solid '+(a.status==='verifiziert'?'#bbf7d0':'#fecaca')+';background:'+(a.status==='verifiziert'?'#f0fdf4':'#fef2f2')+';color:'+(a.status==='verifiziert'?'#16a34a':'#dc2626')+';font-weight:700;cursor:pointer">'+(a.status==='verifiziert'?'✓ Verifiziert':'⚠ Verifizieren')+'</button></div>';
+      }).join('');
+    } else {
+      armH='<div style="padding:16px;text-align:center;color:var(--mut);font-size:13px">Keine Armaturen Ihrem Unternehmen zugeordnet.</div>';
+    }
+  } else {
+    armH='<div style="padding:16px;text-align:center;color:var(--mut);font-size:13px">Armaturen-Katalog nicht verfügbar.</div>';
+  }
+  armEl.innerHTML=armH;
+}
+
+function verifyArmatur(id){
+  if(typeof GemaArmaturen==='undefined')return;
+  var a=GemaArmaturen.getById(id);
+  if(!a)return;
+  if(a.status==='verifiziert'){alert('Bereits verifiziert.');return;}
+  if(confirm('Bestätigen Sie, dass die Zeta-Werte für "'+a.name+'" korrekt sind?')){
+    GemaArmaturen.verifiziere(id);
+    renderRohrsysteme();
+    toast('✓ '+a.name+' verifiziert');
+  }
+}
+
 function fillProfil(){
   if(!_lief) return;
   document.getElementById('pFirma').value = _lief.firma||'';

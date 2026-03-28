@@ -304,7 +304,12 @@ body::before{
       document.getElementById('loginForm').style.display='none';
       document.getElementById('loginSuccess').style.display='';
       document.getElementById('successTxt').textContent='Willkommen, '+user.name+'!';
-      setTimeout(function(){ location.href=redirect; }, 700);
+      // Rollenspezifische Weiterleitung
+      var dest=redirect;
+      if(redirect==='index.html'||!redirect){
+        if(user.roleIds&&user.roleIds.indexOf('role_lieferant')>=0) dest='sys_lieferant_dashboard.html';
+      }
+      setTimeout(function(){ location.href=dest; }, 700);
     } else {
       err.textContent='Falscher Benutzername oder Passwort.';
       err.classList.add('show');
