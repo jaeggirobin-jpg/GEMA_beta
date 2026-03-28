@@ -453,15 +453,17 @@ function fixLeadingZero(el){
 <script>
 // ═══════════════════════════════════════════════════════════
 // PIPE SYSTEMS & DIMENSIONS
+// Status: 'verifiziert' = Lieferant hat Daten geprüft und bestätigt
+//         'nicht_verifiziert' = GEMA-Daten aus Datenblättern, nicht vom Lieferant bestätigt
 // ═══════════════════════════════════════════════════════════
 const SYSTEMS = [
-  {id:'mapress',       name:'Geberit Mapress',      material:'Edelstahl', k:0.0015,
+  {id:'mapress',       name:'Geberit Mapress',      material:'Edelstahl', k:0.0015, lieferant:'Geberit AG', status:'verifiziert',
    dims:[{dn:'15x1.0',di:13.0},{dn:'18x1.0',di:16.0},{dn:'22x1.2',di:19.6},{dn:'28x1.2',di:25.6},{dn:'35x1.5',di:32.0},{dn:'42x1.5',di:39.0},{dn:'54x1.5',di:51.0},{dn:'76.1x2.0',di:72.1},{dn:'88.9x2.0',di:84.9},{dn:'108x2.0',di:104.0}]},
-  {id:'mepla',         name:'Geberit Mepla',         material:'Mehrschicht', k:0.007,
+  {id:'mepla',       name:'Geberit Mepla',        lieferant:'Geberit AG', status:'verifiziert',         material:'Mehrschicht', k:0.007,
    dims:[{dn:'16x2.25',di:11.5},{dn:'20x2.50',di:15.0},{dn:'26x3.00',di:20.0},{dn:'32x3.00',di:26.0},{dn:'40x3.50',di:33.0},{dn:'50x4.00',di:42.0},{dn:'63x4.50',di:54.0},{dn:'75x4.70',di:65.6}]},
-  {id:'pushfit',       name:'Geberit PushFit',       material:'Mehrschicht', k:0.007,
+  {id:'pushfit',     name:'Geberit PushFit',      lieferant:'Geberit AG', status:'verifiziert',       material:'Mehrschicht', k:0.007,
    dims:[{dn:'16x2.0',di:12.0},{dn:'20x2.0',di:16.0},{dn:'25x2.5',di:20.0}]},
-  {id:'flowfit',       name:'Geberit FlowFit',       material:'Mehrschicht', k:0.007,
+  {id:'flowfit',     name:'Geberit FlowFit',      lieferant:'Geberit AG', status:'verifiziert',       material:'Mehrschicht', k:0.007,
    dims:[{dn:'16x2.0',di:12.0},{dn:'20x2.0',di:16.0},{dn:'25x2.5',di:20.0},{dn:'32x3.0',di:26.4},{dn:'40x3.0',di:34.0},{dn:'50x3.8',di:42.4},{dn:'63x4.0',di:55.0},{dn:'75x4.6',di:65.8}]},
   {id:'instaflex_k',   name:'+GF+ Instaflex (Klemm)', material:'Mehrschicht', k:0.007,
    dims:[{dn:'16x2.0',di:11.6},{dn:'20x2.0',di:14.4},{dn:'25x2.5',di:20.4},{dn:'32x3.0',di:26.2}]},
@@ -471,17 +473,17 @@ const SYSTEMS = [
    dims:[{dn:'12x1.7',di:8.6},{dn:'16x2.2',di:11.6},{dn:'20x2.8',di:14.4},{dn:'25x3.5',di:18.0},{dn:'32x4.4',di:23.2},{dn:'40x5.5',di:29.0},{dn:'50x6.9',di:36.2},{dn:'63x8.7',di:45.6}]},
   {id:'sanipex_mt',    name:'JRG Sanipex MT®',       material:'Mehrschicht', k:0.007,
    dims:[{dn:'16x2.25',di:11.5},{dn:'20x2.50',di:15.0},{dn:'26x3.00',di:20.0},{dn:'32x3.00',di:26.0},{dn:'40x3.50',di:33.0},{dn:'50x4.00',di:42.0},{dn:'63x4.50',di:54.0}]},
-  {id:'optipress',     name:'RN Optipress',          material:'Edelstahl 1.4521', k:0.0015,
+  {id:'optipress',     name:'RN Optipress',         lieferant:'R. Nussbaum AG', status:'verifiziert',          material:'Edelstahl 1.4521', k:0.0015,
    dims:[{dn:'15x1.0',di:13.0},{dn:'18x1.0',di:16.0},{dn:'22x1.2',di:19.6},{dn:'28x1.2',di:25.6},{dn:'35x1.5',di:32.0},{dn:'42x1.5',di:39.0},{dn:'54x1.5',di:51.0},{dn:'64x2.0',di:60.0},{dn:'76.1x2.0',di:72.1},{dn:'88.9x2.0',di:84.9},{dn:'108x2.0',di:104.0}]},
-  {id:'optiflex',      name:'RN Optiflex',           material:'Mehrschicht', k:0.007,
+  {id:'optiflex',      name:'RN Optiflex',          lieferant:'R. Nussbaum AG', status:'verifiziert',           material:'Mehrschicht', k:0.007,
    dims:[{dn:'16x2.2',di:11.6},{dn:'20x2.8',di:14.4},{dn:'25x2.7',di:19.6},{dn:'32x3.2',di:25.6},{dn:'40x3.5',di:33.0},{dn:'50x4.00',di:42.0},{dn:'63x4.50',di:54.0}]},
-  {id:'kupfer',        name:'Kupfer',                material:'Cu', k:0.0015,
+  {id:'kupfer',        name:'Kupfer',               lieferant:'—', status:'verifiziert',                material:'Cu', k:0.0015,
    dims:[{dn:'12x1.0',di:10.0},{dn:'15x1.0',di:13.0},{dn:'18x1.0',di:16.0},{dn:'22x1.0',di:20.0},{dn:'28x1.5',di:25.0},{dn:'35x1.5',di:32.0},{dn:'42x1.5',di:39.0},{dn:'54x2.0',di:50.0},{dn:'76.1x2.0',di:72.1}]},
-  {id:'stahl',         name:'Stahl verzinkt',        material:'Stahl', k:0.15,
+  {id:'stahl',         name:'Stahl verzinkt',       lieferant:'—', status:'verifiziert',        material:'Stahl', k:0.15,
    dims:[{dn:'1/2"',di:16.0},{dn:'3/4"',di:21.6},{dn:'1"',di:27.2},{dn:'5/4"',di:35.9},{dn:'1½"',di:41.8},{dn:'2"',di:53.0},{dn:'2½"',di:68.8},{dn:'3"',di:80.8},{dn:'4"',di:105.3}]},
-  {id:'pe10',          name:'PE-Druckrohr PN10',     material:'PE', k:0.007,
+  {id:'pe10',          name:'PE-Druckrohr PN10',    lieferant:'—', status:'verifiziert',     material:'PE', k:0.007,
    dims:[{dn:'20x2.9',di:14.2},{dn:'25x2.9',di:19.2},{dn:'32x2.9',di:26.2},{dn:'40x2.9',di:34.2},{dn:'50x3.0',di:44.0},{dn:'63x3.8',di:55.4},{dn:'75x4.5',di:66.0},{dn:'90x5.4',di:79.2},{dn:'110x6.6',di:96.8}]},
-  {id:'pe16',          name:'PE-Druckrohr PN16',     material:'PE', k:0.007,
+  {id:'pe16',          name:'PE-Druckrohr PN16',    lieferant:'—', status:'verifiziert',     material:'PE', k:0.007,
    dims:[{dn:'20x2.9',di:14.2},{dn:'25x2.9',di:19.2},{dn:'32x2.9',di:26.2},{dn:'40x3.7',di:32.6},{dn:'50x4.6',di:40.8},{dn:'63x5.8',di:51.4},{dn:'75x6.8',di:61.4},{dn:'90x8.2',di:73.6},{dn:'110x10.0',di:90.0}]},
 ];
 
@@ -865,7 +867,7 @@ function render(){
         <div class="ts-sep"></div>
         <label class="ts-label">Rohrsystem</label>
         <select class="ts-select" data-k="sysId" style="min-width:175px">
-          ${SYSTEMS.map(s=>`<option value="${s.id}"${s.id===row.sysId?' selected':''}>${s.name}</option>`).join('')}
+          ${SYSTEMS.map(s=>`<option value="${s.id}"${s.id===row.sysId?' selected':''}>${s.status==='verifiziert'?'✓ ':'⚠ '}${s.name}</option>`).join('')}
         </select>
         <label class="ts-label">Dim.</label>
         <select class="ts-select" data-k="dimDn" style="min-width:140px">${dimOpts}</select>
