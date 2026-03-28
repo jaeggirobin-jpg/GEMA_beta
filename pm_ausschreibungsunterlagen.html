@@ -611,7 +611,12 @@ const VB_KAPITEL=[
 let S={
   currentRole:'planer',currentUserId:'planer-1',
   ausschreibung:null, // active ausschreibung object
-  ausschreibungen:[], // list of all
+  ausschreibungen:[
+    {id:'aus-demo-1',name:'Neubau MFH Musterstrasse 12',typ:'funktional',modelle:['pauschal','einheitspreise'],modell:'pauschal',objekt:'Musterstrasse 12, 4053 Basel',objektId:'',region:'Basel',frist:'2026-05-15',status:'entwurf',bkp:[{code:'251',name:'Allgemeine Sanitärapparate',unterpositionen:[],materialSpec:[]},{code:'254',name:'Wasseraufbereitung',unterpositionen:[],materialSpec:[]}],abzuege:[{name:'Rabatt',typ:'prozent',wert:3,aktiv:true},{name:'Skonto',typ:'prozent',wert:2,aktiv:true}],crbx:{lv:null},beilagen:[],plaene:[{name:'Grundriss_EG.pdf',datum:'2026-03-20T10:00:00Z'}],unterlagen:[{name:'Baubeschrieb.pdf',datum:'2026-03-20T10:00:00Z'}],vorbedingungen:{modus:'gema',kapitel:{},pdfName:''},materialSpec:{},vergabe:null,lose:[{id:'los-d1',name:'LOS 1 — Gesamtgebäude',positionen:[{bkp:'251',titel:'Allgemeine Sanitärapparate',checked:true,status:'erledigt',istLieferung:false,lieferungTyp:null,modulUrl:null,offerte:null,montagePosition:null},{bkp:'251.0',titel:'Lieferung Sanitärapparate',checked:true,status:'erledigt',istLieferung:true,lieferungTyp:null,modulUrl:null,offerte:null,montagePosition:null},{bkp:'253',titel:'Ver- und Entsorgungsapparate',checked:true,status:'in_bearbeitung',istLieferung:false,lieferungTyp:null,modulUrl:null,offerte:null,montagePosition:null},{bkp:'253.0',titel:'Lieferung Enthärtungsanlage',checked:true,status:'erledigt',istLieferung:true,lieferungTyp:'enthaertung',modulUrl:'sa_enthaertung.html',offerte:{lieferantId:'lief-2',lieferantFirma:'Geberit AG',produktName:'AQA perla 20',bruttoPreis:4850,offertPdfName:'Offerte_Geberit.pdf',uploadDatum:'2026-03-22'},montagePosition:{bkp:'253.1',titel:'Montage Enthärtungsanlage',checked:true}},{bkp:'253.1',titel:'Montage Enthärtungsanlage',checked:true,status:'offen',istLieferung:false,lieferungTyp:null,modulUrl:null,offerte:null,montagePosition:null},{bkp:'253.2',titel:'Lieferung Osmoseanlage',checked:true,status:'in_bearbeitung',istLieferung:true,lieferungTyp:'osmose',modulUrl:'sa_osmose.html',offerte:null,montagePosition:null},{bkp:'254',titel:'Sanitärleitungen',checked:true,status:'offen',istLieferung:false,lieferungTyp:null,modulUrl:null,offerte:null,montagePosition:null},{bkp:'254.0',titel:'Kalt- und Warmwasser',checked:true,status:'offen',istLieferung:false,lieferungTyp:null,modulUrl:null,offerte:null,montagePosition:null}]}],crbxVergleich:null,created:'2026-03-20T10:00:00Z'},
+    {id:'aus-demo-2',name:'Sanierung Schulhaus Reinach',typ:'crbx',modelle:['pauschal'],modell:'pauschal',objekt:'Schulstrasse 5, 4153 Reinach',objektId:'',region:'Reinach',frist:'2026-04-30',status:'crbx_geprueft',bkp:[],abzuege:[{name:'Rabatt',typ:'prozent',wert:5,aktiv:true}],crbx:{lv:null},beilagen:[],plaene:[{name:'Schema_Sanitaer.pdf',datum:'2026-03-15'}],unterlagen:[],vorbedingungen:{modus:'gema',kapitel:{},pdfName:''},materialSpec:{},vergabe:null,lose:[{id:'los-d2',name:'LOS 1',positionen:[{bkp:'251',titel:'Allgemeine Sanitärapparate',checked:true,status:'erledigt',istLieferung:false,lieferungTyp:null,modulUrl:null,offerte:null,montagePosition:null},{bkp:'254',titel:'Sanitärleitungen',checked:true,status:'erledigt',istLieferung:false,lieferungTyp:null,modulUrl:null,offerte:null,montagePosition:null},{bkp:'255',titel:'Dämmungen',checked:true,status:'erledigt',istLieferung:false,lieferungTyp:null,modulUrl:null,montagePosition:null}]}],crbxVergleich:{datum:'2026-03-25',bestaetigt:true},created:'2026-03-15'},
+    {id:'aus-demo-3',name:'Umbau Büro Liestal',typ:'funktional',modelle:['global'],modell:'global',objekt:'Rathausstrasse 8, 4410 Liestal',objektId:'',region:'Liestal',frist:'2026-03-31',status:'vergeben',bkp:[{code:'251',name:'Apparate',unterpositionen:[{id:'u1',name:'Lavabos',beschrieb:'6 Stk.',menge:'6',einheit:'Stk.'}],materialSpec:[]}],abzuege:[{name:'Rabatt',typ:'prozent',wert:2,aktiv:true}],crbx:{lv:null},beilagen:[],plaene:[],unterlagen:[],vorbedingungen:{modus:'gema',kapitel:{},pdfName:''},materialSpec:{},vergabe:{status:'vergeben',winnerId:'inst-1',datum:'2026-03-28'},lose:[],crbxVergleich:{datum:'2026-03-27',bestaetigt:true},created:'2026-03-10'}
+  ],
+  activeAusId:'aus-demo-1',
   beteiligte:[
     {id:'inst-1',rolle:'installateur',firma:'Jäggi Vollmer GmbH',person:'Felix Jäggi',email:'felix.jaeggi@jaeggivollmer.ch',tel:'061 692 03 11',gewerke:'',abo:{typ:'basic'},profil:{}},
     {id:'inst-2',rolle:'installateur',firma:'Meier Sanitär AG',person:'Peter Meier',email:'meier@meiersanitaer.ch',tel:'061 555 12 34',gewerke:'',abo:{typ:'gratis'},profil:{}},
@@ -620,12 +625,26 @@ let S={
     {id:'lief-3',rolle:'lieferant',firma:'Isopro Isolierungen AG',person:'Thomas Huber',email:'huber@isopro.ch',tel:'044 333 22 11',gewerke:'255',abo:{typ:'basic',gewerke:['255']}},
     {id:'arch-1',rolle:'architekt',firma:'Architektur Muster AG',person:'Sarah Müller',email:'mueller@archmuster.ch',tel:'061 222 33 44',gewerke:'',abo:{typ:'gratis'}}
   ],
-  verteilungen:[],
-  anfragen:[], // {id, ausId, installateurId, status:'angefragt'|'interessiert'|'abgelehnt', datum, antwortDatum, nachricht}
+  verteilungen:[{ausId:'aus-demo-3',installateurId:'inst-1'},{ausId:'aus-demo-3',installateurId:'inst-2'}],
+  anfragen:[
+    {id:'anf-1',ausId:'aus-demo-1',installateurId:'inst-1',status:'interessiert',datum:'2026-03-21T10:00:00Z',antwortDatum:'2026-03-21T14:00:00Z',nachricht:''},
+    {id:'anf-2',ausId:'aus-demo-1',installateurId:'inst-2',status:'angefragt',datum:'2026-03-21T10:00:00Z',antwortDatum:null,nachricht:''},
+    {id:'anf-3',ausId:'aus-demo-2',installateurId:'inst-1',status:'interessiert',datum:'2026-03-16T08:00:00Z',antwortDatum:'2026-03-16T12:00:00Z',nachricht:''},
+    {id:'anf-4',ausId:'aus-demo-2',installateurId:'inst-2',status:'abgelehnt',datum:'2026-03-16T08:00:00Z',antwortDatum:'2026-03-17T09:00:00Z',nachricht:'Kapazität aktuell ausgelastet'}
+  ], // {id, ausId, installateurId, status:'angefragt'|'interessiert'|'abgelehnt', datum, antwortDatum, nachricht}
   nettoAnfragen:[],
   marktplatzOfferten:[],
   einreichungen:[],
   emails:[],
+  log:[
+    {icon:'📋',action:'Ausschreibung erstellt',detail:'Neubau MFH Musterstrasse 12 (funktional, pauschal+einheitspreise)',who:'Administrator',when:'2026-03-20T10:00:00Z',ausId:'aus-demo-1',ausName:'Neubau MFH Musterstrasse 12'},
+    {icon:'📨',action:'Interesse-Anfrage gesendet',detail:'an Jäggi Vollmer GmbH',who:'Administrator',when:'2026-03-21T10:00:00Z',ausId:'aus-demo-1',ausName:'Neubau MFH Musterstrasse 12'},
+    {icon:'✓',action:'Interesse zugesagt',detail:'Jäggi Vollmer GmbH',who:'Felix Jäggi',when:'2026-03-21T14:00:00Z',ausId:'aus-demo-1',ausName:'Neubau MFH Musterstrasse 12'},
+    {icon:'📄',action:'Offerte erfasst',detail:'Geberit AG — Lieferung Enthärtungsanlage',who:'Administrator',when:'2026-03-22T14:00:00Z',ausId:'aus-demo-1',ausName:'Neubau MFH Musterstrasse 12'},
+    {icon:'📋',action:'Ausschreibung erstellt',detail:'Sanierung Schulhaus Reinach (crbx)',who:'Administrator',when:'2026-03-15T08:00:00Z',ausId:'aus-demo-2',ausName:'Sanierung Schulhaus Reinach'},
+    {icon:'✓',action:'CRBX-Abgleich bestätigt',detail:'',who:'Administrator',when:'2026-03-25T16:00:00Z',ausId:'aus-demo-2',ausName:'Sanierung Schulhaus Reinach'},
+    {icon:'📋',action:'Ausschreibung erstellt',detail:'Umbau Büro Liestal (funktional, global)',who:'Administrator',when:'2026-03-10T09:00:00Z',ausId:'aus-demo-3',ausName:'Umbau Büro Liestal'}
+  ],
   log:[]
 };
 
