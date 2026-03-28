@@ -70,8 +70,7 @@ input,select,button{font-family:var(--sans)}
 .stat-lbl{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-top:3px}
 
 /* LAYOUT */
-.layout{display:grid;grid-template-columns:1fr 280px;gap:12px;align-items:start}
-@media(max-width:1100px){.layout{grid-template-columns:1fr}}
+.layout{display:block}
 
 /* CARD */
 .card{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);box-shadow:var(--sh-sm);overflow:hidden}
@@ -112,6 +111,8 @@ input,select,button{font-family:var(--sans)}
 .ts-del:hover{background:var(--red-bg);border-color:var(--red-bd);color:var(--red)}
 
 .ts-results{padding:9px 13px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--brd);background:rgba(8,145,178,.03)}
+.ts-results .ts-detail{display:none}
+.show-details .ts-results .ts-detail{display:flex}
 .res-item{display:flex;flex-direction:column;gap:1px}
 .res-lbl{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--mut)}
 .res-val{font-size:12.5px;font-weight:700;font-family:var(--mono);color:var(--txt)}
@@ -316,21 +317,17 @@ function fixLeadingZero(el){
     </div>
   </div>
 </nav>
-<div style="max-width:1100px;margin:0 auto;padding:20px 20px 0">
-<div class="gema-hero" style="background:linear-gradient(135deg,#0a2a5c 0%,#1d4ed8 55%,#3b82f6 100%)">
-  <div class="gema-hero-in">
-    <div class="gema-hero-ic">📉</div>
-    <div>
-      <div class="gema-hero-title">Druckverlust</div>
-      <div class="gema-hero-sub">Darcy-Weisbach · Swamee-Jain · SVGW W3 · Pro Teilstrecke mit Fittings</div>
+<div class="pg">
+
+  <div class="gema-hero" style="background:linear-gradient(135deg,#0a2a5c 0%,#1d4ed8 55%,#3b82f6 100%)">
+    <div class="gema-hero-in">
+      <div class="gema-hero-ic">📉</div>
+      <div>
+        <div class="gema-hero-title">Druckverlust</div>
+        <div class="gema-hero-sub">Darcy-Weisbach · Swamee-Jain · SVGW W3 · Pro Teilstrecke mit Fittings</div>
+      </div>
     </div>
   </div>
-</div>
-</div>
-
-
-
-<div class="pg">
 
   <!-- BERECHNUNGS-TABS + MEDIUM -->
   <div id="calcTabBar" style="display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap"></div>
@@ -362,9 +359,17 @@ function fixLeadingZero(el){
     <div class="pf"><label>Bearbeiter</label><input type="text" id="metaBearbeiter" placeholder="Name"></div>
     <div class="pf"><label>Datum</label><input type="date" id="metaDatum"></div>
   </div>
-  <div class="layout">
-    <!-- MAIN -->
-    <div>
+  <!-- PARAMETER (volle Breite) -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding:10px 14px;background:var(--sur);border:1.5px solid var(--brd);border-radius:10px;align-items:flex-end">
+    <div class="fg" style="flex:1;min-width:100px"><label>Temperatur</label><div style="display:flex;gap:0"><input id="inp_temp" type="text" inputmode="decimal" value="10" onblur="fixLeadingZero(this)" style="border-radius:8px 0 0 8px;border-right:0;width:70px"/><span style="padding:7px 10px;background:var(--bg2);border:1.5px solid var(--brd2);border-radius:0 8px 8px 0;font-size:12px;color:var(--mut)">°C</span></div></div>
+    <div class="fg" style="flex:1;min-width:130px"><label>Durchfluss-Modus</label><select id="inp_flowmode" style="padding:7px 10px;border:1.5px solid var(--brd2);border-radius:8px;font-size:13px;width:100%"><option value="lu">LU (nach W3)</option><option value="direct">Q direkt [l/s]</option></select></div>
+    <div class="fg" style="min-width:90px"><label>ρ [kg/m³]</label><input id="out_rho" readonly style="width:90px;background:var(--bg2)"/></div>
+    <div class="fg" style="min-width:110px"><label>ν [m²/s]</label><input id="out_nu" readonly style="width:110px;background:var(--bg2)"/></div>
+    <div style="display:flex;align-items:center;gap:6px;margin-left:auto"><label style="font-size:11px;font-weight:700;color:var(--mut)">Details</label><input type="checkbox" id="togDetails" onchange="toggleDetails(this.checked)" style="width:16px;height:16px;accent-color:var(--acc)"/></div>
+  </div>
+
+  <!-- TEILSTRECKEN -->
+  <div>
       <div id="tsContainer" class="ts-container"></div>
 
       <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
@@ -382,47 +387,6 @@ function fixLeadingZero(el){
         <div id="checksContainer" style="flex:1"></div>
       </div>
     </div>
-
-    <!-- SIDEBAR -->
-    <div style="display:flex;flex-direction:column;gap:10px">
-
-      <!-- Projektdaten -->
-      <div class="g-section">
-        <div class="g-section-hd"><div class="g-section-num">1</div><div><div class="g-section-title">Projekt</div><div class="g-section-sub">Projektdaten und Berechnungsparameter</div></div></div>
-        <div class="g-section-bd">
-          <div class="fg"><label>Projekt / Anlage</label><input id="inp_project" placeholder="z.B. MFH Musterstrasse 12"/></div>
-          <div class="fg"><label>Sachbearbeiter</label><input id="inp_owner" placeholder="Name"/></div>
-          <div class="grid2">
-            <div class="fg"><label>Temperatur [°C]</label><input id="inp_temp" type="text" inputmode="decimal" value="10" onblur="fixLeadingZero(this)"/></div>
-            <div class="fg"><label>Durchfluss-Modus</label>
-              <select id="inp_flowmode">
-                <option value="lu">LU (nach W3)</option>
-                <option value="direct">Q direkt [l/s]</option>
-              </select>
-            </div>
-          </div>
-          <div class="fg"><label>ρ [kg/m³]</label><input id="out_rho" readonly/></div>
-          <div class="fg"><label>ν [m²/s]</label><input id="out_nu" readonly/></div>
-        </div>
-      </div>
-
-      <!-- Hinweise -->
-      <div class="g-section">
-        <div class="g-section-hd"><div class="g-section-num">2</div><div><div class="g-section-title">Hinweise</div><div class="g-section-sub">Bedienung und Formeln</div></div></div>
-        <div class="g-section-bd">
-          <div style="font-size:11.5px;color:var(--txt2);line-height:1.7">
-            • Pro Teilstrecke <b>Rohrsystem → Dimension</b> wählen<br>
-            • Fittings-Button öffnet Dialog mit passenden Formstücken für das gewählte Rohrsystem<br>
-            • <b>TS-Nummer</b> editierbar z.B. «1.1», «1.2» für Unterabschnitte<br>
-            • <b>ΣΖ</b> kann auch manuell überschrieben werden<br>
-            • Armaturen sind systemübergreifend wählbar
-          </div>
-          <div class="divider"></div>
-          <div class="hint">Δp Rohr = λ · (L/di) · (ρ/2) · v²<br>Δp EW = ζ · (ρ/2) · v²</div>
-        </div>
-      </div>
-
-    </div><!-- /sidebar -->
   </div>
 </div><!-- /pg -->
 
@@ -881,27 +845,25 @@ function render(){
       <div class="ts-results">
         <div class="res-item"><div class="res-lbl">Q</div><div class="res-val">${fmt(calc2.Q,3)}<small style="font-size:10px;color:var(--mut)"> l/s</small></div></div>
         <div class="res-div"></div>
-        <div class="res-item"><div class="res-lbl">v [m/s]<span class="frml">v = Q / (π/4 × d<sub>i</sub>²)</span></div><div class="res-val ${vClass}">${fmt(calc2.v,2)}</div></div>
-        <div class="res-div"></div>
-        <div class="res-item"><div class="res-lbl">Re<span class="frml">Re = v × d<sub>i</sub> / ν</span></div><div class="res-val">${reText}</div></div>
-        <div class="res-div"></div>
-        <div class="res-item"><div class="res-lbl">Strömung</div><div class="res-val ${regClass}">${calc2.regime}</div></div>
-        <div class="res-div"></div>
-        <div class="res-item"><div class="res-lbl">λ<span class="frml">Swamee-Jain: 0.25 / [lg(k/3.7d + 5.74/Re⁰·⁹)]²</span></div><div class="res-val">${fmt(calc2.lam,4)}</div></div>
+        <div class="res-item"><div class="res-lbl">v</div><div class="res-val ${vClass}">${fmt(calc2.v,2)}<small style="font-size:10px;color:var(--mut)"> m/s</small></div></div>
+        <div class="res-div ts-detail"></div>
+        <div class="res-item ts-detail"><div class="res-lbl">Re</div><div class="res-val">${reText}</div></div>
+        <div class="res-div ts-detail"></div>
+        <div class="res-item ts-detail"><div class="res-lbl">Strömung</div><div class="res-val ${regClass}">${calc2.regime}</div></div>
+        <div class="res-div ts-detail"></div>
+        <div class="res-item ts-detail"><div class="res-lbl">λ</div><div class="res-val">${fmt(calc2.lam,4)}</div></div>
         <div class="res-div"></div>
         <div class="res-item"><div class="res-lbl">ζ Σ</div>
-          <div style="display:flex;align-items:center;gap:4px">
-            <input class="ts-inp" style="width:70px" type="text" inputmode="decimal" value="${row.zeta_sum}" data-k="zeta_sum" onblur="fixLeadingZero(this)"/>
-          </div>
+          <input class="ts-inp" style="width:60px" type="text" inputmode="decimal" value="${row.zeta_sum}" data-k="zeta_sum" onblur="fixLeadingZero(this)"/>
         </div>
+        <div class="res-div ts-detail"></div>
+        <div class="res-item ts-detail"><div class="res-lbl">äq. RL</div><input class="ts-inp" style="width:60px" type="text" inputmode="decimal" value="${row.eq_rl}" data-k="eq_rl" onblur="fixLeadingZero(this)"/></div>
         <div class="res-div"></div>
-        <div class="res-item"><div class="res-lbl">äq. RL [m]</div><input class="ts-inp" style="width:70px" type="text" inputmode="decimal" value="${row.eq_rl}" data-k="eq_rl" onblur="fixLeadingZero(this)"/></div>
+        <div class="res-item"><div class="res-lbl">Δp Rohr</div><div class="res-val">${fmt(calc2.dp_pipe,2)}<small style="font-size:10px;color:var(--mut)"> kPa</small></div></div>
+        <div class="res-div ts-detail"></div>
+        <div class="res-item ts-detail"><div class="res-lbl">Δp EW</div><div class="res-val">${fmt(calc2.dp_local+calc2.dp_eq,2)}<small style="font-size:10px;color:var(--mut)"> kPa</small></div></div>
         <div class="res-div"></div>
-        <div class="res-item"><div class="res-lbl">Δp Rohr<span class="frml">Δp<sub>R</sub> = λ × L/d × ρ/2 × v² [Pa]</span></div><div class="res-val">${fmt(calc2.dp_pipe,2)}<small style="font-size:10px;color:var(--mut)"> kPa</small></div></div>
-        <div class="res-div"></div>
-        <div class="res-item"><div class="res-lbl">Δp EW<span class="frml">Δp<sub>EW</sub> = ζ<sub>Σ</sub> × ρ/2 × v² [Pa]</span></div><div class="res-val">${fmt(calc2.dp_local+calc2.dp_eq,2)}<small style="font-size:10px;color:var(--mut)"> kPa</small></div></div>
-        <div class="res-div"></div>
-        <div class="res-item"><div class="res-lbl">Δp TS<span class="frml">Δp<sub>TS</sub> = Δp<sub>R</sub> + Δp<sub>EW</sub> [kPa]</span></div><div class="res-big">${fmt(calc2.dp_ts,2)}<small style="font-size:11px;font-weight:700;color:var(--blue)"> kPa</small></div></div>
+        <div class="res-item"><div class="res-lbl">Δp TS</div><div class="res-big">${fmt(calc2.dp_ts,2)}<small style="font-size:11px;font-weight:700;color:var(--blue)"> kPa</small></div></div>
         <div class="res-div"></div>
         <div class="res-item"><div class="res-lbl">Δp kum.</div><div class="res-val" style="color:var(--blue)">${fmt(cum,2)}<small style="font-size:10px"> kPa</small></div></div>
       </div>
@@ -1259,6 +1221,11 @@ $('fileInp').addEventListener('change',e=>{
 // TOAST
 // ═══════════════════════════════════════════════════════════
 let tT;
+function toggleDetails(show){
+  var pg=document.querySelector('.pg');
+  if(show)pg.classList.add('show-details');
+  else pg.classList.remove('show-details');
+}
 function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>el.classList.remove('show'),2200);}
 
 // ESC closes modals
