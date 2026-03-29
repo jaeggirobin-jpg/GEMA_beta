@@ -735,9 +735,9 @@ function toggleObjQuick(){
 }
 function renderObjQuickList(filter){
   if(typeof GemaObjekte==='undefined')return;
-  var all=GemaObjekte.getAll();
+  var all=typeof GemaObjekte.getAllUnfiltered==='function'?GemaObjekte.getAllUnfiltered():GemaObjekte.getAll();
   var aktive=all.filter(function(o){return !o.status||o.status==='aktiv';});
-  var abgeschlossen=all.filter(function(o){return o.status==='abgeschlossen';});
+  var abgeschlossen=all.filter(function(o){return o.status==='abgeschlossen'||o.status==='inaktiv';});
   var q=(filter||'').toLowerCase();
   if(q){aktive=aktive.filter(function(o){return((o.name||'')+(o.ort||'')+(o.strasse||'')).toLowerCase().indexOf(q)>=0;});abgeschlossen=abgeschlossen.filter(function(o){return((o.name||'')+(o.ort||'')+(o.strasse||'')).toLowerCase().indexOf(q)>=0;});}
   var activeId=GemaObjekte.getActiveId();
