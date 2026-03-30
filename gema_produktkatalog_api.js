@@ -367,6 +367,72 @@ KATEGORIEN.zirkulation = {
   }
 };
 
+// Rohrsystem
+KATEGORIEN.rohrsystem = {
+  id: 'rohrsystem',
+  name: 'Rohrsystem',
+  icon: '🔧',
+  typenFelder: [
+    { id: 'material', label: 'Material', typ: 'select', optionen: ['Edelstahl','Mehrschicht','Kupfer','Stahl verzinkt','PE','PP'] },
+    { id: 'verbindung', label: 'Verbindung', typ: 'select', optionen: ['Pressverbindung','Klemmverbindung','Schweissverbindung','Lötverbindung','Steckverbindung'] }
+  ],
+  felder: [
+    { id: 'serie', label: 'Systemname / Serie', typ: 'text', gruppe: 'Allgemein', pflicht: true },
+    { id: 'modell', label: 'Modellbezeichnung', typ: 'text', gruppe: 'Allgemein' },
+    { id: 'material', label: 'Werkstoff', typ: 'text', gruppe: 'Technische Daten' },
+    { id: 'rauhigkeit', label: 'Rauhigkeit k', typ: 'number', einheit: 'mm', gruppe: 'Technische Daten' },
+    { id: 'dimensionen', label: 'Verfügbare Dimensionen', typ: 'textarea', gruppe: 'Technische Daten' },
+    { id: 'druckbereich', label: 'Druckbereich', typ: 'text', einheit: 'bar', gruppe: 'Technische Daten' },
+    { id: 'tempBereich', label: 'Temperaturbereich', typ: 'text', einheit: '°C', gruppe: 'Technische Daten' },
+    { id: 'zulassungen', label: 'Zulassungen / Normen', typ: 'text', gruppe: 'Zertifikate' },
+    { id: 'svgw', label: 'SVGW-zugelassen', typ: 'checkbox', gruppe: 'Zertifikate' }
+  ]
+};
+
+// Armaturen
+KATEGORIEN.armaturen = {
+  id: 'armaturen',
+  name: 'Armaturen',
+  icon: '⌥',
+  typenFelder: [
+    { id: 'armaturTyp', label: 'Armatur-Typ', typ: 'select', optionen: ['Schrägsitzventil','Geradsitzventil','Kugelhahn','Absperrschieber','Rückschlagventil','Druckminderer','Wasserzähler','Filter'] },
+    { id: 'anschluss', label: 'Anschluss', typ: 'select', optionen: ['Press','Klemm','Gewinde','Flansch','Löt'] }
+  ],
+  felder: [
+    { id: 'serie', label: 'Typenbezeichnung / Serie', typ: 'text', gruppe: 'Allgemein', pflicht: true },
+    { id: 'modell', label: 'Modellbezeichnung', typ: 'text', gruppe: 'Allgemein' },
+    { id: 'armaturTyp', label: 'Armatur-Typ', typ: 'select', optionen: ['Schrägsitzventil','Geradsitzventil','Kugelhahn','Absperrschieber','Rückschlagventil','Druckminderer','Wasserzähler','Filter'], gruppe: 'Technische Daten' },
+    { id: 'dn', label: 'Verfügbare DN', typ: 'text', gruppe: 'Technische Daten' },
+    { id: 'kvs', label: 'kvs-Wert', typ: 'number', einheit: 'm³/h', gruppe: 'Technische Daten' },
+    { id: 'zetaWerte', label: 'Zeta-Werte (DN:ζ)', typ: 'textarea', gruppe: 'Technische Daten' },
+    { id: 'druckbereich', label: 'Druckbereich', typ: 'text', einheit: 'bar', gruppe: 'Technische Daten' },
+    { id: 'tempBereich', label: 'Temperaturbereich', typ: 'text', einheit: '°C', gruppe: 'Technische Daten' },
+    { id: 'werkstoff', label: 'Werkstoff Gehäuse', typ: 'text', gruppe: 'Technische Daten' },
+    { id: 'svgw', label: 'SVGW-zugelassen', typ: 'checkbox', gruppe: 'Zertifikate' }
+  ]
+};
+
+// Formstücke / Fittings
+KATEGORIEN.formstücke = {
+  id: 'formstuecke',
+  name: 'Formstücke / Fittings',
+  icon: '↩️',
+  typenFelder: [
+    { id: 'fittingTyp', label: 'Typ', typ: 'select', optionen: ['Bogen 90°','Bogen 45°','T-Stück','Reduktion','Muffe','Kupplung','Winkel','Übergang'] },
+    { id: 'rohrsystem', label: 'Für Rohrsystem', typ: 'text' }
+  ],
+  felder: [
+    { id: 'serie', label: 'Bezeichnung', typ: 'text', gruppe: 'Allgemein', pflicht: true },
+    { id: 'modell', label: 'Modell / Artikelnummer', typ: 'text', gruppe: 'Allgemein' },
+    { id: 'fittingTyp', label: 'Formstück-Typ', typ: 'select', optionen: ['Bogen 90°','Bogen 45°','T-Stück Durchgang','T-Stück Abzweig','Reduktion','Muffe','Kupplung','Winkel 90°','Winkel 45°','Übergang','Anschlusswinkel','Anschlussdose','Verteiler'], gruppe: 'Technische Daten' },
+    { id: 'rohrsystem', label: 'Kompatibles Rohrsystem', typ: 'text', gruppe: 'Technische Daten' },
+    { id: 'dn', label: 'Verfügbare DN', typ: 'text', gruppe: 'Technische Daten' },
+    { id: 'zetaWerte', label: 'Zeta-Werte (DN:ζ)', typ: 'textarea', gruppe: 'Technische Daten' },
+    { id: 'werkstoff', label: 'Werkstoff', typ: 'text', gruppe: 'Technische Daten' },
+    { id: 'bild', label: 'Produktbild URL', typ: 'text', gruppe: 'Medien' }
+  ]
+};
+
 // ── Public API ──
 function getKategorien(){ return Object.values(KATEGORIEN); }
 function getKategorie(id){ return KATEGORIEN[id] || null; }

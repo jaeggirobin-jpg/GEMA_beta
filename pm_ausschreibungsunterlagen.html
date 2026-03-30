@@ -2,7 +2,8 @@
 <html lang="de">
 <head>
 <script src="gema_auth.js"></script>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta charset="utf-8"/><meta name="theme-color" content="#0f172a"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Ausschreibungsunterlagen – GEMA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -85,20 +86,20 @@ input,select,textarea,button{font-family:inherit}
 <script src="gema_db.js"></script><script src="gema_pdf.js"></script><script src="gema_feedback.js"></script><script src="gema_autosave.js"></script><script src="gema_objekte_api.js"></script><script src="gema_produktkatalog_api.js"></script>
 <nav class="g-nav"><div class="g-nav-inner">
   <a class="g-nav-logo" href="index.html"><div class="g-nav-mark"><svg xmlns="http://www.w3.org/2000/svg" viewBox="80 196 415 175" height="28"><defs><clipPath id="c1"><path d="M29 17L145 17 145 151 29 151Z"/></clipPath><clipPath id="c2"><path d="M58.4.6L173.9 67.3 116.1 167.3.6 100.6Z"/></clipPath><clipPath id="c3"><path d="M73 47.4H123.6V98H73Z"/></clipPath><clipPath id="c4"><rect width="174" height="168"/></clipPath></defs><g transform="translate(83,199)"><g clip-path="url(#c4)"><g clip-path="url(#c1)"><g clip-path="url(#c2)"><path fill="#000" d="M144.9 50.6V117.3L87.2 150.6 29.5 117.3V50.6L87.2 17.3Z"/></g></g></g><path fill="#fff" d="M98 73.1c-1.8-1.8-4.1-3.2-6.6-4-6 6-6.5 6.2-7.2 8 6-.4 10.9 5.2 9.6 11.2-.8 3.8-9.3 11.2-16.9 19-3.6 3.6-9.4 3.6-13 0s-3.6-9.4 0-13l8.1-8.1c-1-3.7-.8-7.7.5-11.2l-15.3 15.3c-6.5 6.5-6.5 17.2 0 23.7 6.6 6.6 17.2 6.6 23.7 0L98 96.9c6.5-6.5 6.6-17.1 0-23.8z"/><g clip-path="url(#c3)"><path fill="#fff" d="M118.8 76.1c3.2-3.2 4.9-7.4 4.9-11.9 0-9.3-7.5-16.8-16.8-16.8-4.5 0-8.7 1.7-11.9 4.9L78 69.4c-6.5 6.5-6.6 17.1 0 23.8 1.8 1.8 4.1 3.2 6.6 4 5.9-6 6.4-6.2 7.2-8-2.6.2-5.2-.8-7.1-2.7-3.6-3.6-3.5-9.5.1-13.1 3.2-3.2 11.2-11.2 14.5-14.5 3.6-3.6 9.4-3.6 13 0s3.6 9.4 0 13l-8.1 8.1c1 3.8.8 7.7-.5 11.2z"/></g></g><g fill="#000"><g transform="translate(243.2,313.5)"><path d="M62.5-35.8v13.9c-1.7 7.6-5.3 13.3-10.9 17.2s-11.8 5.8-18.7 5.8C24.3 1.2 17-1.9 10.9-8.5S1.8-22.8 1.8-31.9c0-9.3 3-17.1 8.9-23.5s11.4-9.6 20.3-9.6c10.4 0 18.6 3.6 24.6 10.9l-9.5 10.5c-3.4-5.5-8.2-8.2-14.3-8.2-4.5 0-8.3 2-11.5 5.9s-4.8 8.6-4.8 14.1 1.6 10.1 4.8 13.9 7.1 5.8 11.5 5.8c3.7 0 7-.1 9.7-3.4s3.1-5.2 3.1-8.9H32.9v-11.3z"/></g><g transform="translate(307.5,313.5)"><path d="M41.2-63.9v12.8H19.2v12.7h21.1v12.8H19.2v12.9h22v12.8H4.7v-64z"/></g><g transform="translate(352.4,313.5)"><path d="M57.5 0l-3-37.9h-.4L41-.4h-8.7L19.2-37.9h-.4L15.8 0H1.2l5.8-63.9h15.5l14.2 36.9 14.2-36.9h15.5L72.1 0z"/></g><g transform="translate(425.7,313.5)"><path d="M37.1-63.9L62.9 0H47.3l-4.7-12.8H18.2L13.5 0h-15.7l25.8-63.9zM37.6-25.6l-7.1-18.6h-.2l-7.1 18.6z"/></g></g></svg></div></a>
-  <!-- Projekt-Schnellwahl -->
-  <div class="obj-quick" id="objQuick" style="position:relative;margin-right:12px;flex-shrink:0">
-    <button id="objQuickBtn" onclick="toggleObjQuick()" style="display:flex;align-items:center;gap:6px;padding:5px 12px;border:1.5px solid var(--brd2);border-radius:8px;background:var(--sur);font-size:12px;font-weight:700;color:var(--txt);cursor:pointer;font-family:inherit;max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-      <span style="font-size:14px">📁</span><span id="objQuickLabel">Projekt wählen</span><span style="font-size:9px;color:var(--mut2)">▼</span>
+  <div class="g-nav-bc" style="flex:0">
+    <a class="bc-cat" href="pm_ausschreibung.html">Ausschreibung</a><span class="bc-sep">›</span><span class="bc-cur" id="topP">Ausschreibungsunterlagen</span>
+  </div>
+  <!-- Projekt-Schnellwahl (Mitte) -->
+  <div class="obj-quick" id="objQuick" style="position:relative;flex:1;display:flex;justify-content:center">
+    <button id="objQuickBtn" onclick="toggleObjQuick()" style="display:flex;align-items:center;gap:8px;padding:6px 18px;border:1.5px solid var(--brd2);border-radius:8px;background:var(--sur);font-size:13px;font-weight:700;color:var(--txt);cursor:pointer;font-family:inherit;max-width:400px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+      <span style="font-size:14px">📁</span><span id="objQuickLabel" style="overflow:hidden;text-overflow:ellipsis">Projekt wählen</span><span style="font-size:9px;color:var(--mut2)">▼</span>
     </button>
-    <div id="objQuickDrop" style="display:none;position:absolute;top:calc(100% + 4px);left:0;min-width:320px;max-height:360px;background:var(--sur);border:1.5px solid var(--brd2);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.15);z-index:500;overflow:hidden">
+    <div id="objQuickDrop" style="display:none;position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);min-width:380px;max-height:360px;background:var(--sur);border:1.5px solid var(--brd2);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.15);z-index:500;overflow:hidden">
       <div style="padding:8px;border-bottom:1px solid var(--brd)">
         <input type="text" id="objQuickSearch" placeholder="Projekt suchen…" oninput="filterObjQuick(this.value)" style="width:100%;padding:7px 10px;border:1.5px solid var(--brd2);border-radius:8px;font-size:13px;font-family:inherit;outline:none"/>
       </div>
       <div id="objQuickList" style="max-height:280px;overflow-y:auto"></div>
     </div>
-  </div>
-  <div class="g-nav-bc">
-    <a class="bc-cat" href="pm_ausschreibung.html">Ausschreibung</a><span class="bc-sep">›</span><span class="bc-cur" id="topP">Ausschreibungsunterlagen</span>
   </div>
   <div class="g-nav-right">
     <button class="g-nav-btn no-print" onclick="if(typeof GemaPDF!=='undefined')GemaPDF.export({title:'Ausschreibungsunterlagen',color:'#b45309'})">📄 PDF</button>
@@ -735,9 +736,9 @@ function toggleObjQuick(){
 }
 function renderObjQuickList(filter){
   if(typeof GemaObjekte==='undefined')return;
-  var all=GemaObjekte.getAll();
+  var all=typeof GemaObjekte.getAllUnfiltered==='function'?GemaObjekte.getAllUnfiltered():GemaObjekte.getAll();
   var aktive=all.filter(function(o){return !o.status||o.status==='aktiv';});
-  var abgeschlossen=all.filter(function(o){return o.status==='abgeschlossen';});
+  var abgeschlossen=all.filter(function(o){return o.status==='abgeschlossen'||o.status==='inaktiv';});
   var q=(filter||'').toLowerCase();
   if(q){aktive=aktive.filter(function(o){return((o.name||'')+(o.ort||'')+(o.strasse||'')).toLowerCase().indexOf(q)>=0;});abgeschlossen=abgeschlossen.filter(function(o){return((o.name||'')+(o.ort||'')+(o.strasse||'')).toLowerCase().indexOf(q)>=0;});}
   var activeId=GemaObjekte.getActiveId();
@@ -772,10 +773,24 @@ function selectObjQuick(id){
   _objQuickOpen=false;
   document.getElementById('objQuickDrop').style.display='none';
   updateObjQuickLabel();
-  // Reload data for new project
   ld();buildTabs();nav(defP());
   toast('Projekt gewechselt');
 }
+
+function selectAusschreibung(ausId){
+  S.activeAusId=ausId;save();
+  // Wenn die Ausschreibung einem Objekt zugeordnet ist, Projekt oben wechseln
+  var a=S.ausschreibungen.find(function(x){return x.id===ausId;});
+  if(a&&a.objektId&&typeof GemaObjekte!=='undefined'){
+    var curObjId=GemaObjekte.getActiveId();
+    if(curObjId!==a.objektId){
+      GemaObjekte.setActiveId(a.objektId);
+      updateObjQuickLabel();
+    }
+  }
+  buildTabs();nav('pbkp');
+}
+
 function updateObjQuickLabel(){
   var label=document.getElementById('objQuickLabel');if(!label)return;
   if(typeof GemaObjekte==='undefined'){label.textContent='Projekt wählen';return;}
@@ -792,13 +807,13 @@ function defP(){return{planer:'pub',installateur:'iub',lieferant:'lub',architekt
 
 function buildTabs(){
   const b=document.getElementById('tabBar');let t=[];const nE=S.einreichungen.filter(e=>e.ausId===S.activeAusId).length;
-  if(S.currentRole==='planer'){const nAnf=S.anfragen.filter(x=>x.status==='interessiert').length;t=[{id:'pub',ic:'◫',l:'Übersicht'},{id:'paus',ic:'📋',l:'Ausschreibungen',bg:S.ausschreibungen.length},{id:'pbkp',ic:'☑',l:'BKP-Checkliste'},{id:'pcrbx',ic:'📦',l:'CRBX-Abgleich'},{id:'pdet',ic:'📝',l:'Detail'},{id:'panf',ic:'🤝',l:'Interesse-Anfragen',bg:nAnf},{id:'pvrt',ic:'📤',l:'Verteilen'},{id:'pein',ic:'💰',l:'Offerten',bg:nE},{id:'pvgl',ic:'📊',l:'Vergleich'},{id:'pbet',ic:'👥',l:'Beteiligte'}];}
+  if(S.currentRole==='planer'){const nAnf=S.anfragen.filter(x=>x.status==='interessiert').length;var curA_=S.ausschreibungen.find(function(a){return a.id===S.activeAusId;});var isCrbx=curA_&&curA_.typ==='crbx';t=[{id:'pub',ic:'◫',l:'Übersicht'},{id:'paus',ic:'📋',l:'Ausschreibungen',bg:S.ausschreibungen.length},{id:'pbkp',ic:'☑',l:'BKP-Checkliste'},{id:'pcrbx',ic:'📦',l:'CRBX-Abgleich',disabled:!isCrbx},{id:'pdet',ic:'📝',l:'Detail'},{id:'panf',ic:'🤝',l:'Interesse-Anfragen',bg:nAnf},{id:'pvrt',ic:'📤',l:'Verteilen'},{id:'pein',ic:'💰',l:'Offerten',bg:nE},{id:'pvgl',ic:'📊',l:'Vergleich'},{id:'pbet',ic:'👥',l:'Beteiligte'}];}
   else if(S.currentRole==='installateur'){const nIA=S.anfragen.filter(x=>x.installateurId===S.currentUserId&&x.status==='angefragt').length;t=[{id:'iub',ic:'◫',l:'Übersicht'},{id:'ianf',ic:'🤝',l:'Interesse-Anfragen',bg:nIA},{id:'iaus',ic:'📋',l:'Ausschreibungen'},{id:'idet',ic:'📝',l:'Offerte ausfüllen'},{id:'ipro',ic:'👤',l:'Profil'},{id:'ina',ic:'🔄',l:'Netto-Anfragen',bg:S.nettoAnfragen.filter(x=>x.installateurId===S.currentUserId).length},{id:'iin',ic:'📨',l:'Eingegangene',bg:S.marktplatzOfferten.filter(x=>!x.installateurId||x.installateurId===S.currentUserId).length}];}
   else if(S.currentRole==='lieferant'){t=[{id:'lub',ic:'◫',l:'Übersicht'},{id:'lab',ic:'⭐',l:'Mein Abo'},{id:'lmk',ic:'🏪',l:'Marktplatz'},{id:'lan',ic:'📨',l:'Anfragen',bg:S.nettoAnfragen.filter(x=>x.lieferantId===S.currentUserId&&x.status==='angefragt').length}];}
   else{t=[{id:'aub',ic:'◫',l:'Projektstatus'}];}
-  b.innerHTML=t.map(x=>`<button class="tab-btn" data-tab="${x.id}" onclick="nav('${x.id}')"><span>${x.ic}</span> ${x.l}${x.bg?`<span class="tab-badge">${x.bg}</span>`:''}</button>`).join('');
+  b.innerHTML=t.map(x=>`<button class="tab-btn${x.disabled?' disabled':''}" data-tab="${x.id}" onclick="${x.disabled?'toast(\'Nur bei CRBX-Ausschreibungen\',\'info\')':'nav(\''+x.id+'\')'}" ${x.disabled?'style="opacity:.4;cursor:not-allowed"':''}><span>${x.ic}</span> ${x.l}${x.bg?`<span class="tab-badge">${x.bg}</span>`:''}</button>`).join('');
 }
-function nav(p){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.tab-btn[data-tab="${p}"]`)?.classList.add('active');const el=document.getElementById('PA');const fn=VIEWS[p];el.innerHTML=fn?fn():'<div class="es"><p>Seite nicht gefunden.</p></div>';setTimeout(initDropZones,50);if(p==='pbkp')setTimeout(restoreBKPOpenState,10);}
+function nav(p){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.tab-btn[data-tab="${p}"]`)?.classList.add('active');const el=document.getElementById('PA');const fn=VIEWS[p];el.innerHTML=fn?fn():'<div class="es"><p>Seite nicht gefunden.</p></div>';setTimeout(initDropZones,50);if(p==='pbkp'){setTimeout(restoreBKPOpenState,10);setTimeout(initBKPDragDrop,20);}}
 const VIEWS={};
 
 // ═══════════════════════════════════════════════
@@ -814,13 +829,15 @@ VIEWS.pub=function(){
 };
 
 VIEWS.paus=function(){
-  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h2 style="font-size:20px;font-weight:700">Ausschreibungen</h2><button class="btn btn-p" onclick="oM('mNewA')">+ Neue Ausschreibung</button></div>`;
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="font-size:20px;font-weight:700">Ausschreibungen</h2><button class="btn btn-p" onclick="oM('mNewA')">+ Neue Ausschreibung</button></div>`;
+  h+=`<div style="margin-bottom:14px"><input type="text" id="ausSearch" placeholder="Ausschreibung suchen…" oninput="filterAusList()" style="width:100%;padding:10px 14px 10px 38px;border:1.5px solid var(--brd2);border-radius:10px;font-size:13px;font-family:inherit;background:var(--sur) url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%239ca3af%22><circle cx=%2210%22 cy=%2210%22 r=%227%22 stroke=%22%239ca3af%22 stroke-width=%222%22 fill=%22none%22/><line x1=%2215%22 y1=%2215%22 x2=%2221%22 y2=%2221%22 stroke=%22%239ca3af%22 stroke-width=%222%22/></svg>') no-repeat 10px center;background-size:18px;outline:none" onfocus="this.style.borderColor='#1d4ed8'" onblur="this.style.borderColor='var(--brd2)'"/></div>`;
   if(!S.ausschreibungen.length){h+=`<div class="es"><span class="ei">📋</span><div class="et">Noch keine Ausschreibungen</div><p>Erstelle deine erste Ausschreibung.</p></div>`;return h;}
+  h+=`<div id="ausListContainer">`;
   h+=S.ausschreibungen.map(a=>{
     const nE=S.einreichungen.filter(e=>e.ausId===a.id).length;const nV=S.verteilungen.filter(v=>v.ausId===a.id).length;
     const nUp=(a.bkp||[]).reduce((s,b)=>s+(b.unterpositionen||[]).length,0);
     var bkpInfo='';if(a.lose&&a.lose.length){var allP=a.lose.reduce(function(s,l){return s.concat(l.positionen||[]);},[]);var ch=allP.filter(function(p){return p.checked;});var er=ch.filter(function(p){return p.status==='erledigt';});if(ch.length)bkpInfo=' · BKP '+er.length+'/'+ch.length;}
-    return `<div class="ac" onclick="S.activeAusId='${a.id}';save();nav('pbkp')" style="cursor:pointer">
+    return `<div class="ac" onclick="selectAusschreibung('${a.id}')" style="cursor:pointer">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
         <strong style="font-size:15px">${E(a.name)}</strong>
         <span class="tag ${a.typ==='crbx'?'t-pu':'t-ac'}">${a.typ==='crbx'?'CRBX':'Funktional'}</span>
@@ -830,8 +847,17 @@ VIEWS.paus=function(){
       <div style="font-size:12px;color:var(--mut)">${E(a.objekt||'')} · Frist: ${a.frist||'—'} · ${nUp} Positionen · ${nV} verteilt · ${nE} Offerten${bkpInfo}</div>
     </div>`;
   }).join('');
+  h+=`</div>`;
   return h;
 };
+function filterAusList(){
+  var q=(document.getElementById('ausSearch')||{}).value||'';
+  q=q.trim().toLowerCase();
+  var items=document.querySelectorAll('#ausListContainer .ac');
+  items.forEach(function(el){
+    el.style.display=(!q||el.textContent.toLowerCase().indexOf(q)>=0)?'':'none';
+  });
+}
 
 // ═══════════════════════════════════════════════
 // BKP-CHECKLISTE (Schritt 2+3: LOS + Baum)
@@ -990,13 +1016,17 @@ function renderBKPTree(positionen,losId){
       if(p.bkp.length===3)return; // Skip group header row
       var statusIc=p.status==='erledigt'?'✓':p.status==='in_bearbeitung'?'⟳':'?';
       var statusCl=p.status==='erledigt'?'color:var(--grn)':p.status==='in_bearbeitung'?'color:var(--amb)':'color:var(--mut2)';
-      h+='<div style="display:flex;align-items:center;gap:8px;padding:7px 16px 7px 40px;border-bottom:1px solid var(--brd);font-size:13px'+(p.checked?'':';opacity:.5')+'">';
+      // Drop target line
+      h+='<div class="bkp-drop-line" data-drop-idx="'+i+'" data-los="'+losId+'" style="height:0;border-top:0px solid transparent;transition:height .15s,border .15s"></div>';
+      h+='<div class="bkp-row" draggable="true" data-drag-idx="'+i+'" data-los="'+losId+'" style="display:flex;align-items:center;gap:8px;padding:7px 16px 7px 32px;border-bottom:1px solid var(--brd);font-size:13px'+(p.checked?'':';opacity:.5')+'">';
+      // Drag handle
+      h+='<span class="bkp-drag-handle" style="cursor:grab;color:var(--mut2);font-size:14px;flex-shrink:0;user-select:none;padding:0 2px" title="Ziehen zum Verschieben">⠿</span>';
       // Checkbox
       h+='<input type="checkbox" '+(p.checked?'checked':'')+' onchange="toggleBKP(\''+losId+'\','+i+',this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--acc);flex-shrink:0"/>';
       // BKP number (inline edit)
-      h+='<input type="text" value="'+E(p.bkp)+'" onchange="editBKPField(\''+losId+'\','+i+',\'bkp\',this.value)" style="width:50px;padding:2px 4px;border:1px solid transparent;border-radius:4px;font-size:12px;font-weight:800;color:var(--acc);background:transparent;font-family:var(--sans)" onfocus="this.style.borderColor=\'var(--acc)\'" onblur="this.style.borderColor=\'transparent\'"/>';
+      h+='<input type="text" value="'+E(p.bkp)+'" onchange="editBKPField(\''+losId+'\','+i+',\'bkp\',this.value)" style="width:50px;padding:3px 5px;border:1.5px solid #c8cfdf;border-radius:5px;font-size:12px;font-weight:800;color:#1d4ed8;background:#fff;font-family:var(--sans)" onfocus="this.style.borderColor=\'#1d4ed8\'" onblur="this.style.borderColor=\'#c8cfdf\'"/>';
       // Title (inline edit)
-      h+='<input type="text" value="'+E(p.titel).replace(/"/g,'&quot;')+'" onchange="editBKPField(\''+losId+'\','+i+',\'titel\',this.value)" style="flex:1;padding:2px 6px;border:1px solid transparent;border-radius:4px;font-size:13px;font-weight:600;background:transparent;font-family:var(--sans)" onfocus="this.style.borderColor=\'var(--brd2)\'" onblur="this.style.borderColor=\'transparent\'"/>';
+      h+='<input type="text" value="'+E(p.titel).replace(/"/g,'&quot;')+'" onchange="editBKPField(\''+losId+'\','+i+',\'titel\',this.value)" style="flex:1;padding:3px 6px;border:1.5px solid #c8cfdf;border-radius:5px;font-size:13px;font-weight:600;background:#fff;font-family:var(--sans)" onfocus="this.style.borderColor=\'#1d4ed8\'" onblur="this.style.borderColor=\'#c8cfdf\'"/>';
       // Status icon
       h+='<span style="font-size:14px;font-weight:900;'+statusCl+';cursor:pointer;width:20px;text-align:center" onclick="event.stopPropagation();cycleBKPStatus(\''+losId+'\','+i+',this)" title="Status wechseln">'+statusIc+'</span>';
       // Module link if Lieferung
@@ -1006,6 +1036,8 @@ function renderBKPTree(positionen,losId){
       h+='<button onclick="rmBKPPos(\''+losId+'\','+i+')" style="background:none;border:none;color:var(--mut2);cursor:pointer;font-size:12px;padding:2px" title="Entfernen">✕</button>';
       h+='</div>';
     });
+    // Final drop line
+    h+='<div class="bkp-drop-line" data-drop-idx="end-'+prefix+'" data-los="'+losId+'" style="height:0;border-top:0px solid transparent;transition:height .15s,border .15s"></div>';
     h+='</div></div>';
   });
   // CSS for accordion
@@ -1461,6 +1493,95 @@ function rmBKPPos(losId,idx){
   sv();saveBKPOpenState();nav('pbkp');
 }
 
+// ═══════════════════════════════════════════════
+// DRAG & DROP BKP-Positionen
+// ═══════════════════════════════════════════════
+var _dragIdx=null,_dragLos=null;
+
+function isDynBKP(){
+  try{var u=GemaAuth.getCurrentUser();if(u&&u.profile&&u.profile.dynamischeBKP===false)return false;}catch(e){}
+  return true;
+}
+
+function initBKPDragDrop(){
+  document.querySelectorAll('.bkp-row[draggable]').forEach(function(row){
+    row.addEventListener('dragstart',function(e){
+      _dragIdx=parseInt(row.dataset.dragIdx);_dragLos=row.dataset.los;
+      row.style.opacity='0.4';
+      e.dataTransfer.effectAllowed='move';
+      e.dataTransfer.setData('text/plain',String(_dragIdx));
+    });
+    row.addEventListener('dragend',function(){row.style.opacity='1';clearDropLines();});
+  });
+  document.querySelectorAll('.bkp-drop-line').forEach(function(line){
+    line.addEventListener('dragover',function(e){
+      e.preventDefault();e.dataTransfer.dropEffect='move';
+      clearDropLines();
+      line.style.height='4px';line.style.borderTop='3px solid #1d4ed8';
+    });
+    line.addEventListener('dragleave',function(){line.style.height='0';line.style.borderTop='0';});
+    line.addEventListener('drop',function(e){
+      e.preventDefault();clearDropLines();
+      if(_dragIdx===null||_dragLos!==line.dataset.los)return;
+      var dropTarget=line.dataset.dropIdx;
+      var a=curA();if(!a)return;
+      var l=a.lose.find(function(x){return x.id===_dragLos;});
+      if(!l)return;
+      var fromIdx=_dragIdx;
+      var toIdx;
+      if(String(dropTarget).startsWith('end-')){
+        var prefix=dropTarget.replace('end-','');
+        var lastInGroup=-1;
+        l.positionen.forEach(function(p,i){if(p.bkp.substring(0,3)===prefix)lastInGroup=i;});
+        toIdx=lastInGroup+1;
+      } else {
+        toIdx=parseInt(dropTarget);
+      }
+      if(fromIdx===toIdx||fromIdx===toIdx-1){_dragIdx=null;return;}
+      var moved=l.positionen.splice(fromIdx,1)[0];
+      if(toIdx>fromIdx)toIdx--;
+      l.positionen.splice(toIdx,0,moved);
+      if(isDynBKP()){
+        renumberBKPInGroup(l,toIdx);
+      }
+      _dragIdx=null;_dragLos=null;
+      sv();saveBKPOpenState();nav('pbkp');
+    });
+  });
+}
+
+function clearDropLines(){
+  document.querySelectorAll('.bkp-drop-line').forEach(function(l){l.style.height='0';l.style.borderTop='0';});
+}
+
+function renumberBKPInGroup(los,movedIdx){
+  var moved=los.positionen[movedIdx];
+  if(!moved||moved.bkp.length<=3)return;
+  // Find the 3-digit group prefix by looking backwards
+  var prefix=null;
+  for(var i=movedIdx-1;i>=0;i--){
+    if(los.positionen[i].bkp.length<=3){prefix=los.positionen[i].bkp;break;}
+    if(los.positionen[i].bkp.length>3){prefix=los.positionen[i].bkp.substring(0,3);break;}
+  }
+  if(!prefix)return;
+  // Renumber all 4+ digit items under this prefix
+  var counter=0;
+  for(var i=0;i<los.positionen.length;i++){
+    var p=los.positionen[i];
+    if(p.bkp.length<=3)continue;
+    // Check if belongs to this group
+    var belongsToGroup=false;
+    for(var j=i-1;j>=0;j--){
+      if(los.positionen[j].bkp.length<=3){belongsToGroup=(los.positionen[j].bkp===prefix);break;}
+    }
+    if(belongsToGroup){
+      p.bkp=prefix+'.'+counter;
+      counter++;
+    }
+  }
+}
+
+
 VIEWS.pdet=function(){
   const a=curA();if(!a)return '<div class="es"><p>Keine Ausschreibung gewählt. → <button class="btn btn-s btn-sm" onclick="nav(\'paus\')">Zurück</button></p></div>';
   let h=`<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px"><div><h2 style="font-size:20px;font-weight:700">${E(a.name)}</h2><p style="font-size:13px;color:var(--mut);margin-top:4px">${E(a.objekt)} · ${a.typ==='crbx'?'CRBX':'Funktional'} · ${(a.modelle||[a.modell]).join(' + ')} · Frist: ${a.frist||'—'}</p></div><div class="flex gap-8"><button class="btn btn-s btn-sm" onclick="oM('mAbzug')">⚙ Abzüge</button><button class="btn btn-s btn-sm" onclick="editVB()">📜 Vorbedingungen</button></div></div>`;
@@ -1495,32 +1616,40 @@ VIEWS.pdet=function(){
       h+=`</div></div>`;
     }
   } else {
-    // Funktional mode — BKP groups + Unterpositionen
-    h+=`<div class="card"><div class="card-hd"><h3>⬡ BKP-Positionen</h3><button class="btn btn-s btn-sm" onclick="addBKPGruppe()">+ BKP-Gruppe</button></div><div class="card-bd">`;
-    if(!(a.bkp||[]).length)h+=`<p style="color:var(--mut)">Noch keine BKP-Gruppen. Klicke «+ BKP-Gruppe» um zu starten.</p>`;
-    else h+=(a.bkp||[]).map((bg,bi)=>{
-      const ups=bg.unterpositionen||[];
-      return `<div style="margin-bottom:16px;border:1.5px solid var(--brd);border-radius:var(--r);overflow:hidden">
-        <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg2)">
-          <input type="text" class="fc" style="width:60px;font-weight:800;color:var(--acc);text-align:center;padding:4px" value="${E(bg.code)}" onchange="a=curA();a.bkp[${bi}].code=this.value;save();nav('pdet')"/>
-          <input type="text" class="fc" style="flex:1;font-weight:700" value="${E(bg.name)}" onchange="a=curA();a.bkp[${bi}].name=this.value;save()"/>
-          <button class="btn btn-s btn-sm" onclick="addUp(${bi})">+ Position</button>
-          <button class="btn btn-s btn-sm" onclick="editMatSpec(${bi})">🔧 Material</button>
-          <button class="btn btn-s btn-sm" onclick="openBrutto('${bg.code}')">📄 Offerte</button>
-          <button class="btn btn-d btn-sm" onclick="dlgConfirm('BKP-Gruppe entfernen?','${E(bg.code)} ${E(bg.name)} und alle Unterpositionen werden gelöscht.',()=>{rmBKPG(${bi})})">✕</button>
-        </div>
-        ${ups.map((up,ui)=>`<div class="up-row" style="margin:6px 10px">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-            <strong style="font-size:13px">${E(up.name||'Position '+(ui+1))}</strong>
-            ${up.menge?`<span class="tag t-gy" style="font-size:10px">${up.menge} ${E(up.einheit||'')}</span>`:''}
-            ${up.liefRef?`<span class="tag t-am" style="font-size:10px">📎 ${E(up.liefRef)}</span>`:''}
-            <span class="ml-a flex gap-8"><button class="btn btn-g btn-sm" onclick="editUp(${bi},${ui})">✎</button><button class="btn btn-d btn-sm" onclick="rmUp(${bi},${ui})">✕</button></span>
-          </div>
-          ${up.beschrieb?`<p style="font-size:12px;color:var(--txt2);white-space:pre-line;max-height:60px;overflow:hidden">${E(up.beschrieb)}</p>`:''}
-        </div>`).join('')}
-        ${bg.materialSpec?.length?`<div style="padding:8px 14px;border-top:1px solid var(--brd)"><div style="font-size:11px;font-weight:700;color:var(--mut);margin-bottom:4px">MATERIALSPEZIFIKATION</div><table class="dt" style="font-size:11px"><tr><th>Position</th><th>Lieferant</th><th>Vorschlag UN</th></tr>${bg.materialSpec.map(m=>`<tr><td>${E(m.pos)}</td><td>${E(m.lieferant)}</td><td style="color:var(--mut)">${E(m.vorschlag||'—')}</td></tr>`).join('')}</table></div>`:''}
-      </div>`;
-    }).join('');
+    // Funktional mode — read-only view of checked BKP from Checkliste
+    ensureLose(a);
+    h+=`<div class="card"><div class="card-hd"><h3>⬡ BKP-Positionen</h3><button class="btn btn-s btn-sm" onclick="nav('pbkp')">☑ BKP-Positionen bearbeiten</button></div><div class="card-bd" style="padding:0">`;
+    var allChecked=[];
+    (a.lose||[]).forEach(function(l){
+      (l.positionen||[]).forEach(function(p){if(p.checked)allChecked.push(p);});
+    });
+    if(!allChecked.length)h+=`<p style="padding:16px;color:var(--mut)">Noch keine BKP-Positionen angehakt. → <button class="btn btn-s btn-sm" onclick="nav('pbkp')">Checkliste öffnen</button></p>`;
+    else{
+      var lastGewerk='';
+      allChecked.forEach(function(p){
+        var gw=p.bkp.substring(0,2);
+        if(gw!==lastGewerk){
+          var gwColor=GEWERK_COLORS[gw]||'var(--mut)';var gwLabel=GEWERK_LABELS[gw]||'';
+          if(gwLabel)h+='<div style="padding:8px 16px;background:'+gwColor+';color:#fff;font-size:11px;font-weight:800;letter-spacing:.4px">'+gwLabel+'</div>';
+          lastGewerk=gw;
+        }
+        var is3=p.bkp.length<=3;
+        var indent=is3?16:40;
+        var statusIc=p.status==='erledigt'?'<span style="color:#16a34a;font-weight:900;font-size:14px">✓</span>':p.status==='in_bearbeitung'?'<span style="color:#d97706;font-weight:900;font-size:14px">⟳</span>':'<span style="color:#9ca3af;font-size:14px">?</span>';
+        var offertBtn='';
+        if(p.offerte&&p.offerte.lieferantFirma)offertBtn='<button class="btn btn-sm" style="font-size:10px;padding:3px 10px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;font-weight:700;cursor:default">📄 '+E(p.offerte.lieferantFirma)+(p.offerte.bruttoPreis?' · CHF '+Number(p.offerte.bruttoPreis).toLocaleString('de-CH'):'')+'</button>';
+        else if(p.istLieferung)offertBtn='<button class="btn btn-sm" style="font-size:10px;padding:3px 10px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;font-weight:700;cursor:default">⚠ Offerte fehlt</button>';
+        var modulBtn='';
+        if(p.modulUrl)modulBtn='<a href="'+p.modulUrl+'" target="_blank" class="btn btn-sm" style="font-size:10px;padding:3px 10px;text-decoration:none">🔗 Berechnung</a>';
+        h+='<div style="display:flex;align-items:center;gap:8px;padding:'+(is3?'10px':'7px')+' 16px '+(is3?'10px':'7px')+' '+indent+'px;border-bottom:1px solid var(--brd);font-size:13px;'+(is3?'background:var(--bg2);font-weight:800':'')+'\">';
+        h+='<span style="color:#1d4ed8;min-width:45px;font-weight:800;font-size:'+(is3?'14px':'12px')+'">'+E(p.bkp)+'</span>';
+        h+='<span style="flex:1;font-weight:'+(is3?'800':'600')+'">'+E(p.titel)+'</span>';
+        h+=offertBtn;
+        h+=modulBtn;
+        h+=statusIc;
+        h+='</div>';
+      });
+    }
     h+=`</div></div>`;
   }
 
@@ -2492,8 +2621,9 @@ const TUT={
   ],
   lieferant:[
     {t:'Abo & Gewerke',p:'Wähle Plan und Gewerke im Tab «Mein Abo».<div style="'+_tv+'"><div style="display:flex;gap:4px"><span style="padding:4px 10px;border-radius:6px;border:1px solid var(--brd);font-size:10px">Gratis</span><span style="padding:4px 10px;border-radius:6px;background:var(--acc);color:#fff;font-size:10px;font-weight:700">Basic 95.-</span><span style="padding:4px 10px;border-radius:6px;border:1px solid var(--amb-bd);font-size:10px;color:var(--amb)">Premium 150.-</span></div></div>'},
-    {t:'Marktplatz',p:'Offene Ausschreibungen nach Gewerken gefiltert. Proaktiv Offerten senden.<div style="'+_tv+'"><div style="font-size:10px;color:var(--mut);margin-bottom:4px">3 offene Ausschreibungen in deiner Region</div><div style="padding:3px 6px;border-bottom:1px solid var(--brd);font-size:10px;display:flex;justify-content:space-between"><span><strong>MFH Musterstr.</strong> · BKP 254</span><span style="color:var(--acc)">→</span></div></div>'},
-    {t:'Anfragen beantworten',p:'Offertanfragen beantworten mit PDF-Upload und Preis.<div style="'+_tv+'"><div style="display:flex;align-items:center;gap:6px;font-size:10px"><span style="padding:2px 6px;border-radius:4px;background:var(--amb-bg);color:var(--amb);font-weight:700">📨 Neue Anfrage</span><span style="color:var(--mut)">Enthärtungsanlage · 150 l/min</span></div></div>'}
+    {t:'Produkte & Dokumente',p:'Erfasse deine Produkte im <strong>Lieferanten-Dashboard</strong> mit allen technischen Daten. Pro Produkt 4 Dokumenttypen — als <strong>PDF-Upload</strong> oder <strong>URL-Referenz</strong>:<div style="'+_tv+'"><div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;font-size:10px"><span style="padding:2px 6px;border:1px solid var(--brd);border-radius:4px">📄 Datenblatt</span><span style="padding:2px 6px;border:1px solid var(--brd);border-radius:4px">📋 Montageanleitung</span><span style="padding:2px 6px;border:1px solid var(--brd);border-radius:4px">🏅 Zertifizierung</span><span style="padding:2px 6px;border:1px solid var(--brd);border-radius:4px">📜 Konformität</span></div><div style="margin-top:4px;font-size:9px;color:var(--mut)">💡 URL-Referenz: Link auf deine Homepage — nur einmal pflegen</div></div>'},
+    {t:'Marktplatz & Anfragen',p:'Offene Ausschreibungen im <strong>Marktplatz</strong> nach Gewerken gefiltert. Offertanfragen beantworten mit Preis und PDF-Offerte.<div style="'+_tv+'"><div style="display:flex;align-items:center;gap:6px;font-size:10px"><span style="padding:2px 6px;border-radius:4px;background:var(--amb-bg);color:var(--amb);font-weight:700">📨 Neue Anfrage</span><span style="color:var(--mut)">Enthärtungsanlage · 150 l/min</span></div></div>'},
+    {t:'Rohrsysteme & Armaturen verifizieren',p:'Im Dashboard unter <strong>Rohrsysteme & Armaturen</strong>: Prüfe Zeta-Werte, Dimensionen und technische Daten. Bestätige mit <strong style="color:var(--grn)">✓ Verifizieren</strong> — verifizierte Produkte werden bevorzugt angezeigt.<div style="'+_tv+'"><div style="display:flex;align-items:center;gap:6px;font-size:10px"><strong>Optipress Bogen 90°</strong><span style="color:var(--mut)">ζ=0.3</span><span style="padding:2px 6px;border-radius:10px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;font-weight:700;font-size:9px">✓</span></div></div>'}
   ],
   architekt:[
     {t:'Projektstatus',p:'Status aller Gewerke: Offen, Aktiv, Vergeben. Keine Preise einsehbar.<div style="'+_tv+'"><div style="display:flex;gap:6px;font-size:10px"><span style="padding:2px 8px;border-radius:4px;background:var(--grn-bg);color:var(--grn);font-weight:700">Sanitär: Vergeben</span><span style="padding:2px 8px;border-radius:4px;background:var(--acc-bg);color:var(--acc);font-weight:700">Elektro: Aktiv</span><span style="padding:2px 8px;border-radius:4px;background:var(--bg2);color:var(--mut)">HLKK: Offen</span></div></div>'}
