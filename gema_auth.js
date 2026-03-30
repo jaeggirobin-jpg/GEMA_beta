@@ -255,7 +255,7 @@
     }
   }
 
-  // ── Nav Badge ───────────────────────────────────────────────────────
+  // ── Nav Badge + Admin User-Switcher ─────────────────────────────
   function _injectBadge(user, roles, org) {
     if (document.getElementById('_gemaAuthBadge')) return;
     var roleNames = (user.roleIds||[]).map(function(rid){
@@ -268,13 +268,44 @@
     }
     var badge=document.createElement('div');
     badge.id='_gemaAuthBadge';
-    badge.style.cssText='display:flex;align-items:center;gap:6px;margin-left:16px;padding-right:12px;flex-shrink:0';
+    badge.style.cssText='display:flex;align-items:center;gap:6px;margin-left:16px;padding-right:12px;flex-shrink:0;position:relative';
 
+    var isAdmin=_isAdmin(user);
     badge.innerHTML=
-      '<div style="text-align:right">'+
-        '<div style="font-size:12px;font-weight:700;color:#111827;line-height:1.2">'+_esc(user.name||user.username)+'</div>'+
+      '<div style="text-align:right;cursor:'+(isAdmin?'pointer':'default')+'" '+(isAdmin?'onclick="document.getElementById(\'_gemaSwitcher\').style.display=document.getElementById(\'_gemaSwitcher\').style.display===\'none\'?\'block\':\'none\'"':'')+'>'+
+        '<div style="font-size:12px;font-weight:700;color:#111827;line-height:1.2">'+_esc(user.name||user.username)+(isAdmin?' <span style="font-size:9px;color:#9ca3af">▼</span>':'')+'</div>'+
         '<div style="font-size:10px;font-weight:600;color:'+roleColor+'">'+_esc(roleNames)+'</div>'+
       '</div>';
+
+    // Admin User-Switcher Dropdown
+    if(isAdmin){
+      var allUsers=_getUsers()||[];
+      var dd=document.createElement('div');
+      dd.id='_gemaSwitcher';
+      dd.style.cssText='display:none;position:absolute;top:calc(100% + 6px);right:0;min-width:280px;max-height:400px;overflow-y:auto;background:#fff;border:1.5px solid #c8cfdf;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.15);z-index:600;padding:6px 0';
+      dd.innerHTML='<div style="padding:6px 14px;font-size:10px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px">Als Benutzer anmelden</div>'+
+        allUsers.map(function(u){
+          var uRoles=(u.roleIds||[]).map(function(rid){var r=roles.find(function(x){return x.id===rid;});return r?r.name:'';}).filter(Boolean).join(', ');
+          var uColor=(roles.find(function(r){return u.roleIds&&u.roleIds.indexOf(r.id)>=0;})||{color:'#6b7280'}).color;
+          var isCurrent=u.id===user.id;
+          var lightBadge=u.kontotyp==='login_light'?' <span style="font-size:9px;padding:1px 5px;border-radius:4px;background:#fef3c7;color:#92400e;font-weight:700">Light</span>':'';
+          return '<div onclick="GemaAuth._switchUser(\''+u.id+'\')" style="padding:8px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.1s;'+(isCurrent?'background:#eff4ff;':'')+'font-size:12px" onmouseover="this.style.background=\'#f3f5fb\'" onmouseout="this.style.background=\''+(isCurrent?'#eff4ff':'')+'\'">'+
+            '<div style="width:28px;height:28px;border-radius:50%;background:'+uColor+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">'+_esc((u.name||u.username).split(' ').map(function(s){return s[0];}).join('').substring(0,2).toUpperCase())+'</div>'+
+            '<div style="flex:1;min-width:0">'+
+              '<div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_esc(u.name||u.username)+(isCurrent?' ✓':'')+lightBadge+'</div>'+
+              '<div style="font-size:10px;color:#9ca3af">'+_esc(uRoles)+'</div>'+
+            '</div>'+
+          '</div>';
+        }).join('')+
+        '<div style="border-top:1px solid #e2e7f0;padding:8px 14px;margin-top:4px"><a href="sys_admin.html" style="font-size:11px;font-weight:700;color:#2563eb;text-decoration:none">👥 Benutzerverwaltung →</a></div>';
+      badge.appendChild(dd);
+
+      // Close on outside click
+      document.addEventListener('click',function(e){
+        if(!badge.contains(e.target)){dd.style.display='none';}
+      });
+    }
+
     var inner=document.querySelector('.g-nav-inner');
     if(inner) inner.appendChild(badge);
   }
@@ -421,6 +452,17 @@
       return user;
     },
     logout:function(){localStorage.removeItem(STORAGE_SESSION);location.href='sys_login.html';},
+
+    // Admin: als anderer User anmelden (ohne Passwort)
+    _switchUser:function(userId){
+      var users=_getUsers()||[];
+      var user=users.find(function(u){return u.id===userId;});
+      if(!user)return;
+      var exp=new Date();exp.setDate(exp.getDate()+1);
+      var s={userId:user.id,expires:exp.toISOString()};
+      try{localStorage.setItem(STORAGE_SESSION,JSON.stringify(s));}catch(e){}
+      location.reload();
+    },
 
     // Gewerke des aktuellen Users ermitteln (aus allen Rollen zusammengeführt)
     getGewerke:function(){
