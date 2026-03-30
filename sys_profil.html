@@ -163,7 +163,13 @@ input,select,button,textarea{font-family:var(--sans)}
     </div>
   </div>
 
-  <!-- Unternehmen wird nur via Benutzerverwaltung (Admin) verwaltet -->
+  <!-- Unternehmen -->
+  <div class="card">
+    <div class="card-hd"><span class="ic">🏢</span><h3>Mein Unternehmen</h3></div>
+    <div class="card-body" id="orgInfoCard">
+      <p style="color:var(--mut)">Wird geladen...</p>
+    </div>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -244,6 +250,28 @@ function changePassword(){
   toast('✓ Passwort geändert');
 }
 
+function renderOrgInfo(){
+  var el=document.getElementById('orgInfoCard');if(!el)return;
+  var org=null;try{org=GemaAuth.getCurrentOrg();}catch(e){}
+  if(!org||org.id==='org_default'&&org.name==='Mein Unternehmen'){
+    el.innerHTML='<p style="color:var(--mut)">Kein Unternehmen zugeordnet.</p><p style="font-size:12px;color:var(--mut);margin-top:4px">Kontaktieren Sie Ihren GEMA-Administrator.</p>';
+    return;
+  }
+  var a=org.adresse||{};var k=org.kontakt||{};
+  var isAdmin=false;try{isAdmin=GemaAuth.isOrgAdmin();}catch(e){}
+  var abt=null;try{if(_user&&_user.abteilungId){abt=(org.abteilungen||[]).find(function(x){return x.id===_user.abteilungId;});}}catch(e){}
+  el.innerHTML='<div style="font-size:14px;font-weight:800;margin-bottom:8px">'+E(org.name)+(org.rechtsform?' '+E(org.rechtsform):'')+'</div>'+
+    '<div style="font-size:12.5px;color:var(--txt2);line-height:1.7">'+
+    (a.strasse?E(a.strasse)+'<br/>':'')+
+    (a.plz||a.ort?E([a.plz,a.ort].filter(Boolean).join(' '))+'<br/>':'')+
+    (k.email?'✉ '+E(k.email)+'<br/>':'')+
+    (k.telefon?'☎ '+E(k.telefon)+'<br/>':'')+
+    '</div>'+
+    (abt?'<div style="margin-top:8px;font-size:12px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+(abt.farbe||'#6b7280')+';margin-right:4px"></span>Abteilung: <strong>'+E(abt.name)+'</strong></div>':'')+
+    (isAdmin?'<div style="margin-top:12px"><a href="sys_unternehmen.html" style="font-size:12px;font-weight:700;color:#2563eb;text-decoration:none">🏢 Unternehmen verwalten →</a></div>':'');
+}
+function E(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+
 var _tt;
 function toast(m){var el=document.getElementById('toast');el.textContent=m;el.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){el.classList.remove('show');},2500);}
 
@@ -299,7 +327,7 @@ function selectAllBKP(val){
   document.querySelectorAll('#bkpDefaultTree input[type=checkbox]').forEach(function(cb){cb.checked=val;});
 }
 
-document.addEventListener('DOMContentLoaded', function(){init();renderBKPDefaultTree();});
+document.addEventListener('DOMContentLoaded', function(){init();renderBKPDefaultTree();renderOrgInfo();});
 </script>
 <script src="gema_feedback.js"></script>
 <script>document.addEventListener('DOMContentLoaded',function(){if(typeof GemaFeedback!=='undefined')GemaFeedback.init('profil','Profil');});</script>
