@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<rect width="512" height="512" rx="64" fill="#0f172a"/>
+<g transform="translate(256,210)">
+<path d="M0-100L86.6-50L86.6 50L0 100L-86.6 50L-86.6-50Z" fill="#fff"/>
+<circle cx="-15" cy="-12" r="30" fill="none" stroke="#0f172a" stroke-width="8"/>
+<circle cx="15" cy="12" r="30" fill="none" stroke="#0f172a" stroke-width="8"/>
+</g>
+<text x="256" y="390" text-anchor="middle" fill="#fff" font-family="system-ui" font-size="72" font-weight="900">GEMA</text>
+</svg>

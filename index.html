@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#0f172a"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="GEMA"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-192.svg"/>
 <title>GEMA – Modulübersicht</title>
 <script src="gema_auth.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1335,5 +1341,35 @@ buildFavGrid();
 <script src="gema_feedback.js"></script>
 <script>document.addEventListener('DOMContentLoaded',function(){if(typeof GemaFeedback!=='undefined')GemaFeedback.init('module','Modulübersicht');});</script>
 <script src="gema_scroll.js"></script>
+<script>
+// Service Worker NUR auf Produktion
+if('serviceWorker' in navigator && location.hostname==='gema.ch'){
+  navigator.serviceWorker.register('/sw.js').then(function(reg){
+    console.log('[GEMA] Service Worker registriert');
+    reg.addEventListener('updatefound',function(){
+      var nw=reg.installing;
+      nw.addEventListener('statechange',function(){
+        if(nw.state==='activated'){
+          var b=document.createElement('div');
+          b.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#1e3a5f;color:#fff;padding:12px 24px;font-size:13px;font-weight:700;z-index:9999;display:flex;align-items:center;justify-content:center;gap:12px;font-family:system-ui';
+          b.innerHTML='🔄 Neue GEMA-Version verfügbar <button onclick="location.reload()" style="background:#fff;color:#1e3a5f;border:none;padding:6px 14px;border-radius:8px;font-weight:700;cursor:pointer;font-size:12px">Jetzt aktualisieren</button>';
+          document.body.appendChild(b);
+        }
+      });
+    });
+  }).catch(function(e){console.warn('[GEMA] SW:',e);});
+}
+// Offline-Banner
+window.addEventListener('offline',function(){
+  if(document.getElementById('offlineBanner'))return;
+  var b=document.createElement('div');b.id='offlineBanner';
+  b.style.cssText='position:fixed;top:52px;left:0;right:0;background:#d97706;color:#fff;padding:8px 24px;font-size:12px;font-weight:700;z-index:999;text-align:center';
+  b.textContent='⚡ Offline — Änderungen werden gespeichert und beim nächsten Verbinden synchronisiert.';
+  document.body.appendChild(b);
+});
+window.addEventListener('online',function(){
+  var b=document.getElementById('offlineBanner');if(b)b.remove();
+});
+</script>
 </body>
 </html>
