@@ -458,6 +458,7 @@ function renderUsers(){
       '</div>'+
       '<div class="user-status '+(u.active?'active':'inactive')+'"></div>'+
       '<div class="user-actions">'+
+        (userOrg&&userOrg.admins&&userOrg.admins.indexOf(u.id)>=0?'<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:#eff4ff;color:#2563eb;font-weight:700">Org-Admin</span>':(!isCurrentUser&&u.orgId?'<button class="btn btn-sm" onclick="toggleOrgAdmin(\''+u.id+'\')" title="Zum Org-Admin ernennen">🏢</button>':''))+
         '<button class="btn btn-sm" onclick="openUserModal(\''+u.id+'\')">✏</button>'+
         (!isCurrentUser?'<button class="btn btn-sm btn-danger" onclick="deleteUser(\''+u.id+'\')">🗑</button>':'')+
       '</div>'+
@@ -530,6 +531,22 @@ function saveUser(){
   closeModal('userModal');
   renderUsers();
   toast('✓ Benutzer gespeichert');
+}
+
+function toggleOrgAdmin(uid){
+  var u=users.find(function(x){return x.id===uid;});if(!u||!u.orgId)return;
+  var o=orgs.find(function(x){return x.id===u.orgId;});if(!o)return;
+  if(!o.admins)o.admins=[];
+  if(o.admins.indexOf(uid)>=0){
+    if(!confirm(esc(u.name)+' als Org-Admin entfernen?'))return;
+    o.admins=o.admins.filter(function(id){return id!==uid;});
+  } else {
+    if(!confirm(esc(u.name)+' zum Org-Admin von "'+esc(o.name)+'" ernennen?'))return;
+    o.admins.push(uid);
+  }
+  GemaAuth.saveOrgs(orgs);
+  toast('✓ Org-Admin aktualisiert');
+  renderUsers();
 }
 
 function deleteUser(uid){

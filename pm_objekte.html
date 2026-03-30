@@ -568,8 +568,12 @@ function saveObjekt(){
     if(idx>=0)Object.assign(_mem.objekte[idx],data);
   } else {
     data.id=uid();data.createdAt=new Date().toISOString();
-    // Org-Zuordnung: Objekt gehört zur aktuellen Org des eingeloggten Users
+    // Org-Zuordnung
     if(_currentOrgId) data.orgId=_currentOrgId;
+    // Abteilungs-Zuordnung (wenn aktiviert)
+    try{var _cu=GemaAuth.getCurrentUser();if(_cu&&_cu.abteilungId)data.abteilungId=_cu.abteilungId;}catch(e){}
+    // Ersteller
+    try{data.erstelltVon=GemaAuth.getCurrentUser()?.id;}catch(e){}
     _mem.objekte.push(data);
     if(!_mem.activeObjektId)_mem.activeObjektId=data.id;
   }
