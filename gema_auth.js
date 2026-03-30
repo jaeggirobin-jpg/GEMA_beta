@@ -578,6 +578,59 @@
       return w.GemaAuth.saveUsers(users);
     },
 
+    // ── Werkzeug-Mandate ──
+    // Mandat = Beziehung zwischen Unternehmer-Firma und Lieferant/Prüfer
+    // {id, unternehmerOrgId, unternehmerFirma, lieferantUserId, lieferantFirma,
+    //  typ:'pruefer'|'lieferant'|'beides', zugang:'werkzeuge'|'kategorien'|'alle',
+    //  kategorien:[], aktiv:true, erstelltAm, deaktiviertVon:null}
+    getMandate:function(){
+      try{var r=localStorage.getItem('gema_werkzeug_mandate');return r?JSON.parse(r):[];}catch(e){return[];}
+    },
+    saveMandate:function(mandate){
+      try{localStorage.setItem('gema_werkzeug_mandate',JSON.stringify(mandate));}catch(e){}
+    },
+    createMandat:function(opts){
+      var mandate=w.GemaAuth.getMandate();
+      var m={
+        id:'wm_'+Date.now(),
+        unternehmerOrgId:opts.unternehmerOrgId||'',
+        unternehmerFirma:opts.unternehmerFirma||'',
+        lieferantUserId:opts.lieferantUserId||'',
+        lieferantFirma:opts.lieferantFirma||'',
+        typ:opts.typ||'pruefer',
+        zugang:opts.zugang||'alle',
+        kategorien:opts.kategorien||[],
+        aktiv:true,
+        erstelltAm:new Date().toISOString(),
+        deaktiviertVon:null
+      };
+      mandate.push(m);
+      w.GemaAuth.saveMandate(mandate);
+      return m;
+    },
+    deaktivierMandat:function(mandatId,vonWem){
+      var mandate=w.GemaAuth.getMandate();
+      var m=mandate.find(function(x){return x.id===mandatId;});
+      if(m){m.aktiv=false;m.deaktiviertVon=vonWem||'';w.GemaAuth.saveMandate(mandate);}
+    },
+    aktivierMandat:function(mandatId){
+      var mandate=w.GemaAuth.getMandate();
+      var m=mandate.find(function(x){return x.id===mandatId;});
+      if(m){m.aktiv=true;m.deaktiviertVon=null;w.GemaAuth.saveMandate(mandate);}
+    },
+    getMeineMandate:function(userId,firma){
+      // Mandate wo ich Lieferant/Prüfer bin
+      return w.GemaAuth.getMandate().filter(function(m){
+        return m.aktiv&&(m.lieferantUserId===userId||m.lieferantFirma===firma);
+      });
+    },
+    getMandateFuerUnternehmer:function(orgId,firma){
+      // Mandate die ein Unternehmer vergeben hat
+      return w.GemaAuth.getMandate().filter(function(m){
+        return m.unternehmerOrgId===orgId||m.unternehmerFirma===firma;
+      });
+    },
+
     updateProfile:function(userId,profile){
       var users=_getUsers()||[];
       var idx=users.findIndex(function(u){return u.id===userId;});

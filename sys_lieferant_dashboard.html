@@ -220,6 +220,12 @@ textarea.fc{resize:vertical;min-height:60px;line-height:1.5}
         <p style="color:var(--mut);font-size:13px">Keine fälligen Prüfungen.</p>
       </div>
     </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-hd"><h3>🏢 Meine Auftraggeber</h3></div>
+      <div class="card-bd" id="wzMandate">
+        <p style="color:var(--mut);font-size:13px">Wird geladen...</p>
+      </div>
+    </div>
   </div>
 
   <!-- Tab: Firmenprofil -->
@@ -432,6 +438,7 @@ function renderAll(){
   renderAnfragen();
   renderRohrsysteme();
   renderWerkzeuge();
+  renderMandate();
   fillProfil();
 }
 
@@ -848,13 +855,18 @@ function renderWerkzeuge(){
     return;
   }
 
-  // Filter: nur zugewiesene Werkzeuge für diesen Prüfer
+  // Filter: nur zugewiesene Werkzeuge für diesen Prüfer + nur aktive Mandate
   var userId=user.id;
   var liefFirma=_lief?_lief.firma:'';
+  var aktiveMandatFirmen={};
+  GemaAuth.getMeineMandate(userId,liefFirma).forEach(function(m){aktiveMandatFirmen[m.unternehmerFirma]=true;});
   var meineWz=wzData.werkzeuge.filter(function(w){
-    // Zugewiesen wenn pruefer-Array den User oder die Firma enthält
     if(!w.pruefer||!w.pruefer.length)return false;
-    return w.pruefer.some(function(p){return p===userId||p===liefFirma||p===user.username;});
+    var zugewiesen=w.pruefer.some(function(p){return p===userId||p===liefFirma||p===user.username;});
+    if(!zugewiesen)return false;
+    // Prüfe ob Mandat aktiv ist (wenn Werkzeug einer Firma zugeordnet)
+    if(w.firma&&Object.keys(aktiveMandatFirmen).length>0&&!aktiveMandatFirmen[w.firma])return false;
+    return true;
   });
 
   // Admin sieht alle
@@ -886,6 +898,46 @@ function renderWerkzeuge(){
   } else {
     pruefEl.innerHTML='<p style="color:var(--mut);font-size:13px">✓ Keine fälligen Prüfungen.</p>';
   }
+}
+
+function renderMandate(){
+  var el=document.getElementById('wzMandate');if(!el)return;
+  var user=null;try{user=GemaAuth.getCurrentUser();}catch(e){}
+  if(!user){el.innerHTML='';return;}
+
+  var mandate=GemaAuth.getMeineMandate(user.id,_lief?_lief.firma:'');
+  var alleMandate=GemaAuth.getMandate().filter(function(m){
+    return m.lieferantUserId===user.id||m.lieferantFirma===(_lief?_lief.firma:'');
+  });
+
+  if(!alleMandate.length){
+    el.innerHTML='<p style="color:var(--mut);font-size:12px">Noch keine Auftraggeber. Unternehmer können Ihnen Werkzeuge zur Verwaltung zuweisen.</p>';
+    return;
+  }
+
+  el.innerHTML=alleMandate.map(function(m){
+    var typLabel={pruefer:'Prüfer',lieferant:'Lieferant',beides:'Lieferant + Prüfer'}[m.typ]||m.typ;
+    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--brd)">'+
+      '<div style="width:36px;height:36px;border-radius:8px;background:#eff4ff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🏢</div>'+
+      '<div style="flex:1"><div style="font-size:13px;font-weight:700">'+E(m.unternehmerFirma)+'</div>'+
+      '<div style="font-size:11px;color:var(--mut)">Rolle: '+typLabel+' · Zugang: '+(m.zugang==='alle'?'Alle Werkzeuge':m.zugang==='kategorien'?E((m.kategorien||[]).join(', ')):'Selektiv')+'</div></div>'+
+      (m.aktiv
+        ?'<button onclick="deaktivierMeinMandat(\''+m.id+'\')" style="font-size:10px;padding:4px 10px;border-radius:6px;border:1px solid #fecaca;background:#fef2f2;color:#dc2626;font-weight:700;cursor:pointer">Deaktivieren</button>'
+        :'<span style="font-size:10px;padding:4px 10px;border-radius:6px;background:#f3f4f6;color:#9ca3af;font-weight:700">'+(m.deaktiviertVon==='lieferant'?'Von mir deaktiviert':'Vom Unternehmer deaktiviert')+'</span> <button onclick="aktivierMeinMandat(\''+m.id+'\')" style="font-size:10px;padding:4px 10px;border-radius:6px;border:1px solid #bbf7d0;background:#f0fdf4;color:#16a34a;font-weight:700;cursor:pointer;margin-left:4px">Reaktivieren</button>')+
+    '</div>';
+  }).join('');
+}
+
+function deaktivierMeinMandat(id){
+  if(!confirm('Möchten Sie den Zugang zu den Werkzeugen dieses Unternehmens wirklich deaktivieren?'))return;
+  GemaAuth.deaktivierMandat(id,'lieferant');
+  renderMandate();renderWerkzeuge();
+  toast('Zugang deaktiviert');
+}
+function aktivierMeinMandat(id){
+  GemaAuth.aktivierMandat(id);
+  renderMandate();renderWerkzeuge();
+  toast('Zugang reaktiviert');
 }
 
 function renderRohrsysteme(){
