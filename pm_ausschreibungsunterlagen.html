@@ -833,7 +833,7 @@ const VIEWS={};
 // ═══════════════════════════════════════════════
 VIEWS.pub=function(){
   const nA=S.ausschreibungen.length,nI=S.beteiligte.filter(b=>b.rolle==='installateur').length,nE=S.einreichungen.length;
-  let h=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><button class="btn btn-p btn-sm" onclick="tutOpen()">🎓 So funktioniert's</button></div>`;
+  let h=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><button class="btn btn-p btn-sm" onclick="tutOpen()">🎓 So funktioniert's</button><button class="btn btn-s btn-sm" onclick="showFlowchart()">📊 Prozessübersicht</button></div>`;
   h+=`<div class="sr"><div class="sc"><div class="sc-l">Ausschreibungen</div><div class="sc-v">${nA}</div></div><div class="sc"><div class="sc-l">Installateure</div><div class="sc-v">${nI}</div></div><div class="sc"><div class="sc-l">Offerten</div><div class="sc-v">${nE}</div></div><div class="sc"><div class="sc-l">Vergeben</div><div class="sc-v">${S.ausschreibungen.filter(a=>a.status==='vergeben').length}</div></div></div>`;
   // Activity log with filters
   h+=renderActivityLog();
@@ -2775,6 +2775,115 @@ const TUT={
   ]
 };
 let _tC=0,_tS=[];
+// ── Prozess-Flussdiagramm ──
+function showFlowchart(){
+  var fc='font-size:11px;line-height:1.4;font-family:var(--sans)';
+  var box='padding:10px 14px;border-radius:10px;text-align:center;font-weight:700;font-size:11.5px;position:relative';
+  var arr='text-align:center;font-size:16px;color:var(--mut2);line-height:1';
+  var phase='font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;padding:4px 10px;border-radius:6px;display:inline-block;margin-bottom:6px';
+
+  var h='<div style="max-width:640px;margin:0 auto;'+fc+'">';
+
+  // Phase 1: Vorbereitung
+  h+='<div style="'+phase+';background:#eff4ff;color:#1d4ed8">Phase 1 — Vorbereitung</div>';
+  h+='<div style="'+box+';background:#1d4ed8;color:#fff;margin:8px 0">📋 Ausschreibung erstellen<div style="font-size:10px;font-weight:400;margin-top:2px;opacity:.8">Objekt · Typ (Funktional/CRBX) · Modell · Frist</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="'+box+';background:#eff4ff;color:#1d4ed8;border:1.5px solid #bfcfff;margin:4px 0">📐 Pläne & 📎 Unterlagen hochladen</div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  // Phase 2: BKP
+  h+='<div style="'+phase+';background:#f0fdf4;color:#16a34a;margin-top:12px">Phase 2 — BKP-Checkliste</div>';
+  h+='<div style="'+box+';background:#16a34a;color:#fff;margin:8px 0">☑ BKP-Positionen auswählen<div style="font-size:10px;font-weight:400;margin-top:2px;opacity:.8">Pro LOS · Checkbox pro Position · Fortschrittsbalken</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  // Verzweigung: Lieferung
+  h+='<div style="display:flex;gap:10px;margin:4px 0">';
+  h+='<div style="flex:1;'+box+';background:#fef3c7;color:#92400e;border:1.5px solid #fde68a">🔗 Lieferung-BKP?<div style="font-size:10px;font-weight:400;margin-top:2px">Enthärtung · Osmose · Druckerhöhung etc.</div></div>';
+  h+='<div style="flex:1;'+box+';background:var(--bg2);color:var(--mut);border:1.5px solid var(--brd)">Montage / Leitungen<div style="font-size:10px;font-weight:400;margin-top:2px">Wird direkt als erledigt markiert</div></div>';
+  h+='</div>';
+  h+='<div style="'+arr+'">↓ Ja</div>';
+
+  h+='<div style="'+box+';background:#fef3c7;color:#92400e;border:1.5px solid #fde68a;margin:4px 0">🔬 Berechnung im GEMA-Modul<div style="font-size:10px;font-weight:400;margin-top:2px">z.B. sa_enthaertung.html → Durchfluss, Kapazität, DN</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  h+='<div style="display:flex;gap:10px;margin:4px 0">';
+  h+='<div style="flex:1;'+box+';background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0">📄 Offerte vom Lieferanten<div style="font-size:10px;font-weight:400;margin-top:2px">PDF hochladen oder Offertanfrage senden</div></div>';
+  h+='<div style="flex:1;'+box+';background:#eff4ff;color:#1d4ed8;border:1.5px solid #bfcfff">🏭 Anlage aus Katalog wählen<div style="font-size:10px;font-weight:400;margin-top:2px">Verifizierte Produkte · Datenblätter</div></div>';
+  h+='</div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="'+box+';background:#16a34a;color:#fff;margin:4px 0">✓ Montage-BKP wird automatisch ergänzt</div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  // Phase 3: CRBX (nur bei CRBX)
+  h+='<div style="'+phase+';background:#f5f3ff;color:#7c3aed;margin-top:12px">Phase 3 — CRBX-Abgleich <span style="font-size:9px;font-weight:400">(nur bei CRBX-Typ)</span></div>';
+  h+='<div style="'+box+';background:#7c3aed;color:#fff;margin:8px 0">📦 CRBX-Datei extern erstellen & hochladen</div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="display:flex;gap:8px;margin:4px 0">';
+  h+='<div style="flex:1;'+box+';background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0">✓ Übereinstimmend</div>';
+  h+='<div style="flex:1;'+box+';background:#fffbeb;color:#d97706;border:1.5px solid #fde68a">⚠ Fehlt in CRBX</div>';
+  h+='<div style="flex:1;'+box+';background:#eff4ff;color:#1d4ed8;border:1.5px solid #bfcfff">➕ Nur in CRBX</div>';
+  h+='</div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="'+box+';background:#7c3aed;color:#fff;margin:4px 0">✓ Abgleich bestätigen → Status: Freigegeben</div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  // Phase 4: Vorbedingungen
+  h+='<div style="'+phase+';background:#fef2f2;color:#dc2626;margin-top:12px">Phase 4 — Vorbedingungen & Abzüge</div>';
+  h+='<div style="display:flex;gap:10px;margin:8px 0">';
+  h+='<div style="flex:1;'+box+';background:var(--sur);border:1.5px solid var(--brd)">📜 Vorbedingungen<div style="font-size:10px;font-weight:400;margin-top:2px">Rich-Text Editor · Kapitel · Word-Paste</div></div>';
+  h+='<div style="flex:1;'+box+';background:var(--sur);border:1.5px solid var(--brd)">⚙ Abzüge definieren<div style="font-size:10px;font-weight:400;margin-top:2px">Rabatt · Skonto · MwSt 8.1%</div></div>';
+  h+='</div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  // Phase 5: Anfragen & Verteilen
+  h+='<div style="'+phase+';background:#fef3c7;color:#92400e;margin-top:12px">Phase 5 — Unternehmer anfragen & verteilen</div>';
+  h+='<div style="'+box+';background:#f59e0b;color:#fff;margin:8px 0">🤝 Interesse-Anfragen senden<div style="font-size:10px;font-weight:400;margin-top:2px;opacity:.8">Unternehmer in GEMA: Ja/Nein</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  h+='<div style="display:flex;gap:10px;margin:4px 0">';
+  h+='<div style="flex:1;'+box+';background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0">✓ Interessiert<div style="font-size:10px;font-weight:400;margin-top:2px">→ Unterlagen verteilen</div></div>';
+  h+='<div style="flex:1;'+box+';background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca">✕ Kein Interesse<div style="font-size:10px;font-weight:400;margin-top:2px">Optional: Grund</div></div>';
+  h+='</div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="'+box+';background:#f59e0b;color:#fff;margin:4px 0">📤 Ausschreibung an Unternehmer verteilen<div style="font-size:10px;font-weight:400;margin-top:2px;opacity:.8">E-Mail · LV · Pläne · Vorbedingungen</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  // Phase 6: Offerten
+  h+='<div style="'+phase+';background:#ecfeff;color:#0891b2;margin-top:12px">Phase 6 — Offerten & Vergabe</div>';
+  h+='<div style="'+box+';background:#0891b2;color:#fff;margin:8px 0">💰 Unternehmer reichen Offerten ein<div style="font-size:10px;font-weight:400;margin-top:2px;opacity:.8">Pauschal · Einheitspreise · Global · CRBX mit Preisen</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="'+box+';background:var(--sur);border:1.5px solid #0891b2;color:#0891b2;margin:4px 0">📊 Offertvergleich<div style="font-size:10px;font-weight:400;margin-top:2px;color:var(--txt2)">Pro BKP · Abzüge · MwSt · Günstigster grün markiert</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  h+='<div style="display:flex;gap:10px;margin:4px 0">';
+  h+='<div style="flex:1;'+box+';background:#16a34a;color:#fff">🏆 Zuschlag erteilen<div style="font-size:10px;font-weight:400;margin-top:2px;opacity:.8">E-Mail an Gewinner</div></div>';
+  h+='<div style="flex:1;'+box+';background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca">✉ Absagen senden<div style="font-size:10px;font-weight:400;margin-top:2px">Ohne Preise (kartellkonform)</div></div>';
+  h+='</div>';
+
+  // Legende
+  h+='<div style="margin-top:20px;padding:12px;background:var(--bg2);border-radius:8px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
+  h+='<span style="font-size:10px;font-weight:600;color:var(--mut)">Legende:</span>';
+  h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#1d4ed8;color:#fff">Planer-Aktion</span>';
+  h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#f59e0b;color:#fff">Kommunikation</span>';
+  h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#16a34a;color:#fff">Ergebnis</span>';
+  h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#7c3aed;color:#fff">CRBX-spezifisch</span>';
+  h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#fef3c7;color:#92400e;border:1px solid #fde68a">Lieferant</span>';
+  h+='</div>';
+
+  h+='</div>';
+
+  // Overlay
+  var ov=document.createElement('div');
+  ov.id='flowchartOv';
+  ov.style.cssText='position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.innerHTML='<div style="background:var(--sur);border-radius:16px;max-width:700px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.2)">'
+    +'<div style="padding:16px 20px;border-bottom:1.5px solid var(--brd);display:flex;align-items:center;position:sticky;top:0;background:var(--sur);z-index:1;border-radius:16px 16px 0 0"><h2 style="flex:1;font-size:16px;font-weight:800">📊 Ausschreibungsprozess — Gesamtübersicht</h2><button onclick="document.getElementById(\'flowchartOv\').remove()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--mut)">✕</button></div>'
+    +'<div style="padding:20px 24px">'+h+'</div>'
+    +'<div style="padding:12px 20px;border-top:1px solid var(--brd);text-align:center"><button onclick="document.getElementById(\'flowchartOv\').remove()" class="btn btn-p" style="font-size:13px">Verstanden</button></div>'
+    +'</div>';
+  document.body.appendChild(ov);
+}
+
 function tutOpen(){_tS=TUT[S.currentRole]||TUT.planer;_tC=0;document.getElementById('tutTitle').textContent='🎓 '+({planer:'Planer',installateur:'Installateur',lieferant:'Lieferant',architekt:'Architekt'}[S.currentRole]||'');tutR();document.getElementById('tutOv').classList.add('open');}
 function tutClose(){document.getElementById('tutOv').classList.remove('open');}
 function tutNav(d){_tC+=d;if(_tC>=_tS.length){tutClose();return;}if(_tC<0)_tC=0;tutR();}
