@@ -196,13 +196,12 @@ input,select,textarea,button{font-family:inherit}
 
 <!-- Modal: Beteiligter -->
 <div class="mo" id="mPerson"><div class="ml" style="max-width:480px">
-  <div class="ml-hd"><h2>Beteiligten hinzufügen</h2><button class="cl-btn" onclick="cM('mPerson')">✕</button></div>
+  <div class="ml-hd"><h2 id="apTitle">Beteiligten hinzufügen</h2><button class="cl-btn" onclick="cM('mPerson')">✕</button></div>
   <div class="ml-bd">
-    <div class="fg"><label class="fl">Rolle</label><select class="fc" id="apR"><option value="installateur">Unternehmer / Installateur</option><option value="lieferant">Lieferant</option><option value="architekt">Architekt</option></select></div>
-    <div class="fg"><label class="fl">Firma</label><input type="text" class="fc" id="apF"/></div>
+    <input type="hidden" id="apR" value="installateur"/>
+    <div class="fg"><label class="fl">Firma</label><input type="text" class="fc" id="apF" placeholder="Firma eingeben…" oninput="apSuggest(this.value)" autocomplete="off"/><div id="apSuggestions" style="display:none;position:absolute;z-index:10;background:#fff;border:1.5px solid var(--brd2);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:200px;overflow-y:auto;width:calc(100% - 36px);margin-top:2px"></div></div>
     <div class="g2"><div class="fg"><label class="fl">Kontaktperson</label><input type="text" class="fc" id="apP"/></div><div class="fg"><label class="fl">E-Mail</label><input type="text" class="fc" id="apE"/></div></div>
     <div class="fg"><label class="fl">Telefon</label><input type="text" class="fc" id="apT"/></div>
-    <div class="fg"><label class="fl">Gewerke / BKP (Lieferanten)</label><input type="text" class="fc" id="apG" placeholder="z.B. 255, 251.0"/></div>
   </div>
   <div class="ml-ft"><button class="btn btn-g" onclick="cM('mPerson')">Abbrechen</button><button class="btn btn-p" onclick="addPerson()">Hinzufügen</button></div>
 </div></div>
@@ -2036,22 +2035,73 @@ VIEWS.pber=function(){
 };
 
 VIEWS.pbet=function(){
-  let h=`<div style="display:flex;justify-content:space-between;margin-bottom:20px"><h2 style="font-size:20px;font-weight:700">Beteiligte</h2><button class="btn btn-p" onclick="oM('mPerson')">+ Hinzufügen</button></div>`;
-  [{r:'installateur',ic:'👷',co:'var(--grn)',label:'Installateure'},{r:'lieferant',ic:'🏭',co:'var(--amb)',label:'Lieferanten'},{r:'architekt',ic:'🏛',co:'var(--blue)',label:'Architekten'}].forEach(({r,ic,co,label})=>{
+  let h=`<h2 style="font-size:20px;font-weight:700;margin-bottom:20px">Beteiligte</h2>`;
+  [{r:'installateur',ic:'👷',co:'var(--grn)',label:'Installateure',btnLabel:'+ Installateur hinzufügen'},{r:'lieferant',ic:'🏭',co:'var(--amb)',label:'Lieferanten',btnLabel:'+ Lieferant hinzufügen'},{r:'architekt',ic:'🏛',co:'var(--blue)',label:'Architekten',btnLabel:'+ Architekt hinzufügen'}].forEach(({r,ic,co,label,btnLabel})=>{
     const ls=S.beteiligte.filter(b=>b.rolle===r);
-    h+=`<div class="card"><div class="card-hd"><h3>${ic} ${label}</h3><span class="tag t-gy">${ls.length}</span></div><div class="card-bd">${!ls.length?'<p style="color:var(--mut)">—</p>':ls.map((p,pi)=>{
+    h+=`<div class="card"><div class="card-hd"><h3>${ic} ${label}</h3><span class="tag t-gy">${ls.length}</span><button class="btn btn-p btn-sm" onclick="openAddPerson('${r}')" style="margin-left:auto">${btnLabel}</button></div><div class="card-bd">${!ls.length?'<p style="color:var(--mut)">Noch keine '+label+' erfasst.</p>':ls.map((p,pi)=>{
       var idx=S.beteiligte.indexOf(p);
       var resolved=resolveBeteiligter(p);
-      var hasLogin=!!p.userId;
-      var loginBadge=hasLogin?'<span class="tag t-gr" style="font-size:9px">✓ Login</span>':'<span class="tag t-gy" style="font-size:9px">Kein Login</span>';
+      // Login-Status: 3 Stufen
+      var loginStatus=p._loginStatus||'none'; // 'none'|'pending'|'active'
+      if(p.userId){var u=findUserByEmail(resolved.email);loginStatus=u&&u.einladung&&u.einladung.passwortGesetzt?'active':'pending';}
+      var loginBadge=loginStatus==='active'?'<span class="tag t-gr" style="font-size:9px">✓ Login</span>':loginStatus==='pending'?'<span class="tag t-bl" style="font-size:9px">⟳ Login in Bearbeitung</span>':'<span class="tag t-gy" style="font-size:9px">Kein Login</span>';
       var invBtn='';
-      if(!hasLogin){invBtn='<button class="btn btn-s btn-sm" onclick="inviteLieferant('+idx+')">✉ Einladen</button>';}
-      else if(p._einladungGesendet&&!p.userId){invBtn='<span class="tag t-bl" style="font-size:10px">✉ Einladung ausstehend</span>';}
+      if(loginStatus==='none'){invBtn='<button class="btn btn-s btn-sm" onclick="inviteLieferant('+idx+')">✉ Einladen</button>';}
       return `<div class="cr"><div class="ca" style="background:${co}">${(resolved.firma||'?').charAt(0)}</div><div class="ci"><div class="cn">${E(resolved.firma)} ${loginBadge}</div><div class="cd">${E(resolved.person)} · ${E(resolved.email)} · ${E(resolved.tel)}</div></div>${invBtn}<button class="btn btn-d btn-sm" onclick="rmP('${p.id}')">✕</button></div>`;
     }).join('')}</div></div>`;
   });
   return h;
 };
+
+function openAddPerson(rolle){
+  document.getElementById('apR').value=rolle;
+  var titles={installateur:'Installateur hinzufügen',lieferant:'Lieferant hinzufügen',architekt:'Architekt hinzufügen'};
+  document.getElementById('apTitle').textContent=titles[rolle]||'Beteiligten hinzufügen';
+  ['apF','apP','apE','apT'].forEach(function(x){document.getElementById(x).value='';});
+  document.getElementById('apSuggestions').style.display='none';
+  oM('mPerson');
+}
+
+function apSuggest(q){
+  var sugEl=document.getElementById('apSuggestions');
+  if(!q||q.length<2){sugEl.style.display='none';return;}
+  var rolle=document.getElementById('apR').value;
+  q=q.toLowerCase();
+  // Suche in bestehenden Usern mit passender Rolle
+  var users=[];
+  try{users=GemaAuth.getUsers()||[];}catch(e){}
+  var roleMap={installateur:'role_unternehmer',lieferant:'role_lieferant',architekt:'role_architekt'};
+  var targetRole=roleMap[rolle];
+  var matches=users.filter(function(u){
+    if(!u.active)return false;
+    var nameMatch=(u.name||'').toLowerCase().indexOf(q)>=0;
+    var firmaMatch=(u.profile?.firma||'').toLowerCase().indexOf(q)>=0;
+    var emailMatch=(u.username||'').toLowerCase().indexOf(q)>=0;
+    return(nameMatch||firmaMatch||emailMatch);
+  }).slice(0,5);
+  if(!matches.length){sugEl.style.display='none';return;}
+  sugEl.style.display='block';
+  sugEl.innerHTML=matches.map(function(u){
+    var firma=u.profile?.firma||u.name;
+    var hasTargetRole=u.roleIds&&u.roleIds.indexOf(targetRole)>=0;
+    return '<div onclick="apSelectSuggestion(\''+u.id+'\')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--brd);font-size:12px;display:flex;align-items:center;gap:8px;transition:.1s" onmouseover="this.style.background=\'var(--bg2)\'" onmouseout="this.style.background=\'\'">'
+      +'<div style="flex:1"><strong>'+E(firma)+'</strong><div style="font-size:11px;color:var(--mut)">'+E(u.name)+' · '+E(u.profile?.email||u.username)+'</div></div>'
+      +'<span class="tag t-gr" style="font-size:9px">✓ Login</span>'
+      +'</div>';
+  }).join('');
+}
+
+function apSelectSuggestion(userId){
+  var users=[];try{users=GemaAuth.getUsers()||[];}catch(e){}
+  var u=users.find(function(x){return x.id===userId;});
+  if(!u)return;
+  document.getElementById('apF').value=u.profile?.firma||u.name||'';
+  document.getElementById('apP').value=u.name||'';
+  document.getElementById('apE').value=u.profile?.email||u.username||'';
+  document.getElementById('apT').value=u.profile?.telefon||'';
+  document.getElementById('apSuggestions').style.display='none';
+}
+
 
 function renderCRBXVergleich(a,eins){
   if(!a.crbx?.lv)return '<div class="wp">Kein LV.</div>';
@@ -2836,14 +2886,18 @@ function findUserByEmail(email){
   return users.find(function(u){return u.username===email||u.profile?.email===email;})||null;
 }
 
-function addPerson(){const r=document.getElementById('apR').value,f=document.getElementById('apF').value.trim();if(!f){toast('Firma?','error');return;}
+function addPerson(){var r=document.getElementById('apR').value,f=document.getElementById('apF').value.trim();if(!f){toast('Firma?','error');return;}
   var email=document.getElementById('apE').value.trim();
-  var obj={id:r.substring(0,4)+'-'+Date.now(),rolle:r,userId:null,firma:f,person:document.getElementById('apP').value.trim(),email:email,tel:document.getElementById('apT').value.trim(),gewerke:document.getElementById('apG').value.trim(),profil:{}};
+  var obj={id:r.substring(0,4)+'-'+Date.now(),rolle:r,userId:null,firma:f,person:document.getElementById('apP').value.trim(),email:email,tel:document.getElementById('apT').value.trim(),gewerke:'',profil:{},_loginStatus:'none'};
   // Auto-Verknüpfung: prüfe ob ein User mit dieser Email existiert
   var existingUser=findUserByEmail(email);
-  if(existingUser){obj.userId=existingUser.id;obj._hasLogin=true;toast(f+' ✓ (mit bestehendem Account verknüpft)');}
+  if(existingUser){
+    obj.userId=existingUser.id;
+    obj._loginStatus=existingUser.einladung&&existingUser.einladung.passwortGesetzt?'active':'pending';
+    toast(f+' ✓ (mit bestehendem Account verknüpft)');
+  }
   if(r==='lieferant')obj.abo={aktiv:false,typ:'gratis',gewerke:[]};if(r==='installateur')obj.abo={typ:'gratis',aktiv:true};
-  S.beteiligte.push(obj);save();lg('👥','+',f);cM('mPerson');['apF','apP','apE','apT','apG'].forEach(x=>document.getElementById(x).value='');if(!existingUser)toast(f+' ✓');buildTabs();nav(S.currentRole==='planer'?'pbet':defP());}
+  S.beteiligte.push(obj);save();lg('👥','+',f);cM('mPerson');['apF','apP','apE','apT'].forEach(function(x){document.getElementById(x).value='';});if(!existingUser)toast(f+' ✓');buildTabs();nav(S.currentRole==='planer'?'pbet':defP());}
 
 function inviteLieferant(beteiligterIdx){
   var b=S.beteiligte[beteiligterIdx];if(!b)return;
@@ -2851,12 +2905,17 @@ function inviteLieferant(beteiligterIdx){
   if(typeof GemaAuth==='undefined'){toast('Auth nicht geladen','error');return;}
   // Prüfe ob bereits ein Account mit dieser Email existiert
   var existing=findUserByEmail(b.email);
-  if(existing){b.userId=existing.id;b._hasLogin=true;save();toast(b.firma+' hat bereits ein GEMA-Konto — verknüpft');nav('pbet');return;}
+  if(existing){
+    b.userId=existing.id;
+    b._loginStatus=existing.einladung&&existing.einladung.passwortGesetzt?'active':'pending';
+    save();toast(b.firma+' hat bereits ein GEMA-Konto — verknüpft');nav('pbet');return;
+  }
   var result=GemaAuth.inviteLieferant({
     firma:b.firma,person:b.person,email:b.email,tel:b.tel,
     eingeladenVon:S.currentRole
   });
-  b.userId=result.user.id; // Verknüpfung herstellen
+  b.userId=result.user.id;
+  b._loginStatus='pending'; // Einladung gesendet, Passwort noch nicht gesetzt
   b._einladungGesendet=true;b._loginUrl=result.loginUrl;
   save();
   lg('📨','Lieferant eingeladen',b.firma+' ('+b.email+')');
