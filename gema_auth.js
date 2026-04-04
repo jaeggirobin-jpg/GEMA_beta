@@ -91,15 +91,23 @@
     {id:'role_hlkk_planer',name:'Heizungsplaner',color:'#dc2626',gewerke:['hlkk'],permissions:(function(){var p=_allPerms(true,true,false);p['werkzeugmanagement']={read:true,write:false,admin:false};p['objekte']={read:true,write:true,admin:true};return p;})()},
     {id:'role_lueftung_planer',name:'Lüftungsplaner',color:'#2563eb',gewerke:['lueftung'],permissions:(function(){var p=_allPerms(true,true,false);p['werkzeugmanagement']={read:true,write:false,admin:false};p['objekte']={read:true,write:true,admin:true};return p;})()},
     {id:'role_elektro_planer',name:'Elektroplaner',color:'#d97706',gewerke:['elektro'],permissions:(function(){var p=_allPerms(true,true,false);p['werkzeugmanagement']={read:true,write:false,admin:false};p['objekte']={read:true,write:true,admin:true};return p;})()},
-    {id:'role_architekt',name:'Architekt / GP',color:'#7c3aed',permissions:_somePerms(['terminplan','besprechungsprotokoll','kostenkontrolle','objekte','abnahme_sia'],true,false,false)},
-    {id:'role_unternehmer',name:'Unternehmer',color:'#d97706',permissions:_somePerms(['terminplan','abnahme_sia','werkzeugmanagement','baustellencheckliste','inspektion_wartung'],true,true,false)},
-    {id:'role_lieferant',name:'Lieferant / Prüfer',color:'#16a34a',permissions:_somePerms(['werkzeugmanagement'],true,true,false)},
+    {id:'role_architekt',name:'Architekt / GP',color:'#7c3aed',permissions:_somePerms(['terminplan','besprechungsprotokoll','objekte','abnahme_sia'],true,false,false)},
+    {id:'role_unternehmer',name:'Unternehmer',color:'#d97706',permissions:_somePerms(['terminplan','abnahme_sia','werkzeugmanagement','baustellencheckliste','inspektion_wartung','ausschreibungsunterlagen'],true,true,false)},
+    {id:'role_lieferant',name:'Lieferant',color:'#16a34a',permissions:_somePerms(['ausschreibungsunterlagen','produktkatalog'],true,true,false)},
+    {id:'role_pruefer',name:'Prüfer',color:'#0891b2',permissions:_somePerms(['werkzeugmanagement','fahrzeugmanagement'],true,true,false)},
   ];
 
   // ── Default Org + User ─────────────────────────────────────────────
   var DEFAULT_ORGS = [{
-    id:'org_default', name:'Mein Unternehmen', logo:null, kategorie:'sanitaerplaner',
-    settings:{waehrung:'CHF',land:'CH'},
+    id:'org_default', name:'Jäggi Vollmer GmbH', logo:null, kategorie:'sanitaerplaner',
+    rechtsform:'GmbH',
+    adresse:{strasse:'Rheinfelderstrasse 10',plz:'4058',ort:'Basel',kanton:'BS',land:'CH'},
+    kontakt:{email:'info@jaeggivollmer.ch',telefon:'061 692 03 11',website:''},
+    settings:{waehrung:'CHF',land:'CH',sichtbarkeit:'firma',abteilungenAktiv:false},
+    abteilungen:[],
+    lizenzen:{typ:'pool',maxUser:5,aktiveUser:2,aboStart:'2025-01-01',aboEnde:'2026-12-31',gewerke:['sanitaer']},
+    admins:['user_admin'],
+    active:true,
     createdAt:new Date().toISOString()
   }];
 
@@ -120,12 +128,36 @@
     {id:'sonstiges',          name:'Sonstiges',              icon:'📦'},
   ];
 
-  var DEFAULT_USERS = [{
-    id:'user_admin', username:'admin', name:'Administrator',
-    password:_hash('gema2025'), roleIds:['role_admin'], orgId:'org_default',
-    active:true, createdAt:new Date().toISOString(),
-    profile:{email:'',telefon:'',sprache:'de',benachrichtigungen:true,standardObjekt:'',einheiten:'metrisch'}
-  }];
+  var DEFAULT_USERS = [
+    {id:'user_admin', username:'admin', name:'Administrator',
+     password:_hash('gema2025'), roleIds:['role_admin'], orgId:'org_default',
+     active:true, createdAt:new Date().toISOString(),
+     profile:{email:'',telefon:'',sprache:'de',benachrichtigungen:true,standardObjekt:'',einheiten:'metrisch'}},
+    // Demo-Lieferanten (Login-Light + verschiedene Abo-Stufen)
+    {id:'user_lief_bwt', username:'keller@bwt.ch', name:'Hans Keller',
+     password:_hash('bwt2025'), roleIds:['role_lieferant'], orgId:'org_default',
+     active:true, createdAt:'2025-01-15T10:00:00Z',
+     profile:{email:'keller@bwt.ch',telefon:'061 755 88 99',firma:'BWT',person:'Hans Keller',sprache:'de'},
+     kontotyp:'vollzugang', abo:{typ:'premium'},
+     einladung:{token:'inv_bwt',eingeladenVon:'admin',eingeladenAm:'2025-01-10T08:00:00Z',angenommenAm:'2025-01-15T10:00:00Z',passwortGesetzt:true}},
+    {id:'user_lief_gruenbeck', username:'weber@gruenbeck.ch', name:'Martin Weber',
+     password:_hash('gruen2025'), roleIds:['role_lieferant'], orgId:'org_default',
+     active:true, createdAt:'2025-06-01T08:00:00Z',
+     profile:{email:'weber@gruenbeck.ch',telefon:'044 820 33 44',firma:'Grünbeck',person:'Martin Weber',sprache:'de'},
+     kontotyp:'vollzugang', abo:{typ:'basic'},
+     einladung:{token:'inv_gruenbeck',eingeladenVon:'admin',eingeladenAm:'2025-05-20T08:00:00Z',angenommenAm:'2025-06-01T08:00:00Z',passwortGesetzt:true}},
+    {id:'user_lief_judo', username:'meier@judo.ch', name:'Claudia Meier',
+     password:_hash('judo2025'), roleIds:['role_lieferant'], orgId:'org_default',
+     active:true, createdAt:'2026-03-01T09:00:00Z',
+     profile:{email:'meier@judo.ch',telefon:'031 920 11 22',firma:'Judo',person:'Claudia Meier',sprache:'de'},
+     kontotyp:'login_light', abo:{typ:'testphase',testphaseEnde:'2026-03-31'},
+     einladung:{token:'inv_judo',eingeladenVon:'admin',eingeladenAm:'2026-02-25T08:00:00Z',angenommenAm:'2026-03-01T09:00:00Z',passwortGesetzt:true}},
+    // Demo-Planer
+    {id:'user_planer_1', username:'planer', name:'Felix Jäggi',
+     password:_hash('planer2025'), roleIds:['role_planer'], orgId:'org_default',
+     active:true, createdAt:'2025-01-01T08:00:00Z',
+     profile:{email:'felix@jaeggivollmer.ch',telefon:'061 692 03 11',sprache:'de',benachrichtigungen:true,dynamischeBKP:true}}
+  ];
 
   // ── Storage ────────────────────────────────────────────────────────
   function _getOrgs()    {try{var r=localStorage.getItem(STORAGE_ORGS);   return r?JSON.parse(r):null;}catch(e){return null;}}
@@ -172,6 +204,36 @@
     }
   }
 
+  // ── Login-Light Einschränkungen ─────────────────────────────────
+  function _applyLoginLight(user){
+    if(!user||user.kontotyp!=='login_light')return;
+    var aboTyp=user.abo?user.abo.typ:'light';
+    var isTest=aboTyp==='testphase';
+    var testExpired=isTest&&user.abo.testphaseEnde&&user.abo.testphaseEnde<new Date().toISOString().split('T')[0];
+    if(isTest&&!testExpired)return; // Testphase aktiv → voller Zugang
+
+    // Copy-Schutz: kein Textmarkieren auf geschützten Bereichen
+    var css=document.createElement('style');
+    css.textContent='.gema-protected{user-select:none!important;-webkit-user-select:none!important}.gema-blur{filter:blur(5px)!important;pointer-events:none!important;user-select:none!important}';
+    document.head.appendChild(css);
+
+    // Projektdaten + Planerdaten schützen
+    setTimeout(function(){
+      document.querySelectorAll('.project-bar,.pf,#metaProjekt,#metaBearbeiter').forEach(function(el){el.classList.add('gema-protected');});
+      // Download-Buttons verstecken
+      document.querySelectorAll('button[onclick*="PDF"],button[onclick*="export"],a[download]').forEach(function(el){
+        el.style.display='none';
+      });
+    },500);
+
+    // Upgrade-Banner anzeigen
+    var banner=document.createElement('div');
+    banner.style.cssText='position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#1e3a5f,#0f172a);color:#fff;padding:14px 24px;font-size:13px;z-index:9998;display:flex;align-items:center;justify-content:center;gap:16px;font-family:system-ui';
+    banner.innerHTML='<span>🔒 <strong>Login-Light</strong> — PDF-Download und Textkopiermöglichkeit mit Abo freigeschaltet</span>'
+      +'<button onclick="location.href=\'sys_lieferant_dashboard.html\'" style="background:#f59e0b;color:#fff;border:none;padding:8px 18px;border-radius:8px;font-weight:700;cursor:pointer;font-size:12px;white-space:nowrap">Abo wählen →</button>';
+    document.body.appendChild(banner);
+  }
+
   // ── Logo Swap ──────────────────────────────────────────────────────
   function _swapLogo(org) {
     if (!org || !org.logo) return;
@@ -201,7 +263,7 @@
     }
   }
 
-  // ── Nav Badge ───────────────────────────────────────────────────────
+  // ── Nav Badge + Admin User-Switcher ─────────────────────────────
   function _injectBadge(user, roles, org) {
     if (document.getElementById('_gemaAuthBadge')) return;
     var roleNames = (user.roleIds||[]).map(function(rid){
@@ -214,13 +276,48 @@
     }
     var badge=document.createElement('div');
     badge.id='_gemaAuthBadge';
-    badge.style.cssText='display:flex;align-items:center;gap:6px;margin-left:16px;padding-right:12px;flex-shrink:0';
+    badge.style.cssText='display:flex;align-items:center;gap:6px;margin-left:16px;padding-right:12px;flex-shrink:0;position:relative';
 
+    var isAdmin=_isAdmin(user);
+    var isImpersonating=false;
+    try{isImpersonating=!!localStorage.getItem('_gemaAdminOrigin');}catch(e){}
+    var showSwitcher=isAdmin||isImpersonating;
     badge.innerHTML=
-      '<div style="text-align:right">'+
-        '<div style="font-size:12px;font-weight:700;color:#111827;line-height:1.2">'+_esc(user.name||user.username)+'</div>'+
+      '<div style="text-align:right;cursor:'+(showSwitcher?'pointer':'default')+'" '+(showSwitcher?'onclick="document.getElementById(\'_gemaSwitcher\').style.display=document.getElementById(\'_gemaSwitcher\').style.display===\'none\'?\'block\':\'none\'"':'')+'>'+
+        '<div style="font-size:12px;font-weight:700;color:#111827;line-height:1.2">'+_esc(user.name||user.username)+(showSwitcher?' <span style="font-size:9px;color:#9ca3af">▼</span>':'')+'</div>'+
         '<div style="font-size:10px;font-weight:600;color:'+roleColor+'">'+_esc(roleNames)+'</div>'+
       '</div>';
+
+    // Admin User-Switcher Dropdown (auch bei Impersonation)
+    if(showSwitcher){
+      var allUsers=_getUsers()||[];
+      var dd=document.createElement('div');
+      dd.id='_gemaSwitcher';
+      dd.style.cssText='display:none;position:absolute;top:calc(100% + 6px);right:0;min-width:280px;max-height:400px;overflow-y:auto;background:#fff;border:1.5px solid #c8cfdf;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.15);z-index:600;padding:6px 0';
+      dd.innerHTML=(isImpersonating?'<div onclick="GemaAuth._stopImpersonating()" style="padding:10px 14px;cursor:pointer;background:#1d4ed8;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;border-bottom:1px solid #e2e7f0" onmouseover="this.style.background=\'#1e40af\'" onmouseout="this.style.background=\'#1d4ed8\'">← Zurück zu Admin</div>':'')+
+        '<div style="padding:6px 14px;font-size:10px;font-weight:800;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px">Als Benutzer anmelden</div>'+
+        allUsers.map(function(u){
+          var uRoles=(u.roleIds||[]).map(function(rid){var r=roles.find(function(x){return x.id===rid;});return r?r.name:'';}).filter(Boolean).join(', ');
+          var uColor=(roles.find(function(r){return u.roleIds&&u.roleIds.indexOf(r.id)>=0;})||{color:'#6b7280'}).color;
+          var isCurrent=u.id===user.id;
+          var lightBadge=u.kontotyp==='login_light'?' <span style="font-size:9px;padding:1px 5px;border-radius:4px;background:#fef3c7;color:#92400e;font-weight:700">Light</span>':'';
+          return '<div onclick="GemaAuth._switchUser(\''+u.id+'\')" style="padding:8px 14px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.1s;'+(isCurrent?'background:#eff4ff;':'')+'font-size:12px" onmouseover="this.style.background=\'#f3f5fb\'" onmouseout="this.style.background=\''+(isCurrent?'#eff4ff':'')+'\'">'+
+            '<div style="width:28px;height:28px;border-radius:50%;background:'+uColor+';color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">'+_esc((u.name||u.username).split(' ').map(function(s){return s[0];}).join('').substring(0,2).toUpperCase())+'</div>'+
+            '<div style="flex:1;min-width:0">'+
+              '<div style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_esc(u.name||u.username)+(isCurrent?' ✓':'')+lightBadge+'</div>'+
+              '<div style="font-size:10px;color:#9ca3af">'+_esc(uRoles)+'</div>'+
+            '</div>'+
+          '</div>';
+        }).join('')+
+        '<div style="border-top:1px solid #e2e7f0;padding:8px 14px;margin-top:4px"><a href="sys_admin.html" style="font-size:11px;font-weight:700;color:#2563eb;text-decoration:none">👥 Benutzerverwaltung →</a></div>';
+      badge.appendChild(dd);
+
+      // Close on outside click
+      document.addEventListener('click',function(e){
+        if(!badge.contains(e.target)){dd.style.display='none';}
+      });
+    }
+
     var inner=document.querySelector('.g-nav-inner');
     if(inner) inner.appendChild(badge);
   }
@@ -319,6 +416,12 @@
             _unblock();
             document.addEventListener('DOMContentLoaded',function(){
               if(!_isAdmin(user)) _applyUI(perms);
+              _applyLoginLight(user);
+              // Org-Admin Button sichtbar machen
+              if(w.GemaAuth.isOrgAdmin(user.id)){
+                var oab=document.getElementById('navOrgAdmin');
+                if(oab)oab.style.display='';
+              }
               _injectBadge(user,roles,userOrg);
               _swapLogo(userOrg);
               _autoFillBearbeiter(user);
@@ -367,6 +470,39 @@
     },
     logout:function(){localStorage.removeItem(STORAGE_SESSION);location.href='sys_login.html';},
 
+    // Admin-Impersonation: als anderer User anmelden, Admin-Zugang bleibt
+    _switchUser:function(userId){
+      var users=_getUsers()||[];
+      var user=users.find(function(u){return u.id===userId;});
+      if(!user)return;
+      // Merke den originalen Admin-User
+      var curSession=_getSession();
+      var origAdmin=null;
+      try{origAdmin=localStorage.getItem('_gemaAdminOrigin');}catch(e){}
+      if(!origAdmin&&curSession){
+        var curUser=users.find(function(u){return u.id===curSession.userId;});
+        if(curUser&&_isAdmin(curUser)){
+          try{localStorage.setItem('_gemaAdminOrigin',curUser.id);}catch(e){}
+        }
+      }
+      var exp=new Date();exp.setDate(exp.getDate()+1);
+      var s={userId:user.id,expires:exp.toISOString()};
+      try{localStorage.setItem(STORAGE_SESSION,JSON.stringify(s));}catch(e){}
+      location.reload();
+    },
+    _isImpersonating:function(){
+      try{return !!localStorage.getItem('_gemaAdminOrigin');}catch(e){return false;}
+    },
+    _getAdminOriginId:function(){
+      try{return localStorage.getItem('_gemaAdminOrigin');}catch(e){return null;}
+    },
+    _stopImpersonating:function(){
+      var origId=w.GemaAuth._getAdminOriginId();
+      if(!origId)return;
+      try{localStorage.removeItem('_gemaAdminOrigin');}catch(e){}
+      w.GemaAuth._switchUser(origId);
+    },
+
     // Gewerke des aktuellen Users ermitteln (aus allen Rollen zusammengeführt)
     getGewerke:function(){
       var user=w.GemaAuth.getCurrentUser();if(!user)return['sanitaer'];
@@ -384,6 +520,318 @@
     saveOrgCats:function(c){try{localStorage.setItem(STORAGE_ORG_CATS,JSON.stringify(c));return true;}catch(e){return false;}},
     saveUsers:function(u){try{localStorage.setItem(STORAGE_USERS,JSON.stringify(u));return true;}catch(e){return false;}},
     saveRoles:function(r){try{localStorage.setItem(STORAGE_ROLES,JSON.stringify(r));return true;}catch(e){return false;}},
+
+    // ── Einladungssystem ──
+    inviteLieferant:function(opts){
+      // Erstellt einen Login-Light User für einen Lieferanten
+      var users=_getUsers()||[];
+      var token='inv_'+Date.now()+'_'+Math.random().toString(36).substring(2,8);
+      var userId='user_lief_'+Date.now();
+      var user={
+        id:userId,
+        username:opts.email||token,
+        name:opts.firma||opts.person||'Lieferant',
+        password:null, // Wird beim ersten Login gesetzt
+        roleIds:['role_lieferant'],
+        orgId:opts.orgId||'org_default',
+        active:true,
+        createdAt:new Date().toISOString(),
+        profile:{
+          email:opts.email||'',
+          telefon:opts.tel||'',
+          firma:opts.firma||'',
+          person:opts.person||'',
+          sprache:'de',
+          benachrichtigungen:true
+        },
+        kontotyp:'login_light', // 'login_light' oder 'vollzugang'
+        einladung:{
+          token:token,
+          eingeladenVon:opts.eingeladenVon||'',
+          eingeladenAm:new Date().toISOString(),
+          angenommenAm:null,
+          passwortGesetzt:false
+        },
+        abo:{typ:'light',testphaseEnde:null}
+      };
+      users.push(user);
+      w.GemaAuth.saveUsers(users);
+      return{user:user,token:token,loginUrl:'sys_login.html?invite='+token};
+    },
+
+    // Generische Einladung für alle Rollen (aus Beteiligte)
+    inviteBeteiligter:function(opts){
+      // opts: {email, firma, person, rolle, roleId, orgId, eingeladenVon, beteiligterObjektId}
+      var users=_getUsers()||[];
+      // Prüfe ob Email bereits existiert
+      var existing=users.find(function(u){
+        return u.username&&u.username.toLowerCase()===(opts.email||'').toLowerCase()
+          ||u.profile&&u.profile.email&&u.profile.email.toLowerCase()===(opts.email||'').toLowerCase();
+      });
+      if(existing){
+        return{user:existing,token:null,loginUrl:'sys_login.html',existingAccount:true};
+      }
+      var token='inv_'+Date.now()+'_'+Math.random().toString(36).substring(2,8);
+      var roleId=opts.roleId||'role_unternehmer';
+      var userId='user_'+roleId.replace('role_','')+'_'+Date.now();
+      var user={
+        id:userId,
+        username:opts.email||token,
+        name:opts.person||opts.firma||'Eingeladener',
+        password:null,
+        roleIds:[roleId],
+        orgId:opts.orgId||'org_default',
+        active:true,
+        createdAt:new Date().toISOString(),
+        profile:{
+          email:opts.email||'',
+          telefon:opts.tel||'',
+          firma:opts.firma||'',
+          person:opts.person||'',
+          sprache:'de',
+          benachrichtigungen:true
+        },
+        kontotyp:'login_light',
+        einladung:{
+          token:token,
+          eingeladenVon:opts.eingeladenVon||'',
+          eingeladenAm:new Date().toISOString(),
+          angenommenAm:null,
+          passwortGesetzt:false,
+          beteiligterObjektId:opts.beteiligterObjektId||null
+        },
+        abo:{typ:'light',testphaseEnde:null}
+      };
+      users.push(user);
+      w.GemaAuth.saveUsers(users);
+      return{user:user,token:token,loginUrl:'sys_login.html?invite='+token,existingAccount:false};
+    },
+
+    // Email-Prüfung: existiert bereits ein Account?
+    findUserByEmail:function(email){
+      if(!email)return null;
+      var users=_getUsers()||[];
+      var e=email.toLowerCase();
+      return users.find(function(u){
+        return (u.username&&u.username.toLowerCase()===e)
+          ||(u.profile&&u.profile.email&&u.profile.email.toLowerCase()===e);
+      })||null;
+    },
+
+    // Token-basiertes Erstlogin (erweitert mit Registrierungsfeldern)
+    activateInvitation:function(token,password,regData){
+      var users=_getUsers()||[];
+      var user=users.find(function(u){return u.einladung&&u.einladung.token===token;});
+      if(!user)return null;
+      user.password=_hash(password);
+      user.einladung.angenommenAm=new Date().toISOString();
+      user.einladung.passwortGesetzt=true;
+      // Registrierungsdaten übernehmen
+      if(regData){
+        if(regData.name)user.name=regData.name;
+        if(regData.firma&&user.profile)user.profile.firma=regData.firma;
+        if(regData.person&&user.profile)user.profile.person=regData.name||regData.person;
+      }
+      // 30-Tage Testphase starten
+      var testEnde=new Date();testEnde.setDate(testEnde.getDate()+30);
+      user.abo={typ:'testphase',testphaseEnde:testEnde.toISOString().split('T')[0]};
+      w.GemaAuth.saveUsers(users);
+      return user;
+    },
+
+    // Rollenspezifische Weiterleitung nach Login/Aktivierung
+    getRedirectForUser:function(user){
+      if(!user||!user.roleIds)return'index.html';
+      if(user.roleIds.indexOf('role_lieferant')>=0)return'sys_lieferant_dashboard.html';
+      if(user.roleIds.indexOf('role_pruefer')>=0)return'sys_lieferant_dashboard.html';
+      if(user.roleIds.indexOf('role_unternehmer')>=0)return'index.html';
+      if(user.roleIds.indexOf('role_architekt')>=0)return'index.html';
+      return'index.html';
+    },
+
+    // Prüfe ob User Login-Light ist
+    isLoginLight:function(user){
+      if(!user)user=w.GemaAuth.getCurrentUser();
+      return user&&user.kontotyp==='login_light'&&(!user.abo||user.abo.typ==='light'||user.abo.typ==='testphase');
+    },
+
+    // Abo upgraden
+    upgradeAbo:function(userId,aboTyp){
+      var users=_getUsers()||[];
+      var idx=users.findIndex(function(u){return u.id===userId;});
+      if(idx<0)return false;
+      users[idx].abo={typ:aboTyp};
+      users[idx].kontotyp='vollzugang';
+      return w.GemaAuth.saveUsers(users);
+    },
+
+    // ── Werkzeug-Mandate ──
+    // Mandat = Beziehung zwischen Unternehmer-Firma und Lieferant/Prüfer
+    // {id, unternehmerOrgId, unternehmerFirma, lieferantUserId, lieferantFirma,
+    //  typ:'pruefer'|'lieferant'|'beides', zugang:'werkzeuge'|'kategorien'|'alle',
+    //  kategorien:[], aktiv:true, erstelltAm, deaktiviertVon:null}
+    getMandate:function(){
+      try{var r=localStorage.getItem('gema_werkzeug_mandate');return r?JSON.parse(r):[];}catch(e){return[];}
+    },
+    saveMandate:function(mandate){
+      try{localStorage.setItem('gema_werkzeug_mandate',JSON.stringify(mandate));}catch(e){}
+    },
+    createMandat:function(opts){
+      var mandate=w.GemaAuth.getMandate();
+      var m={
+        id:'wm_'+Date.now(),
+        unternehmerOrgId:opts.unternehmerOrgId||'',
+        unternehmerFirma:opts.unternehmerFirma||'',
+        lieferantUserId:opts.lieferantUserId||'',
+        lieferantFirma:opts.lieferantFirma||'',
+        typ:opts.typ||'pruefer',
+        zugang:opts.zugang||'alle',
+        kategorien:opts.kategorien||[],
+        aktiv:true,
+        erstelltAm:new Date().toISOString(),
+        deaktiviertVon:null
+      };
+      mandate.push(m);
+      w.GemaAuth.saveMandate(mandate);
+      return m;
+    },
+    deaktivierMandat:function(mandatId,vonWem){
+      var mandate=w.GemaAuth.getMandate();
+      var m=mandate.find(function(x){return x.id===mandatId;});
+      if(m){m.aktiv=false;m.deaktiviertVon=vonWem||'';w.GemaAuth.saveMandate(mandate);}
+    },
+    aktivierMandat:function(mandatId){
+      var mandate=w.GemaAuth.getMandate();
+      var m=mandate.find(function(x){return x.id===mandatId;});
+      if(m){m.aktiv=true;m.deaktiviertVon=null;w.GemaAuth.saveMandate(mandate);}
+    },
+    getMeineMandate:function(userId,firma){
+      // Mandate wo ich Lieferant/Prüfer bin
+      return w.GemaAuth.getMandate().filter(function(m){
+        return m.aktiv&&(m.lieferantUserId===userId||m.lieferantFirma===firma);
+      });
+    },
+    getMandateFuerUnternehmer:function(orgId,firma){
+      // Mandate die ein Unternehmer vergeben hat
+      return w.GemaAuth.getMandate().filter(function(m){
+        return m.unternehmerOrgId===orgId||m.unternehmerFirma===firma;
+      });
+    },
+
+    // ── Unternehmens-Verwaltung ──
+    isOrgAdmin:function(userId){
+      var user=userId?(_getUsers()||[]).find(function(u){return u.id===userId;}):w.GemaAuth.getCurrentUser();
+      if(!user)return false;
+      if(_isAdmin(user))return true;
+      var orgs=_getOrgs()||[];
+      var org=orgs.find(function(o){return o.id===user.orgId;});
+      return org&&org.admins&&org.admins.indexOf(user.id)>=0;
+    },
+    getOrgUsers:function(orgId){
+      var users=_getUsers()||[];
+      return users.filter(function(u){return u.orgId===orgId&&u.active;});
+    },
+    getOrgAbteilungen:function(orgId){
+      var orgs=_getOrgs()||[];
+      var org=orgs.find(function(o){return o.id===orgId;});
+      return org?org.abteilungen||[]:[];
+    },
+    createAbteilung:function(orgId,name,farbe,gewerke){
+      var orgs=_getOrgs()||[];
+      var org=orgs.find(function(o){return o.id===orgId;});
+      if(!org)return null;
+      if(!org.abteilungen)org.abteilungen=[];
+      var abt={id:'abt_'+Date.now(),name:name,farbe:farbe||'#6b7280',gewerke:gewerke||[],leiter:null};
+      org.abteilungen.push(abt);
+      w.GemaAuth.saveOrgs(orgs);
+      return abt;
+    },
+    removeAbteilung:function(orgId,abtId){
+      var orgs=_getOrgs()||[];
+      var org=orgs.find(function(o){return o.id===orgId;});
+      if(!org)return;
+      org.abteilungen=(org.abteilungen||[]).filter(function(a){return a.id!==abtId;});
+      // User in dieser Abteilung: abteilungId auf null setzen
+      var users=_getUsers()||[];
+      users.forEach(function(u){if(u.orgId===orgId&&u.abteilungId===abtId)u.abteilungId=null;});
+      w.GemaAuth.saveOrgs(orgs);w.GemaAuth.saveUsers(users);
+    },
+    setUserAbteilung:function(userId,abtId){
+      var users=_getUsers()||[];
+      var idx=users.findIndex(function(u){return u.id===userId;});
+      if(idx<0)return false;
+      users[idx].abteilungId=abtId;
+      return w.GemaAuth.saveUsers(users);
+    },
+    ernennOrgAdmin:function(orgId,userId){
+      var orgs=_getOrgs()||[];
+      var org=orgs.find(function(o){return o.id===orgId;});
+      if(!org)return;
+      if(!org.admins)org.admins=[];
+      if(org.admins.indexOf(userId)<0)org.admins.push(userId);
+      w.GemaAuth.saveOrgs(orgs);
+    },
+    entferneOrgAdmin:function(orgId,userId){
+      var orgs=_getOrgs()||[];
+      var org=orgs.find(function(o){return o.id===orgId;});
+      if(!org)return;
+      org.admins=(org.admins||[]).filter(function(id){return id!==userId;});
+      w.GemaAuth.saveOrgs(orgs);
+    },
+    updateOrgSettings:function(orgId,settings){
+      var orgs=_getOrgs()||[];
+      var org=orgs.find(function(o){return o.id===orgId;});
+      if(!org)return false;
+      org.settings=Object.assign(org.settings||{},settings);
+      return w.GemaAuth.saveOrgs(orgs);
+    },
+    updateOrgInfo:function(orgId,info){
+      var orgs=_getOrgs()||[];
+      var org=orgs.find(function(o){return o.id===orgId;});
+      if(!org)return false;
+      Object.keys(info).forEach(function(k){org[k]=info[k];});
+      return w.GemaAuth.saveOrgs(orgs);
+    },
+
+    // ── Gastzugang ──
+    requestGastZugang:function(userId,orgId){
+      var users=_getUsers()||[];
+      var user=users.find(function(u){return u.id===userId;});
+      if(!user)return null;
+      if(!user.gastZugaenge)user.gastZugaenge=[];
+      var orgs=_getOrgs()||[];
+      var org=orgs.find(function(o){return o.id===orgId;});
+      var gast={orgId:orgId,orgName:org?org.name:'',status:'angefragt',gueltigBis:null,erstelltAm:new Date().toISOString(),bewilligtVon:null};
+      user.gastZugaenge.push(gast);
+      w.GemaAuth.saveUsers(users);
+      return gast;
+    },
+    bewilligeGast:function(userId,orgId,gueltigBis,bewilligtVon){
+      var users=_getUsers()||[];
+      var user=users.find(function(u){return u.id===userId;});
+      if(!user||!user.gastZugaenge)return;
+      var g=user.gastZugaenge.find(function(x){return x.orgId===orgId;});
+      if(g){g.status='aktiv';g.gueltigBis=gueltigBis||null;g.bewilligtVon=bewilligtVon||'';}
+      w.GemaAuth.saveUsers(users);
+    },
+    deaktivierGast:function(userId,orgId){
+      var users=_getUsers()||[];
+      var user=users.find(function(u){return u.id===userId;});
+      if(!user||!user.gastZugaenge)return;
+      var g=user.gastZugaenge.find(function(x){return x.orgId===orgId;});
+      if(g)g.status='deaktiviert';
+      w.GemaAuth.saveUsers(users);
+    },
+    getGastOrgs:function(userId){
+      // Alle Orgs wo dieser User aktiver Gast ist
+      var users=_getUsers()||[];
+      var user=users.find(function(u){return u.id===userId;});
+      if(!user||!user.gastZugaenge)return[];
+      var heute=new Date().toISOString().split('T')[0];
+      return user.gastZugaenge.filter(function(g){
+        return g.status==='aktiv'&&(!g.gueltigBis||g.gueltigBis>=heute);
+      });
+    },
 
     updateProfile:function(userId,profile){
       var users=_getUsers()||[];

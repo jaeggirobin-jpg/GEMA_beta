@@ -9,11 +9,21 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<!-- Rich-Text: natives contenteditable mit eigener Toolbar (kein CDN nötig) -->
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#f4f6fb;--bg2:#edf0f7;--sur:#fff;--sur2:#f8faff;--brd:#e2e7f0;--brd2:#cdd4e4;--txt:#111827;--txt2:#374151;--mut:#6b7280;--mut2:#9ca3af;--blue:#2563eb;--blue-bg:#eff4ff;--blue-bd:#bfcfff;--blue-dk:#1d4ed8;--grn:#16a34a;--grn-bg:#f0fdf4;--grn-bd:#bbf7d0;--red:#dc2626;--red-bg:#fef2f2;--red-bd:#fecaca;--amb:#d97706;--amb-bg:#fffbeb;--amb-bd:#fde68a;--pur:#7c3aed;--pur-bg:#f5f3ff;--pur-bd:#ddd6fe;--acc:#b45309;--acc-bg:#fffbeb;--acc-bd:#fde68a;--r:14px;--r-sm:9px;--r-lg:20px;--sh-sm:0 1px 4px rgba(0,0,0,.07);--sh:0 4px 16px rgba(0,0,0,.08);--sh-lg:0 20px 60px rgba(0,0,0,.16);--sans:"DM Sans",ui-sans-serif,system-ui,sans-serif}
 body{font-family:var(--sans);background:var(--bg);color:var(--txt);min-height:100vh;font-size:14px;-webkit-font-smoothing:antialiased}
 input,select,textarea,button{font-family:inherit}
+/* Rich-Text Editor */
+#vbRichEditor:empty::before{content:attr(data-placeholder);color:var(--mut2);pointer-events:none}
+#vbRichEditor h1{font-size:22px;font-weight:800;margin:16px 0 8px}
+#vbRichEditor h2{font-size:18px;font-weight:700;margin:14px 0 6px}
+#vbRichEditor h3{font-size:15px;font-weight:700;margin:12px 0 4px}
+#vbRichEditor ul,#vbRichEditor ol{padding-left:24px;margin:8px 0}
+#vbRichEditor blockquote{border-left:3px solid var(--brd2);padding-left:12px;color:var(--mut);margin:8px 0}
+#vbRichEditor table{border-collapse:collapse;width:100%;margin:8px 0}
+#vbRichEditor td,#vbRichEditor th{border:1px solid var(--brd);padding:6px 10px;font-size:13px}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--brd2);border-radius:3px}
 /* Nav */
 .g-nav{background:rgba(255,255,255,.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--brd);position:sticky;top:0;z-index:300;box-shadow:0 1px 4px rgba(0,0,0,.06)}.g-nav-inner{padding:0 24px;height:52px;display:flex;align-items:center;gap:0}.g-nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none;margin-right:16px;flex-shrink:0}.g-nav-mark{height:28px;display:flex;align-items:center}
@@ -186,13 +196,12 @@ input,select,textarea,button{font-family:inherit}
 
 <!-- Modal: Beteiligter -->
 <div class="mo" id="mPerson"><div class="ml" style="max-width:480px">
-  <div class="ml-hd"><h2>Beteiligten hinzufügen</h2><button class="cl-btn" onclick="cM('mPerson')">✕</button></div>
+  <div class="ml-hd"><h2 id="apTitle">Beteiligten hinzufügen</h2><button class="cl-btn" onclick="cM('mPerson')">✕</button></div>
   <div class="ml-bd">
-    <div class="fg"><label class="fl">Rolle</label><select class="fc" id="apR"><option value="installateur">Unternehmer / Installateur</option><option value="lieferant">Lieferant</option><option value="architekt">Architekt</option></select></div>
-    <div class="fg"><label class="fl">Firma</label><input type="text" class="fc" id="apF"/></div>
+    <input type="hidden" id="apR" value="installateur"/>
+    <div class="fg"><label class="fl">Firma</label><input type="text" class="fc" id="apF" placeholder="Firma eingeben…" oninput="apSuggest(this.value)" autocomplete="off"/><div id="apSuggestions" style="display:none;position:absolute;z-index:10;background:#fff;border:1.5px solid var(--brd2);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:200px;overflow-y:auto;width:calc(100% - 36px);margin-top:2px"></div></div>
     <div class="g2"><div class="fg"><label class="fl">Kontaktperson</label><input type="text" class="fc" id="apP"/></div><div class="fg"><label class="fl">E-Mail</label><input type="text" class="fc" id="apE"/></div></div>
     <div class="fg"><label class="fl">Telefon</label><input type="text" class="fc" id="apT"/></div>
-    <div class="fg"><label class="fl">Gewerke / BKP (Lieferanten)</label><input type="text" class="fc" id="apG" placeholder="z.B. 255, 251.0"/></div>
   </div>
   <div class="ml-ft"><button class="btn btn-g" onclick="cM('mPerson')">Abbrechen</button><button class="btn btn-p" onclick="addPerson()">Hinzufügen</button></div>
 </div></div>
@@ -599,14 +608,16 @@ const ABOS_INST=ABOS_UN;
 const ABOS_LIEF=ABOS_LF;
 
 // ── VORBEDINGUNGEN KAPITEL ──
-const VB_KAPITEL=[
-  {id:'allg',name:'1. Allgemeiner Beschrieb',placeholder:'Projektbeschreibung, Gebäudetyp, Nutzung…'},
-  {id:'bed',name:'2. Bedingungen Fachingenieur',placeholder:'Grundlagen, objektbezogene Bedingungen, Termine, Normen (SIA 118, SIA 380, suissetec)…'},
-  {id:'ang',name:'3. Angaben Unternehmer',placeholder:'Allgemeine Angaben, Versicherungsnachweis…'},
-  {id:'pers',name:'4. Anzahl einsetzbare Mitarbeiter',placeholder:'Leitende Monteure, Servicemonteure, A/B/C-Monteure, Lernende…'},
-  {id:'regie',name:'5. Regiearbeiten',placeholder:'Lohnansätze, Zuschläge Sonderarbeitszeiten gem. SIA 118/380…'},
-  {id:'komm',name:'6. Kommerzielle Bedingungen',placeholder:'Preise, Rechtsverhältnisse, Subunternehmen, Zahlungsbedingungen, Garantie, Arbeitssicherheit, Materialwahl…'}
+const VB_STANDARD=[
+  {id:'allg',name:'Allgemeiner Beschrieb',placeholder:'Projektbeschreibung, Gebäudetyp, Nutzung…'},
+  {id:'bed',name:'Bedingungen Fachingenieur',placeholder:'Grundlagen, objektbezogene Bedingungen, Termine, Normen (SIA 118, SIA 380, suissetec)…'},
+  {id:'ang',name:'Angaben Unternehmer',placeholder:'Allgemeine Angaben, Versicherungsnachweis…'},
+  {id:'pers',name:'Anzahl einsetzbare Mitarbeiter',placeholder:'Leitende Monteure, Servicemonteure, A/B/C-Monteure, Lernende…'},
+  {id:'regie',name:'Regiearbeiten',placeholder:'Lohnansätze, Zuschläge Sonderarbeitszeiten gem. SIA 118/380…'},
+  {id:'komm',name:'Kommerzielle Bedingungen',placeholder:'Preise, Rechtsverhältnisse, Subunternehmen, Zahlungsbedingungen, Garantie, Arbeitssicherheit, Materialwahl…'}
 ];
+// Legacy compatibility
+const VB_KAPITEL=VB_STANDARD;
 
 // ── STATE ──
 let S={
@@ -619,12 +630,12 @@ let S={
   ],
   activeAusId:'aus-demo-1',
   beteiligte:[
-    {id:'inst-1',rolle:'installateur',firma:'Jäggi Vollmer GmbH',person:'Felix Jäggi',email:'felix.jaeggi@jaeggivollmer.ch',tel:'061 692 03 11',gewerke:'',abo:{typ:'basic'},profil:{}},
-    {id:'inst-2',rolle:'installateur',firma:'Meier Sanitär AG',person:'Peter Meier',email:'meier@meiersanitaer.ch',tel:'061 555 12 34',gewerke:'',abo:{typ:'gratis'},profil:{}},
-    {id:'lief-1',rolle:'lieferant',firma:'Sanitas Troesch AG',person:'Anna Keller',email:'keller@sanitastroesch.ch',tel:'031 999 88 77',gewerke:'251,252',abo:{typ:'basic',gewerke:['25','251','252']}},
-    {id:'lief-2',rolle:'lieferant',firma:'Geberit AG',person:'Marco Schneider',email:'schneider@geberit.ch',tel:'034 429 21 21',gewerke:'254',abo:{typ:'premium',gewerke:['254']}},
-    {id:'lief-3',rolle:'lieferant',firma:'Isopro Isolierungen AG',person:'Thomas Huber',email:'huber@isopro.ch',tel:'044 333 22 11',gewerke:'255',abo:{typ:'basic',gewerke:['255']}},
-    {id:'arch-1',rolle:'architekt',firma:'Architektur Muster AG',person:'Sarah Müller',email:'mueller@archmuster.ch',tel:'061 222 33 44',gewerke:'',abo:{typ:'gratis'}}
+    {id:'inst-1',rolle:'installateur',userId:'user_planer_1',firma:'Jäggi Vollmer GmbH',person:'Felix Jäggi',email:'felix.jaeggi@jaeggivollmer.ch',tel:'061 692 03 11',gewerke:'',abo:{typ:'basic'},profil:{}},
+    {id:'inst-2',rolle:'installateur',userId:null,firma:'Meier Sanitär AG',person:'Peter Meier',email:'meier@meiersanitaer.ch',tel:'061 555 12 34',gewerke:'',abo:{typ:'gratis'},profil:{}},
+    {id:'lief-1',rolle:'lieferant',userId:null,firma:'Sanitas Troesch AG',person:'Anna Keller',email:'keller@sanitastroesch.ch',tel:'031 999 88 77',gewerke:'251,252',abo:{typ:'basic',gewerke:['25','251','252']}},
+    {id:'lief-2',rolle:'lieferant',userId:'user_lief_bwt',firma:'Geberit AG',person:'Marco Schneider',email:'schneider@geberit.ch',tel:'034 429 21 21',gewerke:'254',abo:{typ:'premium',gewerke:['254']}},
+    {id:'lief-3',rolle:'lieferant',userId:null,firma:'Isopro Isolierungen AG',person:'Thomas Huber',email:'huber@isopro.ch',tel:'044 333 22 11',gewerke:'255',abo:{typ:'basic',gewerke:['255']}},
+    {id:'arch-1',rolle:'architekt',userId:null,firma:'Architektur Muster AG',person:'Sarah Müller',email:'mueller@archmuster.ch',tel:'061 222 33 44',gewerke:'',abo:{typ:'gratis'}}
   ],
   verteilungen:[{ausId:'aus-demo-3',installateurId:'inst-1'},{ausId:'aus-demo-3',installateurId:'inst-2'}],
   anfragen:[
@@ -665,7 +676,7 @@ function newAusschreibung(opts){
     plaene:[], // [{name,datum}]
     unterlagen:[], // [{name,datum}]
     vorbedingungen:{typ:'standard',pdfName:''}, // standard|eigene
-    vergabe:{status:null,winnerId:null,datum:null},
+    vergabe:{status:null,winnerId:null,datum:null,empfehlungen:[],empfehlungText:'',entscheidungsinstanz:'',empfaenger:'',frist:null,genehmigung:null,ablehnungGrund:'',zuschlagMsg:'',absageMsg:'',kostenUebertragen:false},
     created:new Date().toISOString()
   };
 }
@@ -807,10 +818,10 @@ function defP(){return{planer:'pub',installateur:'iub',lieferant:'lub',architekt
 
 function buildTabs(){
   const b=document.getElementById('tabBar');let t=[];const nE=S.einreichungen.filter(e=>e.ausId===S.activeAusId).length;
-  if(S.currentRole==='planer'){const nAnf=S.anfragen.filter(x=>x.status==='interessiert').length;var curA_=S.ausschreibungen.find(function(a){return a.id===S.activeAusId;});var isCrbx=curA_&&curA_.typ==='crbx';t=[{id:'pub',ic:'◫',l:'Übersicht'},{id:'paus',ic:'📋',l:'Ausschreibungen',bg:S.ausschreibungen.length},{id:'pbkp',ic:'☑',l:'BKP-Checkliste'},{id:'pcrbx',ic:'📦',l:'CRBX-Abgleich',disabled:!isCrbx},{id:'pdet',ic:'📝',l:'Detail'},{id:'panf',ic:'🤝',l:'Interesse-Anfragen',bg:nAnf},{id:'pvrt',ic:'📤',l:'Verteilen'},{id:'pein',ic:'💰',l:'Offerten',bg:nE},{id:'pvgl',ic:'📊',l:'Vergleich'},{id:'pbet',ic:'👥',l:'Beteiligte'}];}
+  if(S.currentRole==='planer'){const nAnf=S.anfragen.filter(x=>x.status==='interessiert').length;var curA_=S.ausschreibungen.find(function(a){return a.id===S.activeAusId;});var isCrbx=curA_&&curA_.typ==='crbx';t=[{id:'pub',ic:'◫',l:'Übersicht'},{id:'paus',ic:'📋',l:'Ausschreibungen',bg:S.ausschreibungen.length},{id:'pbkp',ic:'☑',l:'BKP-Checkliste'},{id:'pcrbx',ic:'📦',l:'CRBX-Abgleich',disabled:!isCrbx},{id:'pdet',ic:'📝',l:'Detail'},{id:'panf',ic:'🤝',l:'Interesse-Anfragen',bg:nAnf},{id:'pvrt',ic:'📤',l:'Verteilen'},{id:'pein',ic:'💰',l:'Offerten',bg:nE},{id:'pvgl',ic:'📊',l:'Vergleich'},{id:'pvga',ic:'📋',l:'Vergabeantrag'},{id:'pber',ic:'🔬',l:'Berechnungen'},{id:'pbet',ic:'👥',l:'Beteiligte'}];}
   else if(S.currentRole==='installateur'){const nIA=S.anfragen.filter(x=>x.installateurId===S.currentUserId&&x.status==='angefragt').length;t=[{id:'iub',ic:'◫',l:'Übersicht'},{id:'ianf',ic:'🤝',l:'Interesse-Anfragen',bg:nIA},{id:'iaus',ic:'📋',l:'Ausschreibungen'},{id:'idet',ic:'📝',l:'Offerte ausfüllen'},{id:'ipro',ic:'👤',l:'Profil'},{id:'ina',ic:'🔄',l:'Netto-Anfragen',bg:S.nettoAnfragen.filter(x=>x.installateurId===S.currentUserId).length},{id:'iin',ic:'📨',l:'Eingegangene',bg:S.marktplatzOfferten.filter(x=>!x.installateurId||x.installateurId===S.currentUserId).length}];}
   else if(S.currentRole==='lieferant'){t=[{id:'lub',ic:'◫',l:'Übersicht'},{id:'lab',ic:'⭐',l:'Mein Abo'},{id:'lmk',ic:'🏪',l:'Marktplatz'},{id:'lan',ic:'📨',l:'Anfragen',bg:S.nettoAnfragen.filter(x=>x.lieferantId===S.currentUserId&&x.status==='angefragt').length}];}
-  else{t=[{id:'aub',ic:'◫',l:'Projektstatus'}];}
+  else{var nVga=S.ausschreibungen.filter(function(x){return x.vergabe&&x.vergabe.status==='eingereicht';}).length;t=[{id:'aub',ic:'◫',l:'Projektstatus'},{id:'avga',ic:'📋',l:'Vergabeanträge',bg:nVga}];}
   b.innerHTML=t.map(x=>`<button class="tab-btn${x.disabled?' disabled':''}" data-tab="${x.id}" onclick="${x.disabled?'toast(\'Nur bei CRBX-Ausschreibungen\',\'info\')':'nav(\''+x.id+'\')'}" ${x.disabled?'style="opacity:.4;cursor:not-allowed"':''}><span>${x.ic}</span> ${x.l}${x.bg?`<span class="tab-badge">${x.bg}</span>`:''}</button>`).join('');
 }
 function nav(p){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.tab-btn[data-tab="${p}"]`)?.classList.add('active');const el=document.getElementById('PA');const fn=VIEWS[p];el.innerHTML=fn?fn():'<div class="es"><p>Seite nicht gefunden.</p></div>';setTimeout(initDropZones,50);if(p==='pbkp'){setTimeout(restoreBKPOpenState,10);setTimeout(initBKPDragDrop,20);}}
@@ -821,7 +832,7 @@ const VIEWS={};
 // ═══════════════════════════════════════════════
 VIEWS.pub=function(){
   const nA=S.ausschreibungen.length,nI=S.beteiligte.filter(b=>b.rolle==='installateur').length,nE=S.einreichungen.length;
-  let h=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><button class="btn btn-p btn-sm" onclick="tutOpen()">🎓 So funktioniert's</button></div>`;
+  let h=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><button class="btn btn-p btn-sm" onclick="tutOpen()">🎓 So funktioniert's</button><button class="btn btn-s btn-sm" onclick="showFlowchart()">📊 Prozessübersicht</button></div>`;
   h+=`<div class="sr"><div class="sc"><div class="sc-l">Ausschreibungen</div><div class="sc-v">${nA}</div></div><div class="sc"><div class="sc-l">Installateure</div><div class="sc-v">${nI}</div></div><div class="sc"><div class="sc-l">Offerten</div><div class="sc-v">${nE}</div></div><div class="sc"><div class="sc-l">Vergeben</div><div class="sc-v">${S.ausschreibungen.filter(a=>a.status==='vergeben').length}</div></div></div>`;
   // Activity log with filters
   h+=renderActivityLog();
@@ -1318,7 +1329,10 @@ function openLieferungDialog(losId,idx){
   // Footer buttons
   var ft='<button class="btn btn-g" onclick="cM(\'mLieferung\')">Schliessen</button>';
   if(mm.modul)ft+='<a class="btn btn-s" href="'+mm.modul+'" target="_blank">Berechnung bearbeiten</a>';
-  if(mm.kategorie&&typeof GemaProdukte!=='undefined')ft+='<button class="btn btn-s" onclick="liefSendeAnfrage()" style="background:#f59e0b;color:#fff;border-color:#f59e0b">📨 Offerte anfragen</button>';
+  if(mm.kategorie&&typeof GemaProdukte!=='undefined'){
+    ft+='<button class="btn btn-s" onclick="liefMatchProdukte()" style="background:#7c3aed;color:#fff;border-color:#7c3aed">🔍 Passende Produkte</button>';
+    ft+='<button class="btn btn-s" onclick="liefSendeAnfrage()" style="background:#f59e0b;color:#fff;border-color:#f59e0b">📨 Offerte anfragen</button>';
+  }
   if(!p.offerte||!p.offerte.lieferantFirma){
     ft+='<button class="btn btn-p" onclick="saveLiefOfferte()">Offerte speichern</button>';
   } else {
@@ -1350,6 +1364,64 @@ function renderOffertForm(){
 }
 
 // Offertanfrage über GemaProdukte senden
+function liefMatchProdukte(){
+  var a=curA();if(!a)return;
+  var l=a.lose.find(function(x){return x.id===_liefLosId;});
+  if(!l)return;
+  var p=l.positionen[_liefIdx];
+  var mm=MODUL_MAP[p.lieferungTyp]||{};
+  if(!mm.kategorie||typeof GemaProdukte==='undefined'){toast('Kein Produktkatalog verfügbar','error');return;}
+  // Lade Berechnungsdaten
+  var calcData=readCalcData(p.lieferungTyp)||{};
+  // Match aufrufen
+  var matches=[];
+  try{matches=GemaProdukte.match(mm.kategorie,calcData)||[];}catch(e){matches=[];}
+  if(!matches.length){
+    // Fallback: alle Produkte der Kategorie zeigen
+    try{matches=GemaProdukte.getProdukte(mm.kategorie).map(function(pr){return{produkt:pr,score:0};});}catch(e){}
+  }
+  if(!matches.length){toast('Keine Produkte in Kategorie "'+mm.kategorie+'" gefunden','info');return;}
+  // Anzeige im Dialog-Body
+  var body=document.getElementById('liefBody');
+  if(!body)return;
+  var h='<div style="margin-top:14px;border-top:1.5px solid var(--brd);padding-top:14px"><div style="font-size:11px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">🔍 Passende Produkte ('+matches.length+')</div>';
+  h+=matches.slice(0,8).map(function(m){
+    var pr=m.produkt||m;
+    var d=pr.daten||{};
+    var score=m.score||0;
+    var isVer=pr.status==='verifiziert';
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid var(--brd);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:.12s" onmouseover="this.style.borderColor=\'#7c3aed\'" onmouseout="this.style.borderColor=\'var(--brd)\'" onclick="liefSelectMatch(\''+pr.id+'\')">'
+      +'<div style="flex:1"><strong style="font-size:13px">'+E(pr.lieferantFirma)+' '+E(d.serie||'')+' '+E(d.modell||'')+'</strong>'
+      +(isVer?' <span style="font-size:9px;color:#16a34a;font-weight:700">✓</span>':' <span style="font-size:9px;color:#d97706">⚠</span>')
+      +'<div style="font-size:11px;color:var(--mut)">'+Object.keys(d).filter(function(k){return typeof d[k]==='number'&&d[k]>0;}).slice(0,4).map(function(k){return k+': '+d[k];}).join(' · ')+'</div></div>'
+      +(score>0?'<div style="font-size:11px;font-weight:800;color:#7c3aed;background:#f5f3ff;padding:3px 8px;border-radius:6px">'+Math.round(score*100)+'%</div>':'')
+      +'</div>';
+  }).join('');
+  h+='</div>';
+  body.innerHTML+=h;
+}
+
+function liefSelectMatch(produktId){
+  if(typeof GemaProdukte==='undefined')return;
+  var pr=GemaProdukte.getProdukt(produktId);
+  if(!pr)return;
+  var d=pr.daten||{};
+  var a=curA();if(!a)return;
+  var l=a.lose.find(function(x){return x.id===_liefLosId;});
+  if(!l)return;
+  var p=l.positionen[_liefIdx];
+  p.offerte={
+    lieferantId:pr.lieferantId,lieferantFirma:pr.lieferantFirma,
+    produktName:(d.serie||'')+' '+(d.modell||''),bruttoPreis:null,
+    offertPdfName:'',uploadDatum:new Date().toISOString(),
+    offertanfrageId:null,berechnungsdaten:d
+  };
+  p.status='erledigt';
+  sv();lg('✓','Produkt übernommen',pr.lieferantFirma+' — '+p.titel);
+  cM('mLieferung');nav('pbkp');
+  toast('✓ '+pr.lieferantFirma+' '+d.serie+' übernommen');
+}
+
 function liefSendeAnfrage(){
   var a=curA();if(!a)return;
   var l=a.lose.find(function(x){return x.id===_liefLosId;});
@@ -1397,25 +1469,67 @@ function uebernehmeOA(oaId){
 }
 
 function readCalcData(modulKey){
-  // Try to read saved data from known localStorage keys
-  var keyMap={
-    'enthaertung':'gema_meta_sa_enthaertung',
+  // Lade echte Berechnungsdaten aus per-Objekt Storage
+  var dataKeyMap={
+    'enthaertung':'gema_enth_labels',
     'osmose':'gema_meta_sa_osmose',
     'druckerhoehung':'gema_meta_sb_druckerhoehung',
-    'frischwasserstation':'gema_meta_sa_frischwasserstation',
-    'hebeanlage':'gema_meta_sa_abwasserhebeanlage',
-    'fettabscheider':'gema_meta_sa_fettabscheider',
-    'oelabscheider':'gema_meta_sa_oelabscheider',
+    'frischwasserstation':'gema_fws',
+    'hebeanlage':'gema_abwasserhebeanlage_v2',
+    'fettabscheider':'gema_fa',
+    'oelabscheider':'gema_oel',
     'schlammsammler':'gema_meta_sa_schlammsammler',
-    'solaranlage':'gema_meta_sa_solaranlage'
+    'solaranlage':'gema_solar_v2'
   };
-  var sk=keyMap[modulKey];
-  if(!sk)return null;
+  var baseKey=dataKeyMap[modulKey];
+  if(!baseKey)return null;
+  // Per-Objekt Key versuchen
+  var sk=baseKey;
+  if(typeof GemaObjekte!=='undefined'){
+    var oid=GemaObjekte.getActiveId();
+    if(oid)sk=baseKey+'__'+oid;
+  }
   try{
-    var d=JSON.parse(localStorage.getItem(sk));
-    if(d&&d.p)return{Projekt:d.p,Bearbeiter:d.b||'',Datum:d.d||''};
-  }catch(e){}
-  return null;
+    var r=localStorage.getItem(sk);
+    if(!r)r=localStorage.getItem(baseKey); // Fallback global
+    if(!r)return null;
+    var d=JSON.parse(r);
+    // Extrahiere relevante Berechnungswerte je nach Modul
+    var result={};
+    if(modulKey==='enthaertung'){
+      if(d.ve_total_ls)result['Durchfluss']=(d.ve_total_ls||0)+' l/s';
+      if(d.hr_fh)result['Rohwasserhärte']=d.hr_fh+' °fH';
+      if(d.hw_fh)result['Ziel-Härte']=(d.hw_fh||0)+' °fH';
+      if(d.kapazitaet)result['Kapazität']=d.kapazitaet+' m³·°fH';
+      if(d.anlage)result['Gewählte Anlage']=d.anlage;
+    } else if(modulKey==='osmose'){
+      if(d.p)result['Projekt']=d.p;
+    } else if(modulKey==='druckerhoehung'){
+      if(d.p)result['Projekt']=d.p;
+    } else if(modulKey==='frischwasserstation'){
+      if(d.volProArmatur)result['Volumenstrom']=d.volProArmatur+' l/min';
+      if(d.anzahlArmaturen)result['Anzahl Armaturen']=d.anzahlArmaturen;
+    } else if(modulKey==='hebeanlage'){
+      if(d.qTotal)result['Fördermenge']=d.qTotal+' l/s';
+      if(d.hGeo)result['Förderhöhe']=d.hGeo+' m';
+    } else if(modulKey==='fettabscheider'){
+      if(d.ns)result['Nenngrösse']='NS '+d.ns;
+      if(d.portionen)result['Portionen/Tag']=d.portionen;
+    } else if(modulKey==='oelabscheider'){
+      if(d.ns)result['Nenngrösse']='NS '+d.ns;
+    } else if(modulKey==='solaranlage'){
+      if(d.area)result['Kollektorfläche']=d.area+' m²';
+      if(d.deckungsgrad)result['Deckungsgrad']=d.deckungsgrad+'%';
+    }
+    // Fallback: zeige alle Keys die Zahlen enthalten
+    if(!Object.keys(result).length){
+      Object.keys(d).forEach(function(k){
+        if(typeof d[k]==='number'&&k!=='oid')result[k]=d[k];
+        else if(typeof d[k]==='string'&&d[k].length>0&&d[k].length<50&&k!=='p'&&k!=='b'&&k!=='d'&&k!=='oid')result[k]=d[k];
+      });
+    }
+    return Object.keys(result).length?result:null;
+  }catch(e){return null;}
 }
 
 function saveLiefOfferte(){
@@ -1880,14 +1994,449 @@ VIEWS.pvgl=function(){
   return h;
 };
 
+// ═══════════════════════════════════════════════
+// VERGABEANTRAG
+// ═══════════════════════════════════════════════
+VIEWS.pvga=function(){
+  const a=curA();if(!a)return '<div class="wp">Ausschreibung wählen.</div>';
+  const eins=S.einreichungen.filter(e=>e.ausId===a.id);
+  if(!eins.length)return '<div class="es"><p>Noch keine Offerten eingegangen. Vergabeantrag erst möglich nach Offert-Eingang.</p></div>';
+
+  const vg=a.vergabe||{};
+  let h='<h2 style="font-size:20px;font-weight:700;margin-bottom:4px">Vergabeantrag — '+E(a.name)+'</h2>';
+
+  // Status-Banner
+  if(vg.status==='eingereicht'){
+    h+='<div style="padding:12px 16px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;margin-bottom:16px;font-size:13px;font-weight:600;color:#92400e">⟳ Vergabeantrag eingereicht — Warten auf Genehmigung'+(vg.frist?' (Frist: '+vg.frist+')':'')+'</div>';
+  } else if(vg.status==='genehmigt'){
+    h+='<div style="padding:12px 16px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;margin-bottom:16px;font-size:13px;font-weight:600;color:#15803d">✓ Vergabeantrag genehmigt'+(vg.genehmigung?' am '+vg.genehmigung.datum:'')+'</div>';
+  } else if(vg.status==='abgelehnt'){
+    h+='<div style="padding:12px 16px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;margin-bottom:16px;font-size:13px;font-weight:600;color:#991b1b">✕ Vergabeantrag abgelehnt'+(vg.ablehnungGrund?' — Grund: '+E(vg.ablehnungGrund):'')+'<br><button class="btn btn-p btn-sm" style="margin-top:8px" onclick="resetVergabeantrag()">Überarbeiten & neu einreichen</button></div>';
+  } else if(vg.status==='vergeben'){
+    const winner=S.beteiligte.find(b=>b.id===vg.winnerId);
+    h+='<div style="padding:12px 16px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;margin-bottom:16px;font-size:13px;font-weight:600;color:#15803d">🏆 Zuschlag erteilt an '+E(winner?.firma||'–')+' am '+(vg.datum||'–')+'</div>';
+  }
+
+  // ── 1. Checkliste pro Unternehmer ──
+  h+='<div style="margin-bottom:24px"><h3 style="font-size:15px;font-weight:800;margin-bottom:10px">Checkliste — Vorbedingungen</h3>';
+  h+='<table class="dt" style="font-size:12px"><thead><tr><th>Unternehmer</th><th style="text-align:center">Positionen vollständig</th><th style="text-align:center">Vorbedingungen signiert</th><th style="text-align:center">Offerte vollständig</th><th style="text-align:center">Status</th></tr></thead><tbody>';
+  const checkStates={};
+  eins.forEach(e=>{
+    const ck=vg['check_'+e.installateurId]||{pos:false,vorbed:false,offerte:false};
+    checkStates[e.installateurId]=ck;
+    const allOk=ck.pos&&ck.vorbed&&ck.offerte;
+    h+='<tr>';
+    h+='<td style="font-weight:600">'+E(e.firma)+'</td>';
+    h+='<td style="text-align:center"><input type="checkbox" '+(ck.pos?'checked':'')+' onchange="toggleVgCheck(\''+e.installateurId+'\',\'pos\',this.checked)"/></td>';
+    h+='<td style="text-align:center"><input type="checkbox" '+(ck.vorbed?'checked':'')+' onchange="toggleVgCheck(\''+e.installateurId+'\',\'vorbed\',this.checked)"/></td>';
+    h+='<td style="text-align:center"><input type="checkbox" '+(ck.offerte?'checked':'')+' onchange="toggleVgCheck(\''+e.installateurId+'\',\'offerte\',this.checked)"/></td>';
+    h+='<td style="text-align:center">'+(allOk?'<span style="color:#15803d;font-weight:700">✓ Bereit</span>':'<span style="color:#dc2626;font-weight:700">✕ Offen</span>')+'</td>';
+    h+='</tr>';
+  });
+  h+='</tbody></table></div>';
+
+  // ── 2. Empfehlung des Planers ──
+  const empf=vg.empfehlungen||[];
+  h+='<div style="margin-bottom:24px">';
+  h+='<h3 style="font-size:15px;font-weight:800;margin-bottom:10px">Empfehlung des Planers</h3>';
+  h+='<div style="padding:16px;background:linear-gradient(135deg,#eff4ff,#ecfeff);border:2px solid #93c5fd;border-radius:12px;margin-bottom:12px">';
+  h+='<div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">Empfohlene Unternehmer</div>';
+  h+='<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">';
+  eins.forEach(e=>{
+    const isEmpf=empf.indexOf(e.installateurId)>=0;
+    h+='<button onclick="toggleEmpfehlung(\''+e.installateurId+'\')" style="padding:6px 14px;border-radius:8px;border:2px solid '+(isEmpf?'#1d4ed8':'var(--brd)')+';background:'+(isEmpf?'#1d4ed8':'var(--sur)')+';color:'+(isEmpf?'#fff':'var(--txt)')+';font-size:12px;font-weight:700;cursor:pointer;transition:.15s">'+E(e.firma)+(isEmpf?' ✓':'')+'</button>';
+  });
+  h+='</div>';
+  h+='<div class="fg"><label style="font-size:11px;font-weight:700;color:#1d4ed8">Schriftliche Empfehlung / Begründung</label>';
+  h+='<textarea style="width:100%;min-height:60px;padding:8px 10px;border:1.5px solid #93c5fd;border-radius:8px;font-size:13px;font-family:var(--sans);resize:vertical" id="vgaEmpfText" onchange="saveEmpfText(this.value)" placeholder="z.B. Gute Erfahrungen, Referenzprojekte, regionale Nähe, Termintreue…">'+(E(vg.empfehlungText||''))+'</textarea></div>';
+  h+='</div></div>';
+
+  // ── 3. BKP-Preisvergleich (3-stellig) ──
+  h+='<div style="margin-bottom:24px">';
+  h+='<h3 style="font-size:15px;font-weight:800;margin-bottom:10px">Preisvergleich nach BKP (3-stellig)</h3>';
+  h+=_renderBKPVergleich(a,eins,empf);
+  h+='</div>';
+
+  // ── 4. Empfänger & Frist ──
+  if(!vg.status||vg.status==='entwurf'||vg.status==='abgelehnt'){
+    h+='<div style="margin-bottom:24px;padding:16px;background:var(--sur);border:1.5px solid var(--brd);border-radius:12px">';
+    h+='<h3 style="font-size:15px;font-weight:800;margin-bottom:10px">Vergabeantrag einreichen</h3>';
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">';
+    h+='<div class="fg"><label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mut)">Empfänger (Entscheidungsinstanz)</label>';
+    h+='<select id="vgaEmpfaenger" style="padding:8px 10px;border:1.5px solid var(--brd2);border-radius:8px;font-size:13px;font-family:var(--sans)" onchange="saveVgaField(\'empfaenger\',this.value)">';
+    h+='<option value="">– Wählen –</option>';
+    // Nur BH/Architekt/GU/TU aus Beteiligte
+    const betObj=_getVergabeEmpfaenger(a);
+    betObj.forEach(b=>{
+      h+='<option value="'+b.id+'" '+(vg.empfaenger===b.id?'selected':'')+'>'+E(b.firma||'')+' — '+E(b.rolle)+(b.entscheidungsinstanz?' ('+_entscheidungLabel(b.entscheidungsinstanz)+')':'')+'</option>';
+    });
+    h+='</select></div>';
+    h+='<div class="fg"><label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mut)">Frist (10 Arbeitstage Standard)</label>';
+    const defFrist=_defaultFrist();
+    h+='<input type="date" id="vgaFrist" value="'+(vg.frist||defFrist)+'" style="padding:8px 10px;border:1.5px solid var(--brd2);border-radius:8px;font-size:13px;font-family:var(--sans)" onchange="saveVgaField(\'frist\',this.value)"/>';
+    h+='</div></div>';
+
+    // Check if ready to submit
+    const allChecked=eins.every(e=>{const ck=vg['check_'+e.installateurId]||{};return ck.pos&&ck.vorbed&&ck.offerte;});
+    const hasEmpf=empf.length>0;
+    const hasEmpfaenger=!!vg.empfaenger;
+
+    if(!allChecked)h+='<div style="font-size:12px;color:#dc2626;margin-bottom:8px">✕ Checkliste nicht vollständig — alle Unternehmer müssen geprüft sein.</div>';
+    if(!hasEmpf)h+='<div style="font-size:12px;color:#dc2626;margin-bottom:8px">✕ Mindestens einen Unternehmer empfehlen.</div>';
+    if(!hasEmpfaenger)h+='<div style="font-size:12px;color:#dc2626;margin-bottom:8px">✕ Empfänger (Entscheidungsinstanz) wählen.</div>';
+
+    h+='<button class="btn btn-p" style="width:100%;justify-content:center;padding:12px" onclick="submitVergabeantrag()" '+(allChecked&&hasEmpf&&hasEmpfaenger?'':'disabled')+'>📋 Vergabeantrag einreichen</button>';
+    h+='</div>';
+  }
+
+  // ── 5. Genehmigungsaktionen (für Entscheider-Ansicht) ──
+  if(vg.status==='genehmigt'&&!vg.winnerId){
+    h+='<div style="padding:16px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;margin-bottom:16px">';
+    h+='<h3 style="font-size:15px;font-weight:800;margin-bottom:10px;color:#15803d">Zuschlag & Absagen versenden</h3>';
+    h+='<p style="font-size:12px;color:var(--mut);margin-bottom:12px">Der Vergabeantrag wurde genehmigt. Wählen Sie den Gewinner und versenden Sie Zuschlag und Absagen gleichzeitig.</p>';
+    h+='<div class="fg" style="margin-bottom:12px"><label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mut)">Zuschlag an</label>';
+    h+='<select id="vgaWinner" style="padding:8px 10px;border:1.5px solid var(--brd2);border-radius:8px;font-size:13px;font-family:var(--sans)">';
+    empf.forEach(eid=>{const e=eins.find(x=>x.installateurId===eid);if(e)h+='<option value="'+eid+'">'+E(e.firma)+' (empfohlen) — Netto '+fC(calcNetto(a,e))+'</option>';});
+    eins.filter(e=>empf.indexOf(e.installateurId)<0).forEach(e=>{h+='<option value="'+e.installateurId+'">'+E(e.firma)+' — Netto '+fC(calcNetto(a,e))+'</option>';});
+    h+='</select></div>';
+    h+='<button class="btn btn-ok" style="width:100%;justify-content:center;padding:12px" onclick="doVergabeZuschlag()">🏆 Zuschlag erteilen & Absagen senden</button>';
+    h+='</div>';
+  }
+
+  return h;
+};
+
+// ── Vergabeantrag Helper Functions ──
+
+function _entscheidungLabel(val){
+  return{'bauherr':'Bauherr','bh_vertretung':'BH-Vertretung','generalunternehmer':'GU','totalunternehmer':'TU'}[val]||val;
+}
+
+function _getVergabeEmpfaenger(a){
+  // Alle Beteiligten die als Entscheidungsinstanz in Frage kommen
+  if(typeof GemaObjekte==='undefined')return[];
+  try{
+    var objId=a.objektId;if(!objId)return[];
+    var alle=GemaObjekte.getBeteiligte?GemaObjekte.getBeteiligte(objId):[];
+    return alle.filter(function(b){
+      return b.rolle==='Bauherrschaft'||b.rolle==='Architekt / Generalplaner';
+    });
+  }catch(e){return[];}
+}
+
+function _defaultFrist(){
+  var d=new Date();var added=0;
+  while(added<10){d.setDate(d.getDate()+1);if(d.getDay()!==0&&d.getDay()!==6)added++;}
+  return d.toISOString().split('T')[0];
+}
+
+function _renderBKPVergleich(a,eins,empf){
+  var h='<div style="overflow-x:auto"><table class="dt" style="font-size:12px"><thead><tr><th>BKP</th><th>Bezeichnung</th>';
+  eins.forEach(function(e){
+    var isE=empf.indexOf(e.installateurId)>=0;
+    h+='<th class="tr" style="min-width:100px;'+(isE?'background:#eff4ff;color:#1d4ed8;font-weight:800':'')+'">'+E(e.firma)+(isE?' ★':'')+'</th>';
+  });
+  h+='</tr></thead><tbody>';
+
+  // Collect 3-digit BKP totals
+  var bkpGroups={};
+  (a.bkp||[]).forEach(function(bg){
+    var code3=bg.code.substring(0,3);
+    if(!bkpGroups[code3])bkpGroups[code3]={code:code3,name:bg.name,totals:eins.map(function(){return 0;})};
+    (bg.unterpositionen||[]).forEach(function(up){
+      eins.forEach(function(e,ei){
+        var p=e.prices?e.prices[bg.code+'_'+up.id]:0;
+        var v=p||0;
+        if(a.modell==='einheitspreise'&&up.menge)v=v*(parseFloat(up.menge)||0);
+        bkpGroups[code3].totals[ei]+=v;
+      });
+    });
+  });
+
+  // If no BKP-level data, use global totals
+  var codes=Object.keys(bkpGroups).sort();
+  if(!codes.length){
+    h+='<tr style="font-weight:800"><td>—</td><td>Gesamttotal</td>';
+    var nettos=eins.map(function(e){return calcNetto(a,e);});
+    var minN=Math.min.apply(null,nettos.filter(function(n){return n>0;}));
+    eins.forEach(function(e,i){
+      var isE=empf.indexOf(e.installateurId)>=0;
+      h+='<td class="tr" style="font-weight:800;'+(isE?'background:#eff4ff;':'')+(nettos[i]===minN&&eins.length>1?'color:#15803d':'')+'">'+fC(nettos[i])+'</td>';
+    });
+    h+='</tr>';
+  } else {
+    var grandTotals=eins.map(function(){return 0;});
+    codes.forEach(function(code){
+      var g=bkpGroups[code];
+      var minV=Math.min.apply(null,g.totals.filter(function(t){return t>0;}));
+      h+='<tr><td style="font-weight:700;color:var(--acc)">'+E(g.code)+'</td><td>'+E(g.name)+'</td>';
+      g.totals.forEach(function(t,i){
+        var isE=empf.indexOf(eins[i].installateurId)>=0;
+        grandTotals[i]+=t;
+        h+='<td class="tr" style="'+(isE?'background:#eff4ff;':'')+(t>0&&t===minV&&eins.length>1?'color:#15803d;font-weight:700':'')+'">'+fC(t)+'</td>';
+      });
+      h+='</tr>';
+    });
+    // Grand total + Netto
+    var nettos=eins.map(function(e){return calcNetto(a,e);});
+    var minN=Math.min.apply(null,nettos.filter(function(n){return n>0;}));
+    h+='<tr style="font-weight:800;border-top:3px solid var(--txt);background:var(--bg2)"><td></td><td>Brutto Total</td>';
+    eins.forEach(function(e,i){var isE=empf.indexOf(e.installateurId)>=0;h+='<td class="tr" style="'+(isE?'background:#eff4ff;':'')+'">'+fC(e.total||grandTotals[i])+'</td>';});
+    h+='</tr>';
+    h+='<tr style="font-weight:800;border-top:2px solid var(--txt)"><td></td><td>Netto inkl. MwSt</td>';
+    eins.forEach(function(e,i){
+      var isE=empf.indexOf(e.installateurId)>=0;
+      h+='<td class="tr" style="'+(isE?'background:#eff4ff;':'')+(nettos[i]===minN&&eins.length>1?'color:#15803d':'')+'">'+fC(nettos[i])+'</td>';
+    });
+    h+='</tr>';
+  }
+  h+='</tbody></table></div>';
+  return h;
+}
+
+function toggleVgCheck(instId,field,val){
+  const a=curA();if(!a)return;
+  if(!a.vergabe)a.vergabe={status:null,winnerId:null,datum:null,empfehlungen:[],empfehlungText:'',entscheidungsinstanz:'',empfaenger:'',frist:null,genehmigung:null,ablehnungGrund:'',zuschlagMsg:'',absageMsg:'',kostenUebertragen:false};
+  var key='check_'+instId;
+  if(!a.vergabe[key])a.vergabe[key]={pos:false,vorbed:false,offerte:false};
+  a.vergabe[key][field]=val;
+  sv();nav('pvga');
+}
+
+function toggleEmpfehlung(instId){
+  const a=curA();if(!a)return;
+  if(!a.vergabe.empfehlungen)a.vergabe.empfehlungen=[];
+  var idx=a.vergabe.empfehlungen.indexOf(instId);
+  if(idx>=0)a.vergabe.empfehlungen.splice(idx,1);
+  else a.vergabe.empfehlungen.push(instId);
+  sv();nav('pvga');
+}
+
+function saveEmpfText(val){
+  const a=curA();if(!a)return;
+  a.vergabe.empfehlungText=val;sv();
+}
+
+function saveVgaField(field,val){
+  const a=curA();if(!a)return;
+  a.vergabe[field]=val;sv();
+}
+
+function submitVergabeantrag(){
+  const a=curA();if(!a)return;
+  a.vergabe.status='eingereicht';
+  if(!a.vergabe.frist)a.vergabe.frist=_defaultFrist();
+  a.vergabe.eingereichAm=new Date().toISOString();
+  sv();lg('📋','Vergabeantrag eingereicht',a.name+' → '+(a.vergabe.empfaenger||'?'));
+  toast('✓ Vergabeantrag eingereicht');nav('pvga');
+}
+
+function approveVergabeantrag(){
+  const a=curA();if(!a)return;
+  a.vergabe.status='genehmigt';
+  a.vergabe.genehmigung={datum:new Date().toISOString().split('T')[0],von:S.currentUserId};
+  sv();lg('✓','Vergabeantrag genehmigt',a.name);
+  toast('✓ Vergabeantrag genehmigt');nav('pvga');
+}
+
+function rejectVergabeantrag(){
+  const a=curA();if(!a)return;
+  const grund=prompt('Begründung für die Ablehnung:');
+  if(grund===null)return;
+  a.vergabe.status='abgelehnt';
+  a.vergabe.ablehnungGrund=grund;
+  sv();lg('✕','Vergabeantrag abgelehnt',a.name+' — '+grund);
+  toast('Vergabeantrag abgelehnt');nav('pvga');
+}
+
+function resetVergabeantrag(){
+  const a=curA();if(!a)return;
+  a.vergabe.status='entwurf';
+  a.vergabe.ablehnungGrund='';
+  a.vergabe.genehmigung=null;
+  sv();nav('pvga');
+}
+
+function doVergabeZuschlag(){
+  const a=curA();if(!a)return;
+  const wid=document.getElementById('vgaWinner')?.value;
+  if(!wid){toast('Bitte Gewinner wählen','error');return;}
+  const winner=S.beteiligte.find(b=>b.id===wid)||eins_find(a,wid);
+  const eins=S.einreichungen.filter(e=>e.ausId===a.id);
+  const winEin=eins.find(e=>e.installateurId===wid);
+
+  a.status='vergeben';
+  a.vergabe.status='vergeben';
+  a.vergabe.winnerId=wid;
+  a.vergabe.datum=new Date().toISOString().split('T')[0];
+  a.vergabe.zuschlagMsg='Wir freuen uns, Ihnen den Zuschlag für die Arbeiten gemäss Ausschreibung «'+a.name+'» zu erteilen. Wir freuen uns auf die Zusammenarbeit.';
+  a.vergabe.absageMsg='Vielen Dank für Ihre Offerte zur Ausschreibung «'+a.name+'». Wir müssen Ihnen leider mitteilen, dass der Zuschlag anderweitig vergeben wurde.';
+
+  // In Kostenkontrolle übertragen
+  _uebertrageInKostenkontrolle(a,winEin);
+
+  sv();lg('🏆','Zuschlag',winner?.firma+' für '+a.name);
+  toast('🏆 Zuschlag an '+(winner?.firma||winEin?.firma)+' · Absagen an '+(eins.length-1)+' Unternehmer gesendet');
+  buildTabs();nav('pvga');
+}
+
+function eins_find(a,instId){
+  return S.einreichungen.find(function(e){return e.ausId===a.id&&e.installateurId===instId;});
+}
+
+function _uebertrageInKostenkontrolle(a,winEin){
+  if(!winEin||!a.objektId)return;
+  try{
+    var koKey='kostenkontrolle_v3';
+    // Try object-specific key
+    if(typeof GemaObjekte!=='undefined'){
+      var aktiv=GemaObjekte.getActiveId?GemaObjekte.getActiveId():'';
+      if(aktiv)koKey='kostenkontrolle_v3__'+a.objektId;
+    }
+    var raw=localStorage.getItem(koKey);
+    var ko=raw?JSON.parse(raw):{meta:{objekt:'',gewerk:'',unternehmer:'',werkvertragsdatum:'',mwst:8.1,rabatt:0,skonto:0,bauabzuege:0,pauschalabzug:0,notiz:''},werkvertrag:[],zusatz:[],regie:[],rechnungen:[],progress:0,showMwst:true};
+
+    // Meta updaten
+    ko.meta.unternehmer=winEin.firma||'';
+    ko.meta.werkvertragsdatum=new Date().toISOString().split('T')[0];
+    ko.meta.objekt=a.objekt||a.name||'';
+
+    // Werkvertrag-Positionen aus BKP-Totals
+    var bkpTotals={};
+    (a.bkp||[]).forEach(function(bg){
+      var code3=bg.code.substring(0,3);
+      if(!bkpTotals[code3])bkpTotals[code3]={pos:code3,beschr:bg.name,betrag:0};
+      (bg.unterpositionen||[]).forEach(function(up){
+        var p=winEin.prices?winEin.prices[bg.code+'_'+up.id]:0;
+        var v=p||0;
+        if(a.modell==='einheitspreise'&&up.menge)v=v*(parseFloat(up.menge)||0);
+        bkpTotals[code3].betrag+=v;
+      });
+    });
+
+    var codes=Object.keys(bkpTotals).sort();
+    if(codes.length){
+      ko.werkvertrag=codes.map(function(c){
+        return{id:'wv_'+c+'_'+Date.now(),pos:bkpTotals[c].pos,beschr:bkpTotals[c].beschr,betrag:bkpTotals[c].betrag};
+      });
+    } else {
+      // Fallback: Gesamtbetrag
+      ko.werkvertrag=[{id:'wv_total_'+Date.now(),pos:'',beschr:'Werkvertrag '+a.name,betrag:winEin.total||0}];
+    }
+
+    localStorage.setItem(koKey,JSON.stringify(ko));
+    a.vergabe.kostenUebertragen=true;
+  }catch(e){console.warn('Kostenkontrolle-Übertragung fehlgeschlagen:',e);}
+}
+
+VIEWS.pber=function(){
+  var a=curA();
+  var h='<h2 style="font-size:20px;font-weight:700;margin-bottom:16px">🔬 Berechnungen — Projektübersicht</h2>';
+  h+='<p style="font-size:13px;color:var(--mut);margin-bottom:16px;line-height:1.6">Alle verfügbaren Berechnungsmodule für das aktuelle Projekt. Grün = Daten vorhanden, Grau = noch keine Berechnung.</p>';
+  var modules=[
+    {key:'enthaertung',label:'Enthärtungsanlage',icon:'🧂',url:'sa_enthaertung.html',bkp:'253.0'},
+    {key:'osmose',label:'Osmoseanlage',icon:'🔬',url:'sa_osmose.html',bkp:'253.2'},
+    {key:'druckerhoehung',label:'Druckerhöhungsanlage',icon:'⬆️',url:'sb_druckerhoehung.html',bkp:'253.4'},
+    {key:'frischwasserstation',label:'Frischwasserstation',icon:'💧',url:'sa_frischwasserstation.html',bkp:'253.6'},
+    {key:'hebeanlage',label:'Abwasserhebeanlage',icon:'⬆️',url:'sa_abwasserhebeanlage.html',bkp:'252.6'},
+    {key:'fettabscheider',label:'Fettabscheider',icon:'🪣',url:'sa_fettabscheider.html',bkp:'252.4'},
+    {key:'oelabscheider',label:'Ölabscheider',icon:'🛢',url:'sa_oelabscheider.html',bkp:'252.8'},
+    {key:'schlammsammler',label:'Schlammsammler',icon:'🗑️',url:'sa_schlammsammler.html',bkp:'—'},
+    {key:'solaranlage',label:'Thermische Solaranlage',icon:'☀️',url:'sa_solaranlage.html',bkp:'—'},
+    {key:null,label:'Warmwasser SIA 385',icon:'🌡️',url:'sb_warmwasser.html',bkp:'—'},
+    {key:null,label:'Druckverlust',icon:'📉',url:'sb_druckverlust.html',bkp:'254'},
+    {key:null,label:'LU-Tabelle',icon:'📋',url:'sb_lu_tabelle.html',bkp:'—'},
+    {key:null,label:'Niederschlag',icon:'🌧️',url:'sb_niederschlag.html',bkp:'—'}
+  ];
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px">';
+  modules.forEach(function(m){
+    var data=m.key?readCalcData(m.key):null;
+    var hasData=data&&Object.keys(data).length>0;
+    var statusColor=hasData?'#16a34a':'#9ca3af';
+    var statusText=hasData?'✓ Daten vorhanden':'— Keine Berechnung';
+    h+='<a href="'+m.url+'" target="_blank" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid '+(hasData?'#bbf7d0':'var(--brd)')+';border-radius:10px;background:'+(hasData?'#f0fdf4':'var(--sur)')+';text-decoration:none;color:var(--txt);transition:.15s" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 12px rgba(0,0,0,.08)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'">';
+    h+='<span style="font-size:20px">'+m.icon+'</span>';
+    h+='<div style="flex:1"><div style="font-size:13px;font-weight:700">'+E(m.label)+'</div>';
+    if(hasData){
+      var vals=Object.entries(data).slice(0,2).map(function(e){return e[0]+': '+e[1];}).join(' · ');
+      h+='<div style="font-size:11px;color:var(--mut)">'+E(vals)+'</div>';
+    }
+    h+='<div style="font-size:10px;color:'+statusColor+';font-weight:700;margin-top:2px">'+statusText+'</div></div>';
+    if(m.bkp!=='—')h+='<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:var(--bg2);color:var(--mut);font-weight:600">BKP '+m.bkp+'</span>';
+    h+='</a>';
+  });
+  h+='</div>';
+  return h;
+};
+
 VIEWS.pbet=function(){
-  let h=`<div style="display:flex;justify-content:space-between;margin-bottom:20px"><h2 style="font-size:20px;font-weight:700">Beteiligte</h2><button class="btn btn-p" onclick="oM('mPerson')">+ Hinzufügen</button></div>`;
-  [{r:'installateur',ic:'👷',co:'var(--grn)',label:'Installateure'},{r:'lieferant',ic:'🏭',co:'var(--amb)',label:'Lieferanten'},{r:'architekt',ic:'🏛',co:'var(--blue)',label:'Architekten'}].forEach(({r,ic,co,label})=>{
+  let h=`<h2 style="font-size:20px;font-weight:700;margin-bottom:20px">Beteiligte</h2>`;
+  [{r:'installateur',ic:'👷',co:'var(--grn)',label:'Installateure',btnLabel:'+ Installateur hinzufügen'},{r:'lieferant',ic:'🏭',co:'var(--amb)',label:'Lieferanten',btnLabel:'+ Lieferant hinzufügen'},{r:'architekt',ic:'🏛',co:'var(--blue)',label:'Architekten',btnLabel:'+ Architekt hinzufügen'}].forEach(({r,ic,co,label,btnLabel})=>{
     const ls=S.beteiligte.filter(b=>b.rolle===r);
-    h+=`<div class="card"><div class="card-hd"><h3>${ic} ${label}</h3><span class="tag t-gy">${ls.length}</span></div><div class="card-bd">${!ls.length?'<p style="color:var(--mut)">—</p>':ls.map(p=>`<div class="cr"><div class="ca" style="background:${co}">${p.firma.charAt(0)}</div><div class="ci"><div class="cn">${E(p.firma)}</div><div class="cd">${E(p.person)} · ${E(p.email)} · ${E(p.tel)}</div></div><button class="btn btn-d btn-sm" onclick="rmP('${p.id}')">✕</button></div>`).join('')}</div></div>`;
+    h+=`<div class="card"><div class="card-hd"><h3>${ic} ${label}</h3><span class="tag t-gy">${ls.length}</span><button class="btn btn-p btn-sm" onclick="openAddPerson('${r}')" style="margin-left:auto">${btnLabel}</button></div><div class="card-bd">${!ls.length?'<p style="color:var(--mut)">Noch keine '+label+' erfasst.</p>':ls.map((p,pi)=>{
+      var idx=S.beteiligte.indexOf(p);
+      var resolved=resolveBeteiligter(p);
+      // Login-Status: 3 Stufen
+      var loginStatus=p._loginStatus||'none'; // 'none'|'pending'|'active'
+      if(p.userId){var u=findUserByEmail(resolved.email);loginStatus=u&&u.einladung&&u.einladung.passwortGesetzt?'active':'pending';}
+      var loginBadge=loginStatus==='active'?'<span class="tag t-gr" style="font-size:9px">✓ Login</span>':loginStatus==='pending'?'<span class="tag t-bl" style="font-size:9px">⟳ Login in Bearbeitung</span>':'<span class="tag t-gy" style="font-size:9px">Kein Login</span>';
+      var invBtn='';
+      if(loginStatus==='none'){invBtn='<button class="btn btn-s btn-sm" onclick="inviteLieferant('+idx+')">✉ Einladen</button>';}
+      return `<div class="cr"><div class="ca" style="background:${co}">${(resolved.firma||'?').charAt(0)}</div><div class="ci"><div class="cn">${E(resolved.firma)} ${loginBadge}</div><div class="cd">${E(resolved.person)} · ${E(resolved.email)} · ${E(resolved.tel)}</div></div>${invBtn}<button class="btn btn-d btn-sm" onclick="rmP('${p.id}')">✕</button></div>`;
+    }).join('')}</div></div>`;
   });
   return h;
 };
+
+function openAddPerson(rolle){
+  document.getElementById('apR').value=rolle;
+  var titles={installateur:'Installateur hinzufügen',lieferant:'Lieferant hinzufügen',architekt:'Architekt hinzufügen'};
+  document.getElementById('apTitle').textContent=titles[rolle]||'Beteiligten hinzufügen';
+  ['apF','apP','apE','apT'].forEach(function(x){document.getElementById(x).value='';});
+  document.getElementById('apSuggestions').style.display='none';
+  oM('mPerson');
+}
+
+function apSuggest(q){
+  var sugEl=document.getElementById('apSuggestions');
+  if(!q||q.length<2){sugEl.style.display='none';return;}
+  var rolle=document.getElementById('apR').value;
+  q=q.toLowerCase();
+  // Suche in bestehenden Usern mit passender Rolle
+  var users=[];
+  try{users=GemaAuth.getUsers()||[];}catch(e){}
+  var roleMap={installateur:'role_unternehmer',lieferant:'role_lieferant',architekt:'role_architekt'};
+  var targetRole=roleMap[rolle];
+  var matches=users.filter(function(u){
+    if(!u.active)return false;
+    var nameMatch=(u.name||'').toLowerCase().indexOf(q)>=0;
+    var firmaMatch=(u.profile?.firma||'').toLowerCase().indexOf(q)>=0;
+    var emailMatch=(u.username||'').toLowerCase().indexOf(q)>=0;
+    return(nameMatch||firmaMatch||emailMatch);
+  }).slice(0,5);
+  if(!matches.length){sugEl.style.display='none';return;}
+  sugEl.style.display='block';
+  sugEl.innerHTML=matches.map(function(u){
+    var firma=u.profile?.firma||u.name;
+    var hasTargetRole=u.roleIds&&u.roleIds.indexOf(targetRole)>=0;
+    return '<div onclick="apSelectSuggestion(\''+u.id+'\')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--brd);font-size:12px;display:flex;align-items:center;gap:8px;transition:.1s" onmouseover="this.style.background=\'var(--bg2)\'" onmouseout="this.style.background=\'\'">'
+      +'<div style="flex:1"><strong>'+E(firma)+'</strong><div style="font-size:11px;color:var(--mut)">'+E(u.name)+' · '+E(u.profile?.email||u.username)+'</div></div>'
+      +'<span class="tag t-gr" style="font-size:9px">✓ Login</span>'
+      +'</div>';
+  }).join('');
+}
+
+function apSelectSuggestion(userId){
+  var users=[];try{users=GemaAuth.getUsers()||[];}catch(e){}
+  var u=users.find(function(x){return x.id===userId;});
+  if(!u)return;
+  document.getElementById('apF').value=u.profile?.firma||u.name||'';
+  document.getElementById('apP').value=u.name||'';
+  document.getElementById('apE').value=u.profile?.email||u.username||'';
+  document.getElementById('apT').value=u.profile?.telefon||'';
+  document.getElementById('apSuggestions').style.display='none';
+}
+
 
 function renderCRBXVergleich(a,eins){
   if(!a.crbx?.lv)return '<div class="wp">Kein LV.</div>';
@@ -2031,7 +2580,7 @@ VIEWS.iub=function(){
   const myVrt=S.verteilungen.filter(v=>v.installateurId===S.currentUserId);
   const myEin=S.einreichungen.filter(e=>e.installateurId===S.currentUserId);
   const isBasic=me.abo?.typ==='basic'||me.abo?.typ==='premium';
-  let h=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><button class="btn btn-p btn-sm" onclick="tutOpen()">🎓 So funktioniert's</button></div>`;
+  let h=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><button class="btn btn-p btn-sm" onclick="tutOpen()">🎓 So funktioniert's</button><button class="btn btn-s btn-sm" onclick="showFlowchartUN()">📊 Prozessübersicht</button></div>`;
   h+=`<div class="sr"><div class="sc"><div class="sc-l">Einladungen</div><div class="sc-v">${myVrt.length}</div></div><div class="sc"><div class="sc-l">Offerten eingereicht</div><div class="sc-v">${myEin.length}</div></div><div class="sc"><div class="sc-l">Abo</div><div class="sc-v" style="font-size:16px">${E(me.abo?.typ||'gratis')}</div></div></div>`;
   if(!isBasic)h+=`<div class="wp" style="cursor:pointer" onclick="showGate('Profil-Autofill, Nettoanfragen und mehr','95')"><strong>Gratis-Konto:</strong> Mit dem Basic-Abo (CHF 95/Mt.) sparst du 20–30 Min. pro Offerte dank Profil-Autofill. <strong style="text-decoration:underline">Jetzt freischalten →</strong></div>`;
   return h;
@@ -2141,7 +2690,7 @@ VIEWS.iin=function(){
 VIEWS.lub=function(){
   const me=S.beteiligte.find(b=>b.id===S.currentUserId)||{};const abo=me.abo||{};
   const myNA=S.nettoAnfragen.filter(a=>a.lieferantId===S.currentUserId);
-  let h=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><button class="btn btn-p btn-sm" onclick="tutOpen()">🎓 So funktioniert's</button></div>`;
+  let h=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><button class="btn btn-p btn-sm" onclick="tutOpen()">🎓 So funktioniert's</button><button class="btn btn-s btn-sm" onclick="showFlowchartLief()">📊 Prozessübersicht</button></div>`;
   h+=`<div class="sr"><div class="sc"><div class="sc-l">Abo</div><div class="sc-v" style="font-size:18px;color:${abo.aktiv?'var(--grn)':'var(--red)'}">${abo.aktiv?E(abo.typ):'Inaktiv'}</div></div><div class="sc"><div class="sc-l">Offene Anfragen</div><div class="sc-v" style="color:var(--amb)">${myNA.filter(a=>a.status==='angefragt').length}</div></div><div class="sc"><div class="sc-l">Beantwortet</div><div class="sc-v" style="color:var(--grn)">${myNA.filter(a=>a.status==='erhalten').length}</div></div></div>`;
   if(!abo.aktiv)h+=`<div class="wp">Kein aktives Abo. → <button class="btn btn-s btn-sm" onclick="nav('lab')">Abo aktivieren</button></div>`;
   return h;
@@ -2193,7 +2742,66 @@ VIEWS.aub=function(){
   h+=`<table class="dt"><thead><tr><th>Ausschreibung</th><th>Typ</th><th>Objekt</th><th>Frist</th><th>Status</th></tr></thead><tbody>`;
   h+=S.ausschreibungen.map(a=>`<tr><td><strong>${E(a.name)}</strong></td><td><span class="tag ${a.typ==='crbx'?'t-pu':'t-ac'}">${a.typ==='crbx'?'CRBX':'Funktional'}</span></td><td>${E(a.objekt)}</td><td>${a.frist||'—'}</td><td><span class="tag ${a.status==='vergeben'?'t-gr':a.status==='aktiv'||a.status==='crbx_geprueft'?'t-bl':'t-am'}">${a.status==='vergeben'?'Vergeben':a.status==='crbx_geprueft'?'Freigegeben':a.status==='aktiv'?'Aktiv':'Entwurf'}</span></td></tr>`).join('');
   h+=`</tbody></table>`;
-  h+=`<div class="ip" style="margin-top:16px"><strong>Hinweis:</strong> Als Architekt siehst du den Status pro Gewerk. Preise und Offertdetails sind nicht einsehbar.</div>`;
+  // Hinweis zu Vergabeanträge
+  const pendingVga=S.ausschreibungen.filter(function(x){return x.vergabe&&x.vergabe.status==='eingereicht';});
+  if(pendingVga.length){
+    h+='<div style="padding:12px 16px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;margin-top:16px;font-size:13px;color:#92400e"><strong>'+pendingVga.length+' Vergabeantrag/anträge</strong> warten auf Ihre Genehmigung. <button class="btn btn-p btn-sm" style="margin-left:8px" onclick="nav(\'avga\')">Ansehen →</button></div>';
+  }
+  h+='<div class="ip" style="margin-top:16px"><strong>Hinweis:</strong> Preise und Offertdetails sind erst nach einem Vergabeantrag des Planers einsehbar.</div>';
+  return h;
+};
+
+// ── Architekt/BH: Vergabeanträge ──
+VIEWS.avga=function(){
+  let h='<h2 style="font-size:20px;font-weight:700;margin-bottom:16px">Vergabeanträge</h2>';
+  const pending=S.ausschreibungen.filter(function(a){return a.vergabe&&(a.vergabe.status==='eingereicht'||a.vergabe.status==='genehmigt'||a.vergabe.status==='vergeben');});
+  if(!pending.length){h+='<div class="es"><p>Keine Vergabeanträge vorhanden.</p></div>';return h;}
+
+  pending.forEach(function(a){
+    const vg=a.vergabe;
+    const eins=S.einreichungen.filter(function(e){return e.ausId===a.id;});
+    const empf=vg.empfehlungen||[];
+
+    h+='<div style="border:1.5px solid var(--brd);border-radius:12px;padding:16px;margin-bottom:16px;background:var(--sur)">';
+
+    // Header
+    var statusBg='#fffbeb';var statusColor='#92400e';var statusText='⟳ Warten auf Genehmigung';
+    if(vg.status==='genehmigt'){statusBg='#f0fdf4';statusColor='#15803d';statusText='✓ Genehmigt';}
+    if(vg.status==='vergeben'){statusBg='#f0fdf4';statusColor='#15803d';statusText='🏆 Vergeben';}
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
+    h+='<h3 style="font-size:15px;font-weight:800">'+E(a.name)+'</h3>';
+    h+='<span style="padding:4px 10px;border-radius:6px;background:'+statusBg+';color:'+statusColor+';font-size:11px;font-weight:700">'+statusText+'</span>';
+    h+='</div>';
+
+    if(vg.frist)h+='<div style="font-size:12px;color:var(--mut);margin-bottom:12px">Frist: '+vg.frist+'</div>';
+
+    // Empfehlung prominent
+    if(empf.length){
+      h+='<div style="padding:14px;background:linear-gradient(135deg,#eff4ff,#ecfeff);border:2px solid #93c5fd;border-radius:10px;margin-bottom:14px">';
+      h+='<div style="font-size:11px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Empfehlung des Planers</div>';
+      empf.forEach(function(eid){
+        var e=eins.find(function(x){return x.installateurId===eid;});
+        if(e)h+='<div style="font-size:14px;font-weight:800;color:#1d4ed8">★ '+E(e.firma)+'</div>';
+      });
+      if(vg.empfehlungText)h+='<div style="font-size:12px;color:#374151;margin-top:6px;line-height:1.5">'+E(vg.empfehlungText)+'</div>';
+      h+='</div>';
+    }
+
+    // BKP-Preisvergleich (3-stellig)
+    h+='<h4 style="font-size:13px;font-weight:700;margin-bottom:8px">Preisvergleich (BKP 3-stellig)</h4>';
+    h+=_renderBKPVergleich(a,eins,empf);
+
+    // Aktionen
+    if(vg.status==='eingereicht'){
+      h+='<div style="display:flex;gap:8px;margin-top:14px">';
+      h+='<button class="btn btn-ok" style="flex:1;justify-content:center" onclick="S.activeAusId=\''+a.id+'\';approveVergabeantrag()">✓ Genehmigen</button>';
+      h+='<button class="btn btn-g" style="flex:1;justify-content:center;border-color:#fecaca;color:#dc2626" onclick="S.activeAusId=\''+a.id+'\';rejectVergabeantrag()">✕ Ablehnen</button>';
+      h+='</div>';
+    }
+
+    h+='</div>';
+  });
+
   return h;
 };
 
@@ -2228,16 +2836,19 @@ function naObjektChanged(){
 function naPopulateObjekte(){
   const sel=document.getElementById('naObjektId');
   sel.innerHTML='<option value="">— Projekt wählen —</option>';
+  var activeId='';
   try{
     if(typeof GemaObjekte!=='undefined'){
       const all=GemaObjekte.getAll();
-      all.forEach(o=>{sel.innerHTML+=`<option value="${o.id}">${E(o.name||o.strasse||'Projekt '+o.id)}</option>`;});
+      activeId=GemaObjekte.getActiveId()||'';
+      all.forEach(o=>{sel.innerHTML+=`<option value="${o.id}"${o.id===activeId?' selected':''}>${E(o.name||'Projekt')}${o.ort?' · '+E(o.ort):''}</option>`;});
     }
   }catch(e){}
-  // Fallback demo entries if no GemaObjekte
   if(sel.options.length<=1){
-    sel.innerHTML+='<option value="demo-1">Umbau EFH Wolfhagweg 1, 4144 Arlesheim</option><option value="demo-2">Neubau MFH Bläsiring 153, 4057 Basel</option><option value="demo-3">Sanierung Bürogebäude Steinenvorstadt 12, 4051 Basel</option>';
+    sel.innerHTML+='<option value="demo-1">Umbau EFH Wolfhagweg 1, 4144 Arlesheim</option><option value="demo-2">Neubau MFH Bläsiring 153, 4057 Basel</option>';
   }
+  // Auto-Fill wenn aktives Objekt vorhanden
+  if(activeId&&sel.value)try{naObjektChanged();}catch(e){}
 }
 
 function createAusschreibung(){
@@ -2388,86 +2999,163 @@ function renderAbzModal(){const a=curA();if(!a)return;const el=document.getEleme
 function addAbzug(){const a=curA();if(!a)return;a.abzuege.push({id:'abz-'+Date.now(),name:'Neuer Abzug',typ:'prozent',aktiv:true});renderAbzModal();}
 function saveAbzug(){save();cM('mAbzug');nav('pdet');toast('Abzüge gespeichert');}
 
-// ── Vorbedingungen ──
-function editVB(){const a=curA();if(!a)return;
-  const vb=a.vorbedingungen||{};const kap=vb.kapitel||{};const struct=vb.strukturiert||{};
-  let h=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button class="btn btn-g btn-sm" onclick="nav('pdet')">← Zurück</button><h2 style="font-size:20px;font-weight:700;flex:1">📜 Vorbedingungen</h2>
-    <select class="fc" style="width:auto" id="vbModus" onchange="toggleVBModus()"><option value="gema" ${vb.modus!=='pdf'?'selected':''}>GEMA-Vorlage</option><option value="pdf" ${vb.modus==='pdf'?'selected':''}>Eigenes PDF</option></select>
-    <button class="btn btn-p" onclick="saveVB()">💾 Speichern</button>
-  </div>`;
+// ── Vorbedingungen (Rich-Text Editor mit Kapitel-Navigation) ──
+var _vbQuill=null;
+var _vbActiveKap=0;
+var _vbKapitel=[]; // [{id,name,html}] — wird pro Ausschreibung gespeichert
 
-  h+=`<div id="vbPdfArea" style="display:${vb.modus==='pdf'?'block':'none'}"><div class="fg"><label class="fl">PDF-Datei</label><input type="file" class="fc" id="vbPdf" accept=".pdf" style="padding:6px"/></div></div>`;
+function editVB(){
+  var a=curA();if(!a)return;
+  var vb=a.vorbedingungen||{};
+  // Lade Kapitel: aus gespeicherten oder Standard
+  _vbKapitel=vb.kapitelListe?JSON.parse(JSON.stringify(vb.kapitelListe)):VB_STANDARD.map(function(k){return{id:k.id,name:k.name,html:vb.kapitel?.[k.id]||''};});
+  _vbActiveKap=0;
 
-  h+=`<div id="vbKapArea" style="display:${vb.modus==='pdf'?'none':'flex'};gap:0;min-height:70vh">`;
-  // Tab sidebar
-  h+=`<div style="width:220px;flex-shrink:0;border-right:1.5px solid var(--brd);background:var(--sur);border-radius:var(--r) 0 0 var(--r);overflow:hidden">`;
-  VB_KAPITEL.forEach((k,i)=>{h+=`<button class="vb-tab${i===0?' active':''}" data-vbi="${i}" onclick="vbSwitchTab(${i})" style="display:block;width:100%;padding:12px 14px;border:none;background:none;text-align:left;font-family:var(--sans);font-size:12px;font-weight:600;color:var(--mut);cursor:pointer;border-bottom:1px solid var(--brd);transition:.12s">${E(k.name)}</button>`;});
-  // Extra tab for structured fields
-  h+=`<button class="vb-tab" data-vbi="struct" onclick="vbSwitchTab('struct')" style="display:block;width:100%;padding:12px 14px;border:none;background:var(--amb-bg);text-align:left;font-family:var(--sans);font-size:12px;font-weight:700;color:#92400e;cursor:pointer;border-bottom:1px solid var(--brd)">⚙ Regieansätze & Versicherung</button>`;
-  h+=`</div>`;
+  var h='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">';
+  h+='<button class="btn btn-g btn-sm" onclick="nav(\'pdet\')">← Zurück</button>';
+  h+='<h2 style="font-size:20px;font-weight:700;flex:1">📜 Vorbedingungen</h2>';
+  h+='<select class="fc" style="width:auto" id="vbModus" onchange="toggleVBModus()"><option value="gema" '+(vb.modus!=='pdf'?'selected':'')+'>GEMA-Vorlage</option><option value="pdf" '+(vb.modus==='pdf'?'selected':'')+'>Eigenes PDF</option></select>';
+  h+='<button class="btn btn-p" onclick="saveVB()">💾 Speichern</button>';
+  h+='</div>';
 
-  // Content panels
-  h+=`<div style="flex:1;overflow-y:auto;background:var(--sur);border-radius:0 var(--r) var(--r) 0">`;
-  VB_KAPITEL.forEach((k,i)=>{
-    h+=`<div class="vb-panel${i===0?' active':''}" id="vbP${i}" style="${i>0?'display:none;':''}padding:20px 24px">
-      <h3 style="font-size:15px;font-weight:800;margin-bottom:4px">${E(k.name)}</h3>
-      <p style="font-size:12px;color:var(--mut);margin-bottom:12px">${E(k.placeholder)}</p>
-      <textarea class="fc" id="vb_${k.id}" style="min-height:50vh;font-size:13px;line-height:1.7" placeholder="${E(k.placeholder)}">${E(kap[k.id]||'')}</textarea>
-    </div>`;
-  });
+  h+='<div id="vbPdfArea" style="display:'+(vb.modus==='pdf'?'block':'none')+'"><div class="fg"><label class="fl">PDF-Datei</label><input type="file" class="fc" id="vbPdf" accept=".pdf" style="padding:6px"/></div></div>';
 
-  // Structured fields panel
-  h+=`<div class="vb-panel" id="vbPstruct" style="display:none;padding:20px 24px">
-    <h3 style="font-size:15px;font-weight:800;margin-bottom:12px">⚙ Regieansätze & Versicherung</h3>
-    <div class="ip" style="margin-bottom:16px">Diese Felder werden vom Planer definiert. Der Unternehmer füllt sie mit seinen Profildaten automatisch aus (Basic-Abo).</div>
-    <h4 style="font-size:12px;font-weight:800;color:var(--acc);margin-bottom:8px">REGIEANSÄTZE (CHF/Std. — Planer definiert welche Kategorien abgefragt werden)</h4>
-    <div class="g3" style="margin-bottom:16px">
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px"><input type="checkbox" id="vbR_inhaber" ${struct.regie?.inhaber!==false?'checked':''} style="accent-color:var(--acc)"/> Inhaber/Techniker</label>
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px"><input type="checkbox" id="vbR_montagechef" ${struct.regie?.montagechef!==false?'checked':''} style="accent-color:var(--acc)"/> Montagechef</label>
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px"><input type="checkbox" id="vbR_leitMonteur" ${struct.regie?.leitMonteur!==false?'checked':''} style="accent-color:var(--acc)"/> Leit. Monteur</label>
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px"><input type="checkbox" id="vbR_aMonteur" ${struct.regie?.aMonteur!==false?'checked':''} style="accent-color:var(--acc)"/> A-Monteur</label>
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px"><input type="checkbox" id="vbR_bMonteur" ${struct.regie?.bMonteur!==false?'checked':''} style="accent-color:var(--acc)"/> B-Monteur</label>
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px"><input type="checkbox" id="vbR_lehrling" ${struct.regie?.lehrling!==false?'checked':''} style="accent-color:var(--acc)"/> Lehrling</label>
-    </div>
-    <h4 style="font-size:12px;font-weight:800;color:var(--acc);margin-bottom:8px">ZUSCHLÄGE SONDERARBEITSZEITEN</h4>
-    <div class="g2" style="margin-bottom:16px">
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px"><input type="checkbox" id="vbZ_ueberzeit" ${struct.zuschlaege?.ueberzeit!==false?'checked':''} style="accent-color:var(--acc)"/> Überzeit</label>
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px"><input type="checkbox" id="vbZ_nacht" ${struct.zuschlaege?.nacht!==false?'checked':''} style="accent-color:var(--acc)"/> Nacht-/Sa./So.-Arbeit</label>
-    </div>
-    <h4 style="font-size:12px;font-weight:800;color:var(--acc);margin-bottom:8px">VERSICHERUNG (Planer fordert an)</h4>
-    <div class="g2" style="margin-bottom:16px">
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px"><input type="checkbox" id="vbV_deckung" ${struct.versicherung?.deckung!==false?'checked':''} style="accent-color:var(--acc)"/> Deckungssummen anfordern</label>
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px"><input type="checkbox" id="vbV_police" ${struct.versicherung?.police!==false?'checked':''} style="accent-color:var(--acc)"/> Policen-Nr. anfordern</label>
-    </div>
-    <h4 style="font-size:12px;font-weight:800;color:var(--acc);margin-bottom:8px">PERSONAL (Planer fordert an)</h4>
-    <div class="g2">
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px"><input type="checkbox" id="vbP_anzahl" ${struct.personal?.anzahl!==false?'checked':''} style="accent-color:var(--acc)"/> Personalbestand anfordern</label>
-      <label style="display:flex;align-items:center;gap:6px;font-size:12px"><input type="checkbox" id="vbP_tv" ${struct.personal?.tv!==false?'checked':''} style="accent-color:var(--acc)"/> Techn. Verantwortlicher</label>
-    </div>
-  </div>`;
+  h+='<div id="vbKapArea" style="display:'+(vb.modus==='pdf'?'none':'flex')+';gap:0;min-height:70vh;border:1.5px solid var(--brd);border-radius:var(--r);overflow:hidden">';
+  // Sidebar: Kapitel-Navigation
+  h+='<div id="vbSidebar" style="width:240px;flex-shrink:0;border-right:1.5px solid var(--brd);background:#f8faff;display:flex;flex-direction:column">';
+  h+='<div style="padding:10px 14px;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:6px">';
+  h+='<span style="font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;flex:1">Kapitel</span>';
+  h+='<button class="btn btn-sm" onclick="vbAddKapitel()" style="padding:2px 8px;font-size:11px">+</button>';
+  h+='</div>';
+  h+='<div id="vbKapList" style="flex:1;overflow-y:auto"></div>';
+  h+='</div>';
+  // Editor area
+  h+='<div style="flex:1;display:flex;flex-direction:column;background:var(--sur)">';
+  h+='<div id="vbEditorWrap" style="flex:1;display:flex;flex-direction:column">';
+  // Toolbar
+  h+='<div id="vbToolbar" style="display:flex;gap:2px;flex-wrap:wrap;padding:8px 12px;background:#f8faff;border-bottom:1.5px solid var(--brd);position:sticky;top:0;z-index:10">';
+  h+='<select onchange="document.execCommand(\'formatBlock\',false,this.value);this.value=\'\'" style="padding:4px 8px;border:1px solid var(--brd2);border-radius:5px;font-size:11px;font-family:inherit;background:var(--sur)"><option value="">Absatz</option><option value="h1">Überschrift 1</option><option value="h2">Überschrift 2</option><option value="h3">Überschrift 3</option><option value="p">Normal</option></select>';
+  h+='<div style="width:1px;height:24px;background:var(--brd);margin:0 4px"></div>';
+  var btns=[{cmd:'bold',ic:'<b>F</b>',t:'Fett'},{cmd:'italic',ic:'<i>K</i>',t:'Kursiv'},{cmd:'underline',ic:'<u>U</u>',t:'Unterstrichen'},{cmd:'strikeThrough',ic:'<s>S</s>',t:'Durchgestrichen'}];
+  btns.forEach(function(b){h+='<button onclick="document.execCommand(\''+b.cmd+'\',false,null)" title="'+b.t+'" style="width:28px;height:28px;border:1px solid var(--brd);border-radius:5px;background:var(--sur);cursor:pointer;font-size:13px;font-family:serif;display:flex;align-items:center;justify-content:center">'+b.ic+'</button>';});
+  h+='<div style="width:1px;height:24px;background:var(--brd);margin:0 4px"></div>';
+  h+='<button onclick="document.execCommand(\'insertUnorderedList\',false,null)" title="Aufzählung" style="width:28px;height:28px;border:1px solid var(--brd);border-radius:5px;background:var(--sur);cursor:pointer;font-size:13px">•</button>';
+  h+='<button onclick="document.execCommand(\'insertOrderedList\',false,null)" title="Nummerierung" style="width:28px;height:28px;border:1px solid var(--brd);border-radius:5px;background:var(--sur);cursor:pointer;font-size:13px">1.</button>';
+  h+='<button onclick="document.execCommand(\'indent\',false,null)" title="Einrücken" style="width:28px;height:28px;border:1px solid var(--brd);border-radius:5px;background:var(--sur);cursor:pointer;font-size:12px">→</button>';
+  h+='<button onclick="document.execCommand(\'outdent\',false,null)" title="Ausrücken" style="width:28px;height:28px;border:1px solid var(--brd);border-radius:5px;background:var(--sur);cursor:pointer;font-size:12px">←</button>';
+  h+='<div style="width:1px;height:24px;background:var(--brd);margin:0 4px"></div>';
+  h+='<button onclick="document.execCommand(\'removeFormat\',false,null)" title="Formatierung entfernen" style="width:28px;height:28px;border:1px solid var(--brd);border-radius:5px;background:var(--sur);cursor:pointer;font-size:11px">✕</button>';
+  h+='</div>';
+  // Editor
+  h+='<div id="vbRichEditor" contenteditable="true" style="flex:1;min-height:50vh;padding:20px 24px;font-size:14px;line-height:1.7;outline:none;overflow-y:auto;font-family:var(--sans)" data-placeholder="Text eingeben oder aus Word einfügen…"></div>';
+  h+='</div>';
+  h+='</div>';
+  h+='</div>';
 
-  h+=`</div></div>`;
   document.getElementById('PA').innerHTML=h;
-  // Style active tab
-  document.querySelectorAll('.vb-tab').forEach(t=>{if(t.classList.contains('active'))t.style.background='var(--acc-bg)';t.style.color=t.classList.contains('active')?'var(--acc)':'var(--mut)';});
+  renderVBKapList();
+  initVBEditor();
 }
-function vbSwitchTab(idx){
-  document.querySelectorAll('.vb-tab').forEach(t=>{const a=t.dataset.vbi==String(idx);t.classList.toggle('active',a);t.style.background=a?'var(--acc-bg)':'';t.style.color=a?'var(--acc)':'var(--mut)';});
-  document.querySelectorAll('.vb-panel').forEach(p=>p.style.display='none');
-  const panel=document.getElementById('vbP'+idx);if(panel)panel.style.display='block';
+
+function renderVBKapList(){
+  var list=document.getElementById('vbKapList');if(!list)return;
+  list.innerHTML=_vbKapitel.map(function(k,i){
+    var isAct=i===_vbActiveKap;
+    return '<div class="vb-kap-item" draggable="true" data-vbki="'+i+'" onclick="vbSelectKap('+i+')" style="display:flex;align-items:center;gap:6px;padding:10px 14px;border-bottom:1px solid var(--brd);cursor:pointer;background:'+(isAct?'var(--acc-bg)':'transparent')+';transition:.12s;font-size:12px">'
+      +'<span style="cursor:grab;color:var(--mut2);font-size:12px;flex-shrink:0">⠿</span>'
+      +'<span style="width:20px;height:20px;border-radius:50%;background:'+(isAct?'var(--acc)':'var(--brd)')+';color:'+(isAct?'#fff':'var(--mut)')+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0">'+(i+1)+'</span>'
+      +'<span style="flex:1;font-weight:'+(isAct?'700':'600')+';color:'+(isAct?'var(--acc)':'var(--txt)')+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+E(k.name)+'</span>'
+      +(_vbKapitel.length>1?'<button onclick="event.stopPropagation();vbRemoveKap('+i+')" style="background:none;border:none;color:var(--mut2);cursor:pointer;font-size:10px;padding:2px" title="Entfernen">✕</button>':'')
+      +'</div>';
+  }).join('');
+  // Drag & Drop auf Kapitel
+  list.querySelectorAll('.vb-kap-item').forEach(function(el){
+    el.addEventListener('dragstart',function(e){e.dataTransfer.setData('text/plain',el.dataset.vbki);el.style.opacity='0.4';});
+    el.addEventListener('dragend',function(){el.style.opacity='1';});
+    el.addEventListener('dragover',function(e){e.preventDefault();el.style.borderTop='3px solid #1d4ed8';});
+    el.addEventListener('dragleave',function(){el.style.borderTop='';});
+    el.addEventListener('drop',function(e){
+      e.preventDefault();el.style.borderTop='';
+      var from=parseInt(e.dataTransfer.getData('text/plain'));
+      var to=parseInt(el.dataset.vbki);
+      if(from===to)return;
+      vbSaveCurrentKap();
+      var moved=_vbKapitel.splice(from,1)[0];
+      if(to>from)to--;
+      _vbKapitel.splice(to,0,moved);
+      _vbActiveKap=to;
+      renderVBKapList();loadVBKap(to);
+    });
+  });
 }
-function toggleVBModus(){const m=document.getElementById('vbModus').value;document.getElementById('vbPdfArea').style.display=m==='pdf'?'block':'none';document.getElementById('vbKapArea').style.display=m==='pdf'?'none':'block';}
-function saveVB(){const a=curA();if(!a)return;const m=document.getElementById('vbModus').value;
-  if(m==='pdf'){const f=document.getElementById('vbPdf');a.vorbedingungen={modus:'pdf',pdfName:f?.files?.[0]?.name||a.vorbedingungen?.pdfName||'',kapitel:{},strukturiert:{}};}
-  else{const kap={};VB_KAPITEL.forEach(k=>{kap[k.id]=document.getElementById('vb_'+k.id)?.value||'';});
-    const getCb=id=>{const el=document.getElementById(id);return el?el.checked:true;};
-    const strukturiert={
-      regie:{inhaber:getCb('vbR_inhaber'),montagechef:getCb('vbR_montagechef'),leitMonteur:getCb('vbR_leitMonteur'),aMonteur:getCb('vbR_aMonteur'),bMonteur:getCb('vbR_bMonteur'),lehrling:getCb('vbR_lehrling')},
-      zuschlaege:{ueberzeit:getCb('vbZ_ueberzeit'),nacht:getCb('vbZ_nacht')},
-      versicherung:{deckung:getCb('vbV_deckung'),police:getCb('vbV_police')},
-      personal:{anzahl:getCb('vbP_anzahl'),tv:getCb('vbP_tv')}
-    };
-    a.vorbedingungen={modus:'gema',kapitel:kap,pdfName:'',strukturiert};}
+
+function initVBEditor(){
+  var ed=document.getElementById('vbRichEditor');
+  if(!ed)return;
+  // Placeholder Verhalten
+  ed.addEventListener('focus',function(){if(ed.textContent.trim()==='')ed.innerHTML='';});
+  ed.addEventListener('blur',function(){if(ed.textContent.trim()==='')ed.setAttribute('data-empty','true');else ed.removeAttribute('data-empty');});
+  // Word-Paste: HTML beibehalten
+  ed.addEventListener('paste',function(e){
+    // Lasse den Browser den Paste normal verarbeiten (HTML wird übernommen)
+    // Bereinige nur Microsoft-spezifische Tags nach kurzer Verzögerung
+    setTimeout(function(){
+      var html=ed.innerHTML;
+      html=html.replace(/<o:p[^>]*>.*?<\/o:p>/gi,'');
+      html=html.replace(/class="Mso[^"]*"/gi,'');
+      html=html.replace(/style="[^"]*mso-[^"]*"/gi,'');
+      ed.innerHTML=html;
+    },50);
+  });
+  loadVBKap(0);
+}
+
+function vbSaveCurrentKap(){
+  if(_vbActiveKap>=0&&_vbActiveKap<_vbKapitel.length){
+    var ed=document.getElementById('vbRichEditor');
+    if(ed)_vbKapitel[_vbActiveKap].html=ed.innerHTML;
+  }
+}
+
+function loadVBKap(idx){
+  _vbActiveKap=idx;
+  var k=_vbKapitel[idx];if(!k)return;
+  var ed=document.getElementById('vbRichEditor');
+  if(ed)ed.innerHTML=k.html||'';
+}
+
+function vbSelectKap(idx){
+  vbSaveCurrentKap();
+  _vbActiveKap=idx;
+  loadVBKap(idx);
+  renderVBKapList();
+}
+
+function vbAddKapitel(){
+  vbSaveCurrentKap();
+  var name=prompt('Name des neuen Kapitels:');if(!name)return;
+  _vbKapitel.push({id:'kap_'+Date.now(),name:name,html:''});
+  _vbActiveKap=_vbKapitel.length-1;
+  renderVBKapList();loadVBKap(_vbActiveKap);
+}
+
+function vbRemoveKap(idx){
+  if(_vbKapitel.length<=1){toast('Mindestens ein Kapitel erforderlich','error');return;}
+  if(!confirm('"'+_vbKapitel[idx].name+'" entfernen?'))return;
+  _vbKapitel.splice(idx,1);
+  if(_vbActiveKap>=_vbKapitel.length)_vbActiveKap=_vbKapitel.length-1;
+  renderVBKapList();loadVBKap(_vbActiveKap);
+}
+
+function toggleVBModus(){var m=document.getElementById('vbModus').value;document.getElementById('vbPdfArea').style.display=m==='pdf'?'block':'none';document.getElementById('vbKapArea').style.display=m==='pdf'?'none':'flex';}
+
+function saveVB(){var a=curA();if(!a)return;var m=document.getElementById('vbModus').value;
+  vbSaveCurrentKap();
+  if(m==='pdf'){var f=document.getElementById('vbPdf');a.vorbedingungen={modus:'pdf',pdfName:f?.files?.[0]?.name||a.vorbedingungen?.pdfName||'',kapitel:{},kapitelListe:null,strukturiert:{}};}
+  else{
+    // Speichere als kapitelListe (HTML) + legacy kapitel (Text-Fallback)
+    var kap={};_vbKapitel.forEach(function(k){kap[k.id]=k.html.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();});
+    a.vorbedingungen={modus:'gema',kapitel:kap,kapitelListe:JSON.parse(JSON.stringify(_vbKapitel)),pdfName:'',strukturiert:a.vorbedingungen?.strukturiert||{}};}
   save();toast('Gespeichert');nav('pdet');}
 
 // ── CRBX ──
@@ -2481,18 +3169,13 @@ function vtl(iid){const a=curA();if(!a)return;if(S.verteilungen.find(v=>v.ausId=
   save();lg('📤','Eingeladen',inst?.firma+' → '+a.name);toast('📧 E-Mail an '+inst?.firma+' (Vorschau)');buildTabs();nav('pvrt');}
 
 // ── Vergabe ──
-function openVergabe(){const a=curA();if(!a)return;const eins=S.einreichungen.filter(e=>e.ausId===a.id);
-  document.getElementById('vgWinner').innerHTML=eins.map(e=>`<option value="${e.installateurId}">${E(e.firma)} — Netto ${fC(calcNetto(a,e))}</option>`).join('');
-  oM('mVergabe');}
-function doVergabe(){const a=curA();if(!a)return;const wid=document.getElementById('vgWinner').value;const winner=S.beteiligte.find(b=>b.id===wid);
-  a.status='vergeben';a.vergabe={winnerId:wid,datum:new Date().toISOString().split('T')[0],msgWin:document.getElementById('vgMsgWin').value,msgLose:document.getElementById('vgMsgLose').value};
-  save();lg('🏆','Zuschlag',winner?.firma+' für '+a.name);
-  cM('mVergabe');toast('🏆 Zuschlag an '+winner?.firma+' · Absagen gesendet');
-  // Show email previews
-  const losers=S.einreichungen.filter(e=>e.ausId===a.id&&e.installateurId!==wid);
-  let msg=`📧 E-Mails (Vorschau):\n\n✅ Zuschlag an ${winner?.firma}:\n"${a.vergabe.msgWin||'Wir freuen uns auf die Zusammenarbeit.'}"`;
-  losers.forEach(l=>{msg+=`\n\n❌ Absage an ${l.firma}:\n"${a.vergabe.msgLose||'Vielen Dank für Ihre Offerte. Leider müssen wir Ihnen mitteilen, dass der Zuschlag anderweitig vergeben wurde.'}"`;});
-  dlgConfirm('📧 E-Mails versendet','Zuschlag an '+winner?.firma+'. Absagen an '+losers.length+' weitere Unternehmer gesendet.',()=>{});buildTabs();nav('pein');
+function openVergabe(){
+  // Redirect to Vergabeantrag tab
+  nav('pvga');
+}
+function doVergabe(){
+  // Legacy — redirect to new flow
+  nav('pvga');
 }
 
 // ── Installateur Offert-Einreichung ──
@@ -2570,10 +3253,66 @@ function editGewerke(){const me=S.beteiligte.find(b=>b.id===S.currentUserId);if(
 function setInstAbo(typ){const me=S.beteiligte.find(b=>b.id===S.currentUserId);if(!me)return;if(!me.abo)me.abo={};me.abo.typ=typ;me.abo.aktiv=true;save();toast('Abo: '+typ);nav('ipro');}
 
 // ── Beteiligte ──
-function addPerson(){const r=document.getElementById('apR').value,f=document.getElementById('apF').value.trim();if(!f){toast('Firma?','error');return;}
-  const obj={id:r.substring(0,4)+'-'+Date.now(),rolle:r,firma:f,person:document.getElementById('apP').value.trim(),email:document.getElementById('apE').value.trim(),tel:document.getElementById('apT').value.trim(),gewerke:document.getElementById('apG').value.trim(),profil:{}};
+// Beteiligte ↔ User Verknüpfung
+function resolveBeteiligter(b){
+  // Wenn userId gesetzt, Daten aus echtem User-Account lesen
+  if(!b||!b.userId||typeof GemaAuth==='undefined')return b;
+  var users=GemaAuth.getUsers()||[];
+  var u=users.find(function(x){return x.id===b.userId;});
+  if(!u)return b;
+  // Merge: User-Daten haben Priorität, Beteiligter als Fallback
+  return Object.assign({},b,{
+    firma:u.profile?.firma||b.firma,
+    person:u.name||b.person,
+    email:u.profile?.email||u.username||b.email,
+    tel:u.profile?.telefon||b.tel,
+    _user:u, // Referenz auf den echten User
+    _hasLogin:true
+  });
+}
+function findUserByEmail(email){
+  if(!email||typeof GemaAuth==='undefined')return null;
+  var users=GemaAuth.getUsers()||[];
+  return users.find(function(u){return u.username===email||u.profile?.email===email;})||null;
+}
+
+function addPerson(){var r=document.getElementById('apR').value,f=document.getElementById('apF').value.trim();if(!f){toast('Firma?','error');return;}
+  var email=document.getElementById('apE').value.trim();
+  var obj={id:r.substring(0,4)+'-'+Date.now(),rolle:r,userId:null,firma:f,person:document.getElementById('apP').value.trim(),email:email,tel:document.getElementById('apT').value.trim(),gewerke:'',profil:{},_loginStatus:'none'};
+  // Auto-Verknüpfung: prüfe ob ein User mit dieser Email existiert
+  var existingUser=findUserByEmail(email);
+  if(existingUser){
+    obj.userId=existingUser.id;
+    obj._loginStatus=existingUser.einladung&&existingUser.einladung.passwortGesetzt?'active':'pending';
+    toast(f+' ✓ (mit bestehendem Account verknüpft)');
+  }
   if(r==='lieferant')obj.abo={aktiv:false,typ:'gratis',gewerke:[]};if(r==='installateur')obj.abo={typ:'gratis',aktiv:true};
-  S.beteiligte.push(obj);save();lg('👥','+',f);cM('mPerson');['apF','apP','apE','apT','apG'].forEach(x=>document.getElementById(x).value='');toast(f+' ✓');buildTabs();nav(S.currentRole==='planer'?'pbet':defP());}
+  S.beteiligte.push(obj);save();lg('👥','+',f);cM('mPerson');['apF','apP','apE','apT'].forEach(function(x){document.getElementById(x).value='';});if(!existingUser)toast(f+' ✓');buildTabs();nav(S.currentRole==='planer'?'pbet':defP());}
+
+function inviteLieferant(beteiligterIdx){
+  var b=S.beteiligte[beteiligterIdx];if(!b)return;
+  if(!b.email){toast('E-Mail fehlt — bitte zuerst E-Mail erfassen','error');return;}
+  if(typeof GemaAuth==='undefined'){toast('Auth nicht geladen','error');return;}
+  // Prüfe ob bereits ein Account mit dieser Email existiert
+  var existing=findUserByEmail(b.email);
+  if(existing){
+    b.userId=existing.id;
+    b._loginStatus=existing.einladung&&existing.einladung.passwortGesetzt?'active':'pending';
+    save();toast(b.firma+' hat bereits ein GEMA-Konto — verknüpft');nav('pbet');return;
+  }
+  var result=GemaAuth.inviteLieferant({
+    firma:b.firma,person:b.person,email:b.email,tel:b.tel,
+    eingeladenVon:S.currentRole
+  });
+  b.userId=result.user.id;
+  b._loginStatus='pending'; // Einladung gesendet, Passwort noch nicht gesetzt
+  b._einladungGesendet=true;b._loginUrl=result.loginUrl;
+  save();
+  lg('📨','Lieferant eingeladen',b.firma+' ('+b.email+')');
+  toast('✉ Einladung an '+b.firma+' gesendet — Login-URL: '+result.loginUrl);
+  nav('pbet');
+}
+
 function rmP(id){const p=S.beteiligte.find(b=>b.id===id);dlgConfirm(E(p?.firma)+' entfernen?','Dieser Beteiligte wird aus der Liste gelöscht.',()=>{S.beteiligte=S.beteiligte.filter(b=>b.id!==id);save();toast('Entfernt');nav('pbet');});}
 
 // ── Abo Gate ──
@@ -2630,6 +3369,216 @@ const TUT={
   ]
 };
 let _tC=0,_tS=[];
+// ── Prozess-Flussdiagramm ──
+function showFlowchart(){
+  var fc='font-size:11px;line-height:1.4;font-family:var(--sans)';
+  var box='padding:10px 14px;border-radius:10px;text-align:center;font-weight:700;font-size:11.5px;position:relative';
+  var arr='text-align:center;font-size:16px;color:var(--mut2);line-height:1';
+  var phase='font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;padding:4px 10px;border-radius:6px;display:inline-block;margin-bottom:6px';
+
+  var h='<div style="max-width:640px;margin:0 auto;'+fc+'">';
+
+  // Phase 1: Vorbereitung
+  h+='<div style="'+phase+';background:#eff4ff;color:#1d4ed8">Phase 1 — Vorbereitung</div>';
+  h+='<div style="'+box+';background:#1d4ed8;color:#fff;margin:8px 0">📋 Ausschreibung erstellen<div style="font-size:10px;font-weight:400;margin-top:2px;opacity:.8">Objekt · Typ (Funktional/CRBX) · Modell · Frist</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="'+box+';background:#eff4ff;color:#1d4ed8;border:1.5px solid #bfcfff;margin:4px 0">📐 Pläne & 📎 Unterlagen hochladen</div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  // Phase 2: BKP
+  h+='<div style="'+phase+';background:#f0fdf4;color:#16a34a;margin-top:12px">Phase 2 — BKP-Checkliste</div>';
+  h+='<div style="'+box+';background:#16a34a;color:#fff;margin:8px 0">☑ BKP-Positionen auswählen<div style="font-size:10px;font-weight:400;margin-top:2px;opacity:.8">Pro LOS · Checkbox pro Position · Fortschrittsbalken</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  // Verzweigung: Lieferung
+  h+='<div style="display:flex;gap:10px;margin:4px 0">';
+  h+='<div style="flex:1;'+box+';background:#fef3c7;color:#92400e;border:1.5px solid #fde68a">🔗 Lieferung-BKP?<div style="font-size:10px;font-weight:400;margin-top:2px">Enthärtung · Osmose · Druckerhöhung etc.</div></div>';
+  h+='<div style="flex:1;'+box+';background:var(--bg2);color:var(--mut);border:1.5px solid var(--brd)">Montage / Leitungen<div style="font-size:10px;font-weight:400;margin-top:2px">Wird direkt als erledigt markiert</div></div>';
+  h+='</div>';
+  h+='<div style="'+arr+'">↓ Ja</div>';
+
+  h+='<div style="'+box+';background:#fef3c7;color:#92400e;border:1.5px solid #fde68a;margin:4px 0">🔬 Berechnung im GEMA-Modul<div style="font-size:10px;font-weight:400;margin-top:2px">z.B. sa_enthaertung.html → Durchfluss, Kapazität, DN</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  h+='<div style="display:flex;gap:10px;margin:4px 0">';
+  h+='<div style="flex:1;'+box+';background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0">📄 Offerte vom Lieferanten<div style="font-size:10px;font-weight:400;margin-top:2px">PDF hochladen oder Offertanfrage senden</div></div>';
+  h+='<div style="flex:1;'+box+';background:#eff4ff;color:#1d4ed8;border:1.5px solid #bfcfff">🏭 Anlage aus Katalog wählen<div style="font-size:10px;font-weight:400;margin-top:2px">Verifizierte Produkte · Datenblätter</div></div>';
+  h+='</div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="'+box+';background:#16a34a;color:#fff;margin:4px 0">✓ Montage-BKP wird automatisch ergänzt</div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  // Phase 3: CRBX (nur bei CRBX)
+  h+='<div style="'+phase+';background:#f5f3ff;color:#7c3aed;margin-top:12px">Phase 3 — CRBX-Abgleich <span style="font-size:9px;font-weight:400">(nur bei CRBX-Typ)</span></div>';
+  h+='<div style="'+box+';background:#7c3aed;color:#fff;margin:8px 0">📦 CRBX-Datei extern erstellen & hochladen</div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="display:flex;gap:8px;margin:4px 0">';
+  h+='<div style="flex:1;'+box+';background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0">✓ Übereinstimmend</div>';
+  h+='<div style="flex:1;'+box+';background:#fffbeb;color:#d97706;border:1.5px solid #fde68a">⚠ Fehlt in CRBX</div>';
+  h+='<div style="flex:1;'+box+';background:#eff4ff;color:#1d4ed8;border:1.5px solid #bfcfff">➕ Nur in CRBX</div>';
+  h+='</div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="'+box+';background:#7c3aed;color:#fff;margin:4px 0">✓ Abgleich bestätigen → Status: Freigegeben</div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  // Phase 4: Vorbedingungen
+  h+='<div style="'+phase+';background:#fef2f2;color:#dc2626;margin-top:12px">Phase 4 — Vorbedingungen & Abzüge</div>';
+  h+='<div style="display:flex;gap:10px;margin:8px 0">';
+  h+='<div style="flex:1;'+box+';background:var(--sur);border:1.5px solid var(--brd)">📜 Vorbedingungen<div style="font-size:10px;font-weight:400;margin-top:2px">Rich-Text Editor · Kapitel · Word-Paste</div></div>';
+  h+='<div style="flex:1;'+box+';background:var(--sur);border:1.5px solid var(--brd)">⚙ Abzüge definieren<div style="font-size:10px;font-weight:400;margin-top:2px">Rabatt · Skonto · MwSt 8.1%</div></div>';
+  h+='</div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  // Phase 5: Anfragen & Verteilen
+  h+='<div style="'+phase+';background:#fef3c7;color:#92400e;margin-top:12px">Phase 5 — Unternehmer anfragen & verteilen</div>';
+  h+='<div style="'+box+';background:#f59e0b;color:#fff;margin:8px 0">🤝 Interesse-Anfragen senden<div style="font-size:10px;font-weight:400;margin-top:2px;opacity:.8">Unternehmer in GEMA: Ja/Nein</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  h+='<div style="display:flex;gap:10px;margin:4px 0">';
+  h+='<div style="flex:1;'+box+';background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0">✓ Interessiert<div style="font-size:10px;font-weight:400;margin-top:2px">→ Unterlagen verteilen</div></div>';
+  h+='<div style="flex:1;'+box+';background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca">✕ Kein Interesse<div style="font-size:10px;font-weight:400;margin-top:2px">Optional: Grund</div></div>';
+  h+='</div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="'+box+';background:#f59e0b;color:#fff;margin:4px 0">📤 Ausschreibung an Unternehmer verteilen<div style="font-size:10px;font-weight:400;margin-top:2px;opacity:.8">E-Mail · LV · Pläne · Vorbedingungen</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  // Phase 6: Offerten
+  h+='<div style="'+phase+';background:#ecfeff;color:#0891b2;margin-top:12px">Phase 6 — Offerten & Vergabe</div>';
+  h+='<div style="'+box+';background:#0891b2;color:#fff;margin:8px 0">💰 Unternehmer reichen Offerten ein<div style="font-size:10px;font-weight:400;margin-top:2px;opacity:.8">Pauschal · Einheitspreise · Global · CRBX mit Preisen</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="'+box+';background:var(--sur);border:1.5px solid #0891b2;color:#0891b2;margin:4px 0">📊 Offertvergleich<div style="font-size:10px;font-weight:400;margin-top:2px;color:var(--txt2)">Pro BKP · Abzüge · MwSt · Günstigster grün markiert</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  h+='<div style="display:flex;gap:10px;margin:4px 0">';
+  h+='<div style="flex:1;'+box+';background:#16a34a;color:#fff">🏆 Zuschlag erteilen<div style="font-size:10px;font-weight:400;margin-top:2px;opacity:.8">E-Mail an Gewinner</div></div>';
+  h+='<div style="flex:1;'+box+';background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca">✉ Absagen senden<div style="font-size:10px;font-weight:400;margin-top:2px">Ohne Preise (kartellkonform)</div></div>';
+  h+='</div>';
+
+  // Legende
+  h+='<div style="margin-top:20px;padding:12px;background:var(--bg2);border-radius:8px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center">';
+  h+='<span style="font-size:10px;font-weight:600;color:var(--mut)">Legende:</span>';
+  h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#1d4ed8;color:#fff">Planer-Aktion</span>';
+  h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#f59e0b;color:#fff">Kommunikation</span>';
+  h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#16a34a;color:#fff">Ergebnis</span>';
+  h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#7c3aed;color:#fff">CRBX-spezifisch</span>';
+  h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#fef3c7;color:#92400e;border:1px solid #fde68a">Lieferant</span>';
+  h+='</div>';
+
+  h+='</div>';
+  _showFlowOverlay('📊 Ausschreibungsprozess — Gesamtübersicht',h);
+}
+
+// ── Prozess-Flussdiagramm: Unternehmer ──
+function showFlowchartUN(){
+  var box='padding:10px 14px;border-radius:10px;text-align:center;font-weight:700;font-size:11.5px';
+  var arr='text-align:center;font-size:16px;color:var(--mut2);line-height:1';
+  var phase='font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;padding:4px 10px;border-radius:6px;display:inline-block;margin-bottom:6px';
+
+  var h='<div style="max-width:560px;margin:0 auto;font-size:11px;line-height:1.4">';
+
+  h+='<div style="'+phase+';background:#fef3c7;color:#92400e">Phase 1 — Einladung</div>';
+  h+='<div style="'+box+';background:#f59e0b;color:#fff;margin:8px 0">🤝 Interesse-Anfrage vom Planer erhalten<div style="font-size:10px;font-weight:400;margin-top:2px;opacity:.8">Projekt · Objekt · BKP-Umfang · Frist</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="display:flex;gap:10px;margin:4px 0">';
+  h+='<div style="flex:1;'+box+';background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0">✓ Ja, interessiert</div>';
+  h+='<div style="flex:1;'+box+';background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca">✕ Kein Interesse</div>';
+  h+='</div>';
+  h+='<div style="'+arr+'">↓ Bei Zusage</div>';
+
+  h+='<div style="'+phase+';background:#eff4ff;color:#1d4ed8;margin-top:12px">Phase 2 — Unterlagen prüfen</div>';
+  h+='<div style="'+box+';background:#1d4ed8;color:#fff;margin:8px 0">📋 Ausschreibungsunterlagen erhalten<div style="font-size:10px;font-weight:400;margin-top:2px;opacity:.8">LV · Pläne · Vorbedingungen · Beilagen</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="'+box+';background:var(--sur);border:1.5px solid var(--brd);margin:4px 0">👤 Profil vervollständigen (Basic-Abo)<div style="font-size:10px;font-weight:400;margin-top:2px;color:var(--mut)">Firma · Versicherung · Personal · Regieansätze → Autofill</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  h+='<div style="'+phase+';background:#ecfeff;color:#0891b2;margin-top:12px">Phase 3 — Offerte erstellen</div>';
+  h+='<div style="display:flex;gap:10px;margin:8px 0">';
+  h+='<div style="flex:1;'+box+';background:var(--sur);border:1.5px solid #0891b2;color:#0891b2">💰 Preise einfüllen<div style="font-size:10px;font-weight:400;margin-top:2px;color:var(--txt2)">Pauschal · EP · Global</div></div>';
+  h+='<div style="flex:1;'+box+';background:var(--sur);border:1.5px solid #7c3aed;color:#7c3aed">📦 CRBX mit Preisen<div style="font-size:10px;font-weight:400;margin-top:2px;color:var(--txt2)">E1S-Datei hochladen</div></div>';
+  h+='</div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="'+box+';background:var(--sur);border:1.5px solid var(--brd);margin:4px 0">🔄 Netto-Anfragen an Lieferanten (Basic-Abo)<div style="font-size:10px;font-weight:400;margin-top:2px;color:var(--mut)">Einzelne BKP-Positionen anfragen · Marktplatz-Offerten prüfen</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  h+='<div style="'+phase+';background:#f0fdf4;color:#16a34a;margin-top:12px">Phase 4 — Einreichen & Ergebnis</div>';
+  h+='<div style="'+box+';background:#16a34a;color:#fff;margin:8px 0">✅ Offerte einreichen<div style="font-size:10px;font-weight:400;margin-top:2px;opacity:.8">Nur eigene Offerte sichtbar · Preise vertraulich</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="display:flex;gap:10px;margin:4px 0">';
+  h+='<div style="flex:1;'+box+';background:#16a34a;color:#fff">🏆 Zuschlag erhalten</div>';
+  h+='<div style="flex:1;'+box+';background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca">Absage (ohne Preise)</div>';
+  h+='</div>';
+
+  h+='<div style="margin-top:16px;padding:10px;background:var(--bg2);border-radius:8px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">';
+  h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#f59e0b;color:#fff">Kommunikation</span>';
+  h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#1d4ed8;color:#fff">Prüfen</span>';
+  h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#0891b2;color:#fff">Offerte</span>';
+  h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#16a34a;color:#fff">Ergebnis</span>';
+  h+='</div></div>';
+
+  _showFlowOverlay('📊 Unternehmer — Prozessübersicht',h);
+}
+
+// ── Prozess-Flussdiagramm: Lieferant ──
+function showFlowchartLief(){
+  var box='padding:10px 14px;border-radius:10px;text-align:center;font-weight:700;font-size:11.5px';
+  var arr='text-align:center;font-size:16px;color:var(--mut2);line-height:1';
+  var phase='font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;padding:4px 10px;border-radius:6px;display:inline-block;margin-bottom:6px';
+
+  var h='<div style="max-width:560px;margin:0 auto;font-size:11px;line-height:1.4">';
+
+  h+='<div style="'+phase+';background:#f0fdf4;color:#16a34a">Phase 1 — Abo & Produkte</div>';
+  h+='<div style="'+box+';background:#16a34a;color:#fff;margin:8px 0">⭐ Abo wählen & Gewerke definieren<div style="font-size:10px;font-weight:400;margin-top:2px;opacity:.8">Basic · Premium · Gewerke freischalten</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="display:flex;gap:10px;margin:4px 0">';
+  h+='<div style="flex:1;'+box+';background:var(--sur);border:1.5px solid var(--brd)">📦 Produkte erfassen<div style="font-size:10px;font-weight:400;margin-top:2px;color:var(--mut)">Anlagen · Rohrsysteme · Armaturen</div></div>';
+  h+='<div style="flex:1;'+box+';background:var(--sur);border:1.5px solid var(--brd)">📄 Dokumente hochladen<div style="font-size:10px;font-weight:400;margin-top:2px;color:var(--mut)">Datenblatt · Montage · Zertifikat · Konformität</div></div>';
+  h+='</div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="'+box+';background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0;margin:4px 0">✓ Produkte verifizieren → Badge "Verifiziert"</div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  h+='<div style="'+phase+';background:#fef3c7;color:#92400e;margin-top:12px">Phase 2 — Anfragen & Offerten</div>';
+  h+='<div style="display:flex;gap:10px;margin:8px 0">';
+  h+='<div style="flex:1;'+box+';background:#f59e0b;color:#fff">📨 Offertanfragen empfangen<div style="font-size:10px;font-weight:400;margin-top:2px;opacity:.8">Von Planern · Berechnungsdaten</div></div>';
+  h+='<div style="flex:1;'+box+';background:var(--sur);border:1.5px solid #f59e0b;color:#92400e">🔄 Netto-Anfragen<div style="font-size:10px;font-weight:400;margin-top:2px;color:var(--mut)">Von Unternehmern · BKP-Positionen</div></div>';
+  h+='</div>';
+  h+='<div style="'+arr+'">↓</div>';
+  h+='<div style="'+box+';background:var(--sur);border:1.5px solid var(--brd);margin:4px 0">💰 Offerte mit Preis & PDF beantworten</div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  h+='<div style="'+phase+';background:#eff4ff;color:#1d4ed8;margin-top:12px">Phase 3 — Marktplatz</div>';
+  h+='<div style="'+box+';background:#1d4ed8;color:#fff;margin:8px 0">🏪 Marktplatz — offene Ausschreibungen<div style="font-size:10px;font-weight:400;margin-top:2px;opacity:.8">Nach Gewerken gefiltert · Proaktiv Offerten senden</div></div>';
+  h+='<div style="'+arr+'">↓</div>';
+
+  h+='<div style="'+phase+';background:#f5f3ff;color:#7c3aed;margin-top:12px">Phase 4 — Rohrsysteme & Armaturen</div>';
+  h+='<div style="display:flex;gap:10px;margin:8px 0">';
+  h+='<div style="flex:1;'+box+';background:var(--sur);border:1.5px solid #7c3aed;color:#7c3aed">🔧 Rohrsysteme<div style="font-size:10px;font-weight:400;margin-top:2px;color:var(--mut)">Dimensionen · Rauhigkeit · Zeta-Werte prüfen</div></div>';
+  h+='<div style="flex:1;'+box+';background:var(--sur);border:1.5px solid #7c3aed;color:#7c3aed">⌥ Armaturen<div style="font-size:10px;font-weight:400;margin-top:2px;color:var(--mut)">Zeta-Werte · DN · Verifizieren</div></div>';
+  h+='</div>';
+
+  h+='<div style="margin-top:16px;padding:10px;background:var(--bg2);border-radius:8px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">';
+  h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#16a34a;color:#fff">Produkte</span>';
+  h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#f59e0b;color:#fff">Anfragen</span>';
+  h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#1d4ed8;color:#fff">Marktplatz</span>';
+  h+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;background:#7c3aed;color:#fff">Technik</span>';
+  h+='</div></div>';
+
+  _showFlowOverlay('📊 Lieferant — Prozessübersicht',h);
+}
+
+// Gemeinsames Overlay für alle Flussdiagramme
+function _showFlowOverlay(title,content){
+  var ov=document.createElement('div');
+  ov.id='flowchartOv';
+  ov.style.cssText='position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px';
+  ov.innerHTML='<div style="background:var(--sur);border-radius:16px;max-width:700px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.2)">'
+    +'<div style="padding:16px 20px;border-bottom:1.5px solid var(--brd);display:flex;align-items:center;position:sticky;top:0;background:var(--sur);z-index:1;border-radius:16px 16px 0 0"><h2 style="flex:1;font-size:16px;font-weight:800">'+title+'</h2><button onclick="document.getElementById(\'flowchartOv\').remove()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--mut)">✕</button></div>'
+    +'<div style="padding:20px 24px">'+content+'</div>'
+    +'<div style="padding:12px 20px;border-top:1px solid var(--brd);text-align:center"><button onclick="document.getElementById(\'flowchartOv\').remove()" class="btn btn-p" style="font-size:13px">Verstanden</button></div>'
+    +'</div>';
+  document.body.appendChild(ov);
+}
+
 function tutOpen(){_tS=TUT[S.currentRole]||TUT.planer;_tC=0;document.getElementById('tutTitle').textContent='🎓 '+({planer:'Planer',installateur:'Installateur',lieferant:'Lieferant',architekt:'Architekt'}[S.currentRole]||'');tutR();document.getElementById('tutOv').classList.add('open');}
 function tutClose(){document.getElementById('tutOv').classList.remove('open');}
 function tutNav(d){_tC+=d;if(_tC>=_tS.length){tutClose();return;}if(_tC<0)_tC=0;tutR();}
@@ -2685,7 +3634,7 @@ function initDropZones(){
 // ═══════════════════════════════════════════════
 (async()=>{
   try{if(typeof _GemaDB!=='undefined')await _GemaDB.init('ausschreibung',['gema_ausschreibung_v4']);}catch(e){}
-  ld();updateObjQuickLabel();if(isAdmin()){const rb=document.getElementById('roleBar');if(rb)rb.style.display='flex';}
+  ld();if(isAdmin()){const rb=document.getElementById('roleBar');if(rb)rb.style.display='flex';}
   switchRole(S.currentRole||'planer');
 })().catch(e=>console.error('[GEMA]',e));
 </script>

@@ -164,6 +164,22 @@ input,select,button,textarea{font-family:var(--sans)}
         <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="openUserModal()">+ Neuer Benutzer</button>
       </div>
       <div class="card-body">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+          <input type="text" id="filterSearch" placeholder="Name oder Email suchen…" oninput="renderUsers()" style="flex:2;min-width:180px;padding:7px 12px;border:1.5px solid var(--brd2);border-radius:8px;font-size:13px;font-family:inherit"/>
+          <select id="filterRolle" onchange="renderUsers()" style="padding:7px 10px;border:1.5px solid var(--brd2);border-radius:8px;font-size:12px;font-family:inherit">
+            <option value="">Alle Rollen</option>
+          </select>
+          <select id="filterOrg" onchange="renderUsers()" style="padding:7px 10px;border:1.5px solid var(--brd2);border-radius:8px;font-size:12px;font-family:inherit">
+            <option value="">Alle Unternehmen</option>
+          </select>
+          <select id="filterStatus" onchange="renderUsers()" style="padding:7px 10px;border:1.5px solid var(--brd2);border-radius:8px;font-size:12px;font-family:inherit">
+            <option value="">Alle Status</option>
+            <option value="aktiv">Aktiv</option>
+            <option value="inaktiv">Deaktiviert</option>
+            <option value="login_light">Login-Light</option>
+            <option value="org_admin">Org-Admin</option>
+          </select>
+        </div>
         <div class="user-list" id="userList"></div>
       </div>
     </div>
@@ -435,11 +451,45 @@ function switchTab(tab,btn){
 }
 
 // ── USERS ─────────────────────────────────────────────────────────────
+function populateFilters(){
+  // Rollen-Dropdown
+  var roleSel=document.getElementById('filterRolle');
+  if(roleSel&&roleSel.options.length<=1){
+    roles.forEach(function(r){var o=document.createElement('option');o.value=r.id;o.textContent=r.name;roleSel.appendChild(o);});
+  }
+  // Org-Dropdown
+  var orgSel=document.getElementById('filterOrg');
+  if(orgSel&&orgSel.options.length<=1){
+    orgs.forEach(function(o){var opt=document.createElement('option');opt.value=o.id;opt.textContent=o.name;orgSel.appendChild(opt);});
+    var noOrg=document.createElement('option');noOrg.value='__none__';noOrg.textContent='Kein Unternehmen';orgSel.appendChild(noOrg);
+  }
+}
+
 function renderUsers(){
-  document.getElementById('userCount').textContent=users.length+' Benutzer';
+  populateFilters();
+  // Filter anwenden
+  var q=(document.getElementById('filterSearch')||{}).value||'';
+  q=q.trim().toLowerCase();
+  var fRolle=(document.getElementById('filterRolle')||{}).value||'';
+  var fOrg=(document.getElementById('filterOrg')||{}).value||'';
+  var fStatus=(document.getElementById('filterStatus')||{}).value||'';
+
+  var filtered=users.filter(function(u){
+    if(q&&(u.name||'').toLowerCase().indexOf(q)<0&&(u.username||'').toLowerCase().indexOf(q)<0&&(u.profile?.email||'').toLowerCase().indexOf(q)<0)return false;
+    if(fRolle&&(!u.roleIds||u.roleIds.indexOf(fRolle)<0))return false;
+    if(fOrg==='__none__'&&u.orgId&&u.orgId!=='org_default')return false;
+    if(fOrg&&fOrg!=='__none__'&&u.orgId!==fOrg)return false;
+    if(fStatus==='aktiv'&&!u.active)return false;
+    if(fStatus==='inaktiv'&&u.active)return false;
+    if(fStatus==='login_light'&&u.kontotyp!=='login_light')return false;
+    if(fStatus==='org_admin'){var isOA=false;orgs.forEach(function(o){if(o.admins&&o.admins.indexOf(u.id)>=0)isOA=true;});if(!isOA)return false;}
+    return true;
+  });
+
+  document.getElementById('userCount').textContent=filtered.length+'/'+users.length+' Benutzer';
   var el=document.getElementById('userList');
   if(!users.length){el.innerHTML='<div style="text-align:center;padding:32px;color:var(--mut)">Noch keine Benutzer erfasst.</div>';return;}
-  el.innerHTML=users.map(u=>{
+  el.innerHTML=filtered.map(u=>{
     var userRoles=(u.roleIds||[]).map(rid=>{
       var r=roles.find(x=>x.id===rid);
       return r?'<span class="role-badge" style="background:'+r.color+'">'+esc(r.name)+'</span>':'';
@@ -453,11 +503,12 @@ function renderUsers(){
       '<div class="user-avatar" style="background:'+color+'">'+esc(initials)+'</div>'+
       '<div style="flex:1;min-width:0">'+
         '<div class="user-name">'+esc(u.name||u.username)+(isCurrentUser?' <span style="font-size:10px;color:var(--acc);font-weight:700">(Ich)</span>':'')+'</div>'+
-        '<div class="user-meta">@'+esc(u.username)+orgLabel+(u.active?'':' · Deaktiviert')+'</div>'+
+        '<div class="user-meta">@'+esc(u.username)+orgLabel+(u.kontotyp==='login_light'?' · <span style="color:#d97706;font-weight:700">Login-Light</span>'+(u.abo&&u.abo.typ==='testphase'?' (Testphase bis '+(u.abo.testphaseEnde||'?')+')':''):'')+(u.active?'':' · Deaktiviert')+'</div>'+
         '<div class="user-roles">'+userRoles+'</div>'+
       '</div>'+
       '<div class="user-status '+(u.active?'active':'inactive')+'"></div>'+
       '<div class="user-actions">'+
+        (userOrg&&userOrg.admins&&userOrg.admins.indexOf(u.id)>=0?'<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:#eff4ff;color:#2563eb;font-weight:700">Org-Admin</span>':(!isCurrentUser&&u.orgId?'<button class="btn btn-sm" onclick="toggleOrgAdmin(\''+u.id+'\')" title="Zum Org-Admin ernennen">🏢</button>':''))+
         '<button class="btn btn-sm" onclick="openUserModal(\''+u.id+'\')">✏</button>'+
         (!isCurrentUser?'<button class="btn btn-sm btn-danger" onclick="deleteUser(\''+u.id+'\')">🗑</button>':'')+
       '</div>'+
@@ -530,6 +581,22 @@ function saveUser(){
   closeModal('userModal');
   renderUsers();
   toast('✓ Benutzer gespeichert');
+}
+
+function toggleOrgAdmin(uid){
+  var u=users.find(function(x){return x.id===uid;});if(!u||!u.orgId)return;
+  var o=orgs.find(function(x){return x.id===u.orgId;});if(!o)return;
+  if(!o.admins)o.admins=[];
+  if(o.admins.indexOf(uid)>=0){
+    if(!confirm(esc(u.name)+' als Org-Admin entfernen?'))return;
+    o.admins=o.admins.filter(function(id){return id!==uid;});
+  } else {
+    if(!confirm(esc(u.name)+' zum Org-Admin von "'+esc(o.name)+'" ernennen?'))return;
+    o.admins.push(uid);
+  }
+  GemaAuth.saveOrgs(orgs);
+  toast('✓ Org-Admin aktualisiert');
+  renderUsers();
 }
 
 function deleteUser(uid){
