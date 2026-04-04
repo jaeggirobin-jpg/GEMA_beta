@@ -134,6 +134,14 @@ input::placeholder,textarea::placeholder{color:#cbd5e1!important}
 .rolle-be{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
 .rolle-we{background:#f0f4ff;color:#3730a3;border:1px solid #c7d2fe}
 
+/* LOGIN STATUS */
+.login-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;white-space:nowrap;display:inline-flex;align-items:center;gap:3px}
+.login-ok{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
+.login-pending{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+.login-none{background:var(--bg2);color:var(--mut2);border:1px solid var(--brd)}
+.btn-invite{padding:3px 10px;font-size:10px;font-weight:700;border-radius:6px;border:1.5px solid var(--acc-bd);background:var(--acc-bg);color:var(--acc);cursor:pointer;white-space:nowrap;transition:.15s}
+.btn-invite:hover{background:var(--acc);color:#fff}
+
 /* MODAL */
 .modal-bg{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px}
 .modal-bg.open{display:flex}
@@ -266,7 +274,7 @@ input::placeholder,textarea::placeholder{color:#cbd5e1!important}
     <div class="card" style="overflow-x:auto">
       <table class="bet-table" id="betTable">
         <thead><tr>
-          <th>Rolle</th><th>Firma</th><th>Name</th><th>Kontakt</th><th>Objekt</th><th class="no-print" style="width:80px">Aktionen</th>
+          <th>Rolle</th><th>Firma</th><th>Name</th><th>Kontakt</th><th>Objekt</th><th class="no-print">Login</th><th class="no-print" style="width:80px">Aktionen</th>
         </tr></thead>
         <tbody id="betBody"></tbody>
       </table>
@@ -609,6 +617,27 @@ function populateObjFilter(){
 const ROLLE_CLS={Bauherrschaft:'rolle-bh','Architekt / Generalplaner':'rolle-ar',Sanitärplaner:'rolle-pl','Unternehmer / Installateur':'rolle-un',Behörden:'rolle-be',Weitere:'rolle-we'};
 const ROLLE_SHORT={Bauherrschaft:'Bauherrschaft','Architekt / Generalplaner':'Architekt/GP',Sanitärplaner:'Sanitärplaner','Unternehmer / Installateur':'Unternehmer',Behörden:'Behörden',Weitere:'Weitere'};
 
+// Rolle → roleId Mapping für Einladungen
+const ROLLE_TO_ROLEID={
+  'Bauherrschaft':'role_architekt',
+  'Architekt / Generalplaner':'role_architekt',
+  'Sanitärplaner':'role_planer',
+  'Unternehmer / Installateur':'role_unternehmer',
+  'Behörden':'role_architekt',
+  'Weitere':'role_unternehmer'
+};
+
+function _getLoginStatus(b){
+  // Prüfe ob für diese Email ein User existiert
+  if(!b.email)return{status:'none',label:'–',cls:'login-none'};
+  if(typeof GemaAuth==='undefined')return{status:'none',label:'–',cls:'login-none'};
+  var user=GemaAuth.findUserByEmail(b.email);
+  if(!user)return{status:'invite',label:'Nicht eingeladen',cls:'login-none'};
+  if(user.einladung&&user.einladung.passwortGesetzt)return{status:'ok',label:'Login',cls:'login-ok',userId:user.id};
+  if(user.einladung&&!user.einladung.passwortGesetzt)return{status:'pending',label:'Login in Bearbeitung',cls:'login-pending',userId:user.id};
+  return{status:'ok',label:'Login',cls:'login-ok',userId:user.id};
+}
+
 function renderBeteiligte(){
   const objFilter=$('betObjFilter')?.value||'';
   const rolleFilter=$('betRolleFilter')?.value||'';
@@ -624,13 +653,24 @@ function renderBeteiligte(){
     const cls=ROLLE_CLS[b.rolle]||'rolle-we';
     const short=ROLLE_SHORT[b.rolle]||b.rolle;
     const fullname=[b.vorname,b.name].filter(Boolean).join(' ');
-    const kontakt=[b.email,b.telefon||b.mobile].filter(Boolean).join(' · ');
+    const ls=_getLoginStatus(b);
+    let loginCell='';
+    if(ls.status==='ok'){
+      loginCell='<span class="login-status login-ok">✓ '+esc(ls.label)+'</span>';
+    } else if(ls.status==='pending'){
+      loginCell='<span class="login-status login-pending">⟳ '+esc(ls.label)+'</span>';
+    } else if(ls.status==='invite'&&b.email){
+      loginCell='<button class="btn-invite" onclick="inviteBeteiligter(\''+esc(b.id)+'\')">✉ Einladen</button>';
+    } else {
+      loginCell='<span class="login-status login-none">–</span>';
+    }
     return `<tr>
       <td><span class="rolle-badge ${cls}">${esc(short)}</span></td>
       <td style="font-weight:600">${esc(b.firma||'–')}</td>
       <td>${esc(fullname||'–')}${b.funktion?'<br><span style="font-size:11px;color:var(--mut)">'+esc(b.funktion)+'</span>':''}</td>
       <td style="font-size:12px">${b.email?'<a href="mailto:'+esc(b.email)+'" style="color:var(--acc)">'+esc(b.email)+'</a><br>':''}${esc(b.telefon||b.mobile||'')}</td>
       <td style="font-size:12px;color:var(--mut)">${esc(obj?.name||'–')}</td>
+      <td class="no-print">${loginCell}</td>
       <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-ghost btn-xs" onclick="openBetModal('${esc(b.id)}')">✏</button>
         <button class="btn btn-ghost btn-xs" onclick="deleteBet('${esc(b.id)}')">✕</button>
@@ -671,10 +711,11 @@ function saveBet(){
   if(!objektId){toast('⚠ Bitte Objekt wählen');return;}
   const editId=$('betEditId').value;
   const bkpRaw=$('betBkp').value.trim();
+  const email=$('betEmail').value.trim();
   const data={objektId,rolle:$('betRolle').value,firma:$('betFirma').value.trim(),name:$('betName').value.trim(),
     vorname:$('betVorname').value.trim(),funktion:$('betFunktion').value.trim(),strasse:$('betStrasse').value.trim(),
     plz:$('betPlz').value.trim(),ort:$('betOrt').value.trim(),kanton:($('betKanton')?$('betKanton').value:'').trim(),telefon:$('betTelefon').value.trim(),
-    mobile:$('betMobile').value.trim(),email:$('betEmail').value.trim(),
+    mobile:$('betMobile').value.trim(),email:email,
     bkp:bkpRaw?bkpRaw.split(',').map(s=>s.trim()).filter(Boolean):[],notizen:$('betNotizen').value.trim()};
   if(editId){
     const idx=_mem.beteiligte.findIndex(x=>x.id===editId);
@@ -696,6 +737,64 @@ function deleteBet(directId){
   toast('🗑 Beteiligter gelöscht');
 }
 window.deleteBet=deleteBet;
+
+function inviteBeteiligter(betId){
+  const b=_mem.beteiligte.find(x=>x.id===betId);
+  if(!b||!b.email){toast('⚠ Keine E-Mail-Adresse vorhanden');return;}
+  if(typeof GemaAuth==='undefined'){toast('⚠ Auth-System nicht verfügbar');return;}
+  // Prüfe ob schon eingeladen
+  const existing=GemaAuth.findUserByEmail(b.email);
+  if(existing){
+    toast('ℹ Dieser Benutzer hat bereits ein Konto');
+    renderBeteiligte();
+    return;
+  }
+  const roleId=ROLLE_TO_ROLEID[b.rolle]||'role_unternehmer';
+  const currentUser=GemaAuth.getCurrentUser();
+  const personName=[b.vorname,b.name].filter(Boolean).join(' ');
+  const result=GemaAuth.inviteBeteiligter({
+    email:b.email,
+    firma:b.firma||'',
+    person:personName||b.firma||'',
+    rolle:b.rolle,
+    roleId:roleId,
+    orgId:currentUser?currentUser.orgId:'org_default',
+    eingeladenVon:currentUser?currentUser.id:'',
+    beteiligterObjektId:b.objektId
+  });
+  if(result.existingAccount){
+    toast('ℹ Dieser Benutzer hat bereits ein Konto — kein neuer Einladungslink nötig');
+  } else {
+    // Einladungslink anzeigen
+    const url=location.origin+'/'+result.loginUrl;
+    _showInviteLink(b,url);
+    toast('✓ Einladung erstellt');
+  }
+  renderBeteiligte();
+}
+window.inviteBeteiligter=inviteBeteiligter;
+
+function _showInviteLink(bet,url){
+  const fullname=[bet.vorname,bet.name].filter(Boolean).join(' ')||bet.firma||'Beteiligter';
+  const modal=document.createElement('div');
+  modal.className='modal-bg open';
+  modal.id='invLinkModal';
+  modal.innerHTML=`<div class="modal" style="max-width:480px">
+    <div class="modal-hd"><h3>Einladungslink</h3><button class="modal-close" onclick="document.getElementById('invLinkModal').remove()">✕</button></div>
+    <div class="modal-bd">
+      <p style="font-size:13px;margin-bottom:12px"><strong>${esc(fullname)}</strong> (${esc(bet.email)}) wurde eingeladen.</p>
+      <p style="font-size:12px;color:var(--mut);margin-bottom:12px">Senden Sie diesen Link per E-Mail. Nach dem Klick kann sich der Beteiligte registrieren.</p>
+      <div style="display:flex;gap:6px">
+        <input type="text" value="${esc(url)}" readonly style="flex:1;padding:8px 10px;border:1.5px solid var(--brd2);border-radius:var(--r-sm);font-size:12px;font-family:monospace;background:var(--bg)" id="invLinkInput"/>
+        <button class="btn btn-primary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('invLinkInput').value);this.textContent='Kopiert!';setTimeout(()=>this.textContent='Kopieren',2000)">Kopieren</button>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost" onclick="document.getElementById('invLinkModal').remove()">Schliessen</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
 
 function updateBadges(){
   const _vis = _isAdminUser

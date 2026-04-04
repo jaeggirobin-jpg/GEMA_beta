@@ -274,28 +274,51 @@ body::before{
   var redirect = params.get('r') || 'index.html';
   var inviteToken = params.get('invite') || '';
 
-  // Einladungs-Modus: Passwort setzen
+  // Einladungs-Modus: Registrierung oder bestehender Account
   if(inviteToken){
+    // Prüfe ob Token gültig ist und ob Account bereits existiert
+    var users=GemaAuth.getUsers()||[];
+    var invUser=users.find(function(u){return u.einladung&&u.einladung.token===inviteToken;});
+    var invEmail=invUser&&invUser.profile?invUser.profile.email:'';
+    var invName=invUser?invUser.name:'';
+    var invFirma=invUser&&invUser.profile?invUser.profile.firma:'';
+
+    // Fall 1: Token bereits aktiviert (Passwort schon gesetzt)
+    if(invUser&&invUser.einladung&&invUser.einladung.passwortGesetzt){
+      document.getElementById('loginForm').innerHTML=
+        '<h2 style="font-size:20px;font-weight:800;margin-bottom:8px;text-align:center">Bereits registriert</h2>'+
+        '<p style="font-size:13px;color:#6b7280;text-align:center;margin-bottom:20px">Sie haben bereits ein Konto. Bitte melden Sie sich an.</p>'+
+        '<button onclick="location.href=\'sys_login.html\'" style="width:100%;padding:12px;border:none;border-radius:10px;background:#1d4ed8;color:#fff;font-size:14px;font-weight:700;cursor:pointer">→ Zum Login</button>';
+      return;
+    }
+
+    // Fall 2: Neuer Account — Registrierungsformular
     document.getElementById('loginForm').innerHTML=
       '<h2 style="font-size:20px;font-weight:800;margin-bottom:8px;text-align:center">Willkommen bei GEMA</h2>'+
-      '<p style="font-size:13px;color:var(--mut,#6b7280);text-align:center;margin-bottom:20px">Sie wurden eingeladen. Setzen Sie Ihr Passwort um loszulegen.</p>'+
-      '<div class="fg" style="margin-bottom:12px"><label style="font-size:12px;font-weight:700">Passwort wählen</label><input type="password" id="invPw1" class="login-input" placeholder="Mind. 4 Zeichen"/></div>'+
-      '<div class="fg" style="margin-bottom:12px"><label style="font-size:12px;font-weight:700">Passwort bestätigen</label><input type="password" id="invPw2" class="login-input"/></div>'+
+      '<p style="font-size:13px;color:#6b7280;text-align:center;margin-bottom:20px">Sie wurden eingeladen. Vervollständigen Sie Ihr Profil um loszulegen.</p>'+
+      '<div style="margin-bottom:12px"><label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">Name</label><input type="text" id="invName" class="login-input" placeholder="Vor- und Nachname" value="'+(invName&&invName!=='Eingeladener'&&invName!=='Lieferant'?invName:'')+'"/></div>'+
+      '<div style="margin-bottom:12px"><label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">Firma</label><input type="text" id="invFirma" class="login-input" placeholder="Firmenname" value="'+(invFirma||'')+'"/></div>'+
+      '<div style="margin-bottom:12px"><label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">E-Mail</label><input type="email" id="invEmail" class="login-input" value="'+(invEmail||'')+'" style="background:#f8fafc;color:#6b7280" readonly/></div>'+
+      '<div style="margin-bottom:12px"><label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">Passwort wählen</label><input type="password" id="invPw1" class="login-input" placeholder="Mind. 4 Zeichen"/></div>'+
+      '<div style="margin-bottom:12px"><label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">Passwort bestätigen</label><input type="password" id="invPw2" class="login-input"/></div>'+
       '<div id="invError" style="color:#dc2626;font-size:12px;margin-bottom:8px;display:none"></div>'+
       '<button onclick="activateInvite()" style="width:100%;padding:12px;border:none;border-radius:10px;background:#1d4ed8;color:#fff;font-size:14px;font-weight:700;cursor:pointer">Zugang aktivieren</button>'+
-      '<div style="margin-top:16px;padding:12px;background:#eff4ff;border-radius:8px;font-size:12px;color:#1d4ed8;line-height:1.5;text-align:center">🎁 <strong>30 Tage kostenlos testen</strong> — Alle Features freigeschaltet. Danach entscheiden Sie.</div>';
-    w.activateInvite=function(){
+      '<div style="margin-top:16px;padding:12px;background:#eff4ff;border-radius:8px;font-size:12px;color:#1d4ed8;line-height:1.5;text-align:center"><strong>30 Tage kostenlos testen</strong> — Alle Features freigeschaltet. Danach entscheiden Sie.</div>';
+    window.activateInvite=function(){
+      var name=document.getElementById('invName').value.trim();
+      var firma=document.getElementById('invFirma').value.trim();
       var pw1=document.getElementById('invPw1').value;
       var pw2=document.getElementById('invPw2').value;
       var err=document.getElementById('invError');
       err.style.display='none';
+      if(!name){err.textContent='Bitte geben Sie Ihren Namen ein.';err.style.display='';return;}
       if(!pw1||pw1.length<4){err.textContent='Passwort muss mind. 4 Zeichen haben.';err.style.display='';return;}
       if(pw1!==pw2){err.textContent='Passwörter stimmen nicht überein.';err.style.display='';return;}
-      var user=GemaAuth.activateInvitation(inviteToken,pw1);
+      var user=GemaAuth.activateInvitation(inviteToken,pw1,{name:name,firma:firma});
       if(!user){err.textContent='Einladungslink ungültig oder abgelaufen.';err.style.display='';return;}
-      // Auto-Login
+      // Auto-Login + rollenspezifische Weiterleitung
       GemaAuth.login(user.username,pw1,true);
-      location.href='sys_lieferant_dashboard.html';
+      location.href=GemaAuth.getRedirectForUser(user);
     };
     return;
   }
@@ -334,7 +357,7 @@ body::before{
       // Rollenspezifische Weiterleitung
       var dest=redirect;
       if(redirect==='index.html'||!redirect){
-        if(user.roleIds&&(user.roleIds.indexOf('role_lieferant')>=0||user.roleIds.indexOf('role_pruefer')>=0)) dest='sys_lieferant_dashboard.html';
+        dest=GemaAuth.getRedirectForUser(user);
       }
       setTimeout(function(){ location.href=dest; }, 700);
     } else {
