@@ -784,7 +784,15 @@ function selectObjQuick(id){
   _objQuickOpen=false;
   document.getElementById('objQuickDrop').style.display='none';
   updateObjQuickLabel();
-  ld();buildTabs();nav(defP());
+  ld();
+  // Erste Ausschreibung des neuen Objekts als aktiv setzen
+  var objAus=S.ausschreibungen.filter(function(a){return a.objektId===id;});
+  if(objAus.length){
+    S.activeAusId=objAus[0].id;
+    ldBKP(objAus[0]);
+    save();
+  }
+  buildTabs();nav(defP());
   toast('Projekt gewechselt');
 }
 
@@ -799,6 +807,8 @@ function selectAusschreibung(ausId){
       updateObjQuickLabel();
     }
   }
+  // BKP-Daten der gewählten Ausschreibung laden
+  if(a)ldBKP(a);
   buildTabs();nav('pbkp');
 }
 
