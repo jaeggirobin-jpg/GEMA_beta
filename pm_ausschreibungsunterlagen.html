@@ -2815,7 +2815,13 @@ VIEWS.idet=function(){
   // Vorbedingungen section (read + fill own data)
   h+=`<div class="card"><div class="card-hd"><h3>📜 Vorbedingungen</h3>${isBasic?`<button class="btn btn-s btn-sm" onclick="oM('mProfil')">👤 Profil → Autofill</button>`:`<button class="btn btn-s btn-sm" onclick="showGate('Profil-Autofill','95')" style="opacity:.6">🔒 Autofill (Basic)</button>`}</div><div class="card-bd">`;
   if(a.vorbedingungen?.modus==='pdf')h+=`<p style="font-size:13px">📄 Beilage: ${E(a.vorbedingungen.pdfName||'PDF')}</p>`;
-  else{VB_KAPITEL.forEach(k=>{const txt=(a.vorbedingungen?.kapitel||{})[k.id]||'';if(txt)h+=`<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:var(--mut)">${E(k.name)}</div><p style="font-size:12px;color:var(--txt2);white-space:pre-line">${E(txt)}</p></div>`;});}
+  else{VB_KAPITEL.forEach(k=>{const txt=(a.vorbedingungen?.kapitel||{})[k.id]||'';
+    var profilKap=['ang','pers','regie'];var isProfilKap=profilKap.indexOf(k.id)>=0;
+    h+=`<div style="margin-bottom:10px;padding:8px 12px;background:${txt?'var(--sur)':'var(--bg2)'};border:1px solid ${txt?'var(--grn-bd,#bbf7d0)':'var(--brd)'};border-radius:8px">`;
+    h+=`<div style="font-size:11px;font-weight:700;color:${txt?'var(--grn)':'var(--mut)'};display:flex;align-items:center;gap:6px">${txt?'✓':'○'} ${E(k.name)}${isProfilKap&&!txt?' <span style="font-size:9px;color:var(--acc)">(via Profil ausfüllbar)</span>':''}</div>`;
+    if(txt)h+=`<p style="font-size:12px;color:var(--txt2);white-space:pre-line;margin-top:4px">${E(txt)}</p>`;
+    h+=`</div>`;
+  });}
   h+=`</div></div>`;
 
   // Beilagen
@@ -3427,7 +3433,71 @@ function saveProfil(){const me=S.beteiligte.find(b=>b.id===S.currentUserId);if(!
     persK:document.getElementById('pfPersK')?.value||'',persT:document.getElementById('pfPersT')?.value||'',persM:document.getElementById('pfPersM')?.value||'',tv:document.getElementById('pfTV')?.value||'',lm:document.getElementById('pfLM')?.value||'',
     r1:document.getElementById('pfR1')?.value||'',r2:document.getElementById('pfR2')?.value||'',r3:document.getElementById('pfR3')?.value||'',r4:document.getElementById('pfR4')?.value||'',r5:document.getElementById('pfR5')?.value||'',r6:document.getElementById('pfR6')?.value||'',
     z1:document.getElementById('pfZ1')?.value||'',z2:document.getElementById('pfZ2')?.value||''};
-  save();cM('mProfil');toast('Profil gespeichert');}
+  save();cM('mProfil');toast('Profil gespeichert');
+  // Auto-Fill Vorbedingungen mit Profildaten
+  fillVBFromProfil(me);
+}
+
+function fillVBFromProfil(me){
+  var a=curA();if(!a||!me||!me.profil)return;
+  var p=me.profil;
+  if(!a.vorbedingungen)a.vorbedingungen={modus:'gema',kapitel:{},kapitelListe:null};
+  var kap=a.vorbedingungen.kapitel||(a.vorbedingungen.kapitel={});
+
+  // ang: Angaben Unternehmer
+  var ang=[];
+  if(p.firma)ang.push('Firma: '+p.firma);
+  if(p.gf)ang.push('Geschäftsführer: '+p.gf);
+  if(p.addr)ang.push('Adresse: '+p.addr);
+  if(p.gj)ang.push('Gründungsjahr: '+p.gj);
+  if(p.instBer)ang.push('Installationsberechtigung: '+p.instBer);
+  if(p.versGes||p.versNr){
+    ang.push('');
+    ang.push('Versicherung:');
+    if(p.versGes)ang.push('  Gesellschaft: '+p.versGes);
+    if(p.versNr)ang.push('  Police-Nr.: '+p.versNr);
+    if(p.deckP)ang.push('  Deckung pro Person: CHF '+p.deckP);
+    if(p.deckS)ang.push('  Deckung pro Ereignis: CHF '+p.deckS);
+  }
+  if(ang.length)kap.ang=ang.join('\n');
+
+  // pers: Anzahl einsetzbare Mitarbeiter
+  var pers=[];
+  if(p.persK)pers.push('Kaufmännische Mitarbeiter: '+p.persK);
+  if(p.persT)pers.push('Technische Mitarbeiter: '+p.persT);
+  if(p.persM)pers.push('Monteure total: '+p.persM);
+  if(p.tv)pers.push('Technisch Verantwortlicher: '+p.tv);
+  if(p.lm)pers.push('Leitender Monteur: '+p.lm);
+  if(pers.length)kap.pers=pers.join('\n');
+
+  // regie: Regiearbeiten
+  var regie=[];
+  regie.push('Regieansätze (CHF/Std.):');
+  if(p.r1)regie.push('  Inhaber / Techniker: '+p.r1);
+  if(p.r2)regie.push('  Montageleiter: '+p.r2);
+  if(p.r3)regie.push('  Leitender Monteur: '+p.r3);
+  if(p.r4)regie.push('  A-Monteur: '+p.r4);
+  if(p.r5)regie.push('  B-Monteur: '+p.r5);
+  if(p.r6)regie.push('  Lernender 1./2. Lehrjahr: '+p.r6);
+  if(p.z1||p.z2){
+    regie.push('');
+    regie.push('Zuschläge Sonderarbeitszeiten:');
+    if(p.z1)regie.push('  Überzeit: '+p.z1+'%');
+    if(p.z2)regie.push('  Nacht-/Sa./So.-Arbeit: '+p.z2+'%');
+  }
+  if(regie.length>1)kap.regie=regie.join('\n');
+
+  // kapitelListe auch aktualisieren wenn vorhanden
+  if(a.vorbedingungen.kapitelListe){
+    a.vorbedingungen.kapitelListe.forEach(function(k){
+      if(kap[k.id]&&!k.html){
+        k.html='<p>'+E(kap[k.id]).replace(/\n/g,'</p><p>')+'</p>';
+      }
+    });
+  }
+
+  save();
+}
 
 // ── Lieferant ──
 function lSend(aid,ev){const f=ev.target.files[0];if(!f)return;const a=S.nettoAnfragen.find(x=>x.id===aid);if(!a)return;a.status='erhalten';a.pdfName=f.name;save();lg('📄','Netto gesendet',a.bkpCode);toast('Gesendet');buildTabs();nav('lan');}
