@@ -1693,6 +1693,33 @@ function initBKPDragDrop(){
       e.dataTransfer.setData('text/plain',String(_dragIdx));
     });
     row.addEventListener('dragend',function(){row.style.opacity='1';clearDropLines();});
+    // Erlaubt Drop über Zeilen (zeigt move-Cursor statt verboten)
+    row.addEventListener('dragover',function(e){
+      e.preventDefault();e.dataTransfer.dropEffect='move';
+      clearDropLines();
+      // Nächste Drop-Line unterhalb highlighten
+      var next=row.nextElementSibling;
+      if(next&&next.classList.contains('bkp-drop-line')){
+        next.style.height='4px';next.style.borderTop='3px solid #1d4ed8';
+      }
+    });
+    row.addEventListener('drop',function(e){
+      e.preventDefault();clearDropLines();
+      if(_dragIdx===null)return;
+      // Drop auf Zeile = vor diese Zeile einfügen
+      var targetIdx=parseInt(row.dataset.dragIdx);
+      var a=curA();if(!a)return;
+      var l=a.lose.find(function(x){return x.id===_dragLos;});
+      if(!l)return;
+      var fromIdx=_dragIdx;
+      if(fromIdx===targetIdx||fromIdx===targetIdx-1){_dragIdx=null;return;}
+      var moved=l.positionen.splice(fromIdx,1)[0];
+      var toIdx=targetIdx>fromIdx?targetIdx-1:targetIdx;
+      l.positionen.splice(toIdx,0,moved);
+      if(isDynBKP()){renumberBKPInGroup(l,toIdx);}
+      _dragIdx=null;_dragLos=null;
+      sv();saveBKPOpenState();nav('pbkp');
+    });
   });
   document.querySelectorAll('.bkp-drop-line').forEach(function(line){
     line.addEventListener('dragover',function(e){
