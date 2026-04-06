@@ -1434,6 +1434,12 @@ function openLieferungDialog(losId,idx){
 
 function toggleLieferungFlag(checked){
   if(_liefLosId===null||_liefIdx===null)return;
+  if(!checked){
+    if(!confirm('Lieferung-Markierung entfernen? Der Offerte-Button wird ausgeblendet.')){
+      document.getElementById('liefToggle').checked=true;
+      return;
+    }
+  }
   var a=curA();if(!a)return;
   var l=a.lose.find(function(x){return x.id===_liefLosId;});
   if(!l)return;
