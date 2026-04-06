@@ -1104,6 +1104,7 @@ function renderBKPTree(positionen,losId){
     h+='<span style="font-weight:800;color:var(--acc);font-size:13px;min-width:32px">'+E(prefix)+'</span>';
     h+='<span style="font-weight:700;font-size:13px;flex:1">'+E(gTitle)+'</span>';
     h+='<span style="font-size:11px;color:var(--mut);background:var(--sur);padding:2px 8px;border-radius:10px;border:1px solid var(--brd)">'+checkedInGroup+'/'+totalInGroup+'</span>';
+    h+='<button onclick="event.stopPropagation();addBKPPosInGroup(\''+losId+'\',\''+prefix+'\')" style="margin-left:4px;background:none;border:1.5px solid var(--brd2);border-radius:6px;padding:2px 8px;font-size:10px;font-weight:700;color:var(--acc);cursor:pointer;font-family:inherit;white-space:nowrap" onmouseover="this.style.background=\'var(--acc-bg)\'" onmouseout="this.style.background=\'none\'" title="Neue Position in '+E(prefix)+'">+ Position</button>';
     h+='</div>';
     h+='<div class="bkp-group-bd" style="display:none">';
     g.items.forEach(function(item){
@@ -1683,6 +1684,31 @@ function addBKPPos(losId){
   l.positionen.push({bkp:'',titel:'Neue Position',checked:false,status:'offen',istLieferung:false,lieferungTyp:null,modulUrl:null,offerte:null,montagePosition:null});
   sv();saveBKPOpenState();nav('pbkp');
 }
+function addBKPPosInGroup(losId,prefix){
+  var a=curA();if(!a)return;
+  var l=a.lose.find(function(x){return x.id===losId;});
+  if(!l)return;
+  // Finde die letzte Position in dieser 3-stelligen BKP-Gruppe
+  var lastIdx=-1;
+  l.positionen.forEach(function(p,i){if(p.bkp.substring(0,3)===prefix)lastIdx=i;});
+  // Nächste freie Sub-Nummer berechnen
+  var maxSub=0;
+  l.positionen.forEach(function(p){
+    if(p.bkp.substring(0,3)===prefix&&p.bkp.indexOf('.')>=0){
+      var sub=parseInt(p.bkp.split('.')[1])||0;
+      if(sub>maxSub)maxSub=sub;
+    }
+  });
+  var newBkp=prefix+'.'+(maxSub+1);
+  var newPos={bkp:newBkp,titel:'Neue Position',checked:true,status:'offen',istLieferung:false,lieferungTyp:null,modulUrl:null,offerte:null,montagePosition:null};
+  if(lastIdx>=0){
+    l.positionen.splice(lastIdx+1,0,newPos);
+  } else {
+    l.positionen.push(newPos);
+  }
+  sv();saveBKPOpenState();nav('pbkp');
+}
+
 function rmBKPPos(losId,idx){
   var a=curA();if(!a)return;
   var l=a.lose.find(function(x){return x.id===losId;});
@@ -1723,8 +1749,8 @@ function initBKPDragDrop(){
     row.addEventListener('drop',function(e){
       e.preventDefault();clearDropLines();
       if(_dragIdx===null)return;
-      // Drop auf Zeile = vor diese Zeile einfügen
-      var targetIdx=parseInt(row.dataset.dragIdx);
+      // Drop auf Zeile = NACH dieser Zeile einfügen (blauer Strich zeigt unterhalb)
+      var targetIdx=parseInt(row.dataset.dragIdx)+1;
       var a=curA();if(!a)return;
       var l=a.lose.find(function(x){return x.id===_dragLos;});
       if(!l)return;
