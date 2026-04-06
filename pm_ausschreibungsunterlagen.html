@@ -2427,28 +2427,63 @@ function apSuggest(q){
   if(!q||q.length<2){sugEl.style.display='none';return;}
   var rolle=document.getElementById('apR').value;
   q=q.toLowerCase();
-  // Suche in bestehenden Usern mit passender Rolle
-  var users=[];
-  try{users=GemaAuth.getUsers()||[];}catch(e){}
+  var html='';var found=0;
+
+  // 1. Zentraler Lieferantenkatalog (für Lieferanten-Rolle)
+  if(rolle==='lieferant'&&typeof GemaProdukte!=='undefined'){
+    var katalogMatches=GemaProdukte.searchLieferanten(q).slice(0,5);
+    katalogMatches.forEach(function(l){
+      found++;
+      html+='<div onclick="apSelectKatalogLief(\''+l.id+'\')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--brd);font-size:12px;display:flex;align-items:center;gap:8px;transition:.1s" onmouseover="this.style.background=\'var(--bg2)\'" onmouseout="this.style.background=\'\'">'
+        +'<div style="flex:1"><strong>'+E(l.firma)+'</strong><div style="font-size:11px;color:var(--mut)">'+E(l.kontaktPerson||'')+' · '+E(l.email||'')+'</div></div>'
+        +'<span class="tag t-am" style="font-size:9px">Katalog</span>'
+        +'</div>';
+    });
+  }
+
+  // 2. Bestehende Users mit Login
+  var users=[];try{users=GemaAuth.getUsers()||[];}catch(e){}
   var roleMap={installateur:'role_unternehmer',lieferant:'role_lieferant',architekt:'role_architekt'};
   var targetRole=roleMap[rolle];
+  // Bereits gezeigte Emails (aus Katalog) ausschliessen
+  var shownEmails=new Set();
+  if(rolle==='lieferant'&&typeof GemaProdukte!=='undefined'){
+    GemaProdukte.searchLieferanten(q).forEach(function(l){if(l.email)shownEmails.add(l.email.toLowerCase());});
+  }
   var matches=users.filter(function(u){
     if(!u.active)return false;
+    if(u.profile?.email&&shownEmails.has(u.profile.email.toLowerCase()))return false;
+    if(u.username&&shownEmails.has(u.username.toLowerCase()))return false;
     var nameMatch=(u.name||'').toLowerCase().indexOf(q)>=0;
     var firmaMatch=(u.profile?.firma||'').toLowerCase().indexOf(q)>=0;
     var emailMatch=(u.username||'').toLowerCase().indexOf(q)>=0;
     return(nameMatch||firmaMatch||emailMatch);
   }).slice(0,5);
-  if(!matches.length){sugEl.style.display='none';return;}
-  sugEl.style.display='block';
-  sugEl.innerHTML=matches.map(function(u){
+  matches.forEach(function(u){
+    found++;
     var firma=u.profile?.firma||u.name;
-    var hasTargetRole=u.roleIds&&u.roleIds.indexOf(targetRole)>=0;
-    return '<div onclick="apSelectSuggestion(\''+u.id+'\')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--brd);font-size:12px;display:flex;align-items:center;gap:8px;transition:.1s" onmouseover="this.style.background=\'var(--bg2)\'" onmouseout="this.style.background=\'\'">'
+    html+='<div onclick="apSelectSuggestion(\''+u.id+'\')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--brd);font-size:12px;display:flex;align-items:center;gap:8px;transition:.1s" onmouseover="this.style.background=\'var(--bg2)\'" onmouseout="this.style.background=\'\'">'
       +'<div style="flex:1"><strong>'+E(firma)+'</strong><div style="font-size:11px;color:var(--mut)">'+E(u.name)+' · '+E(u.profile?.email||u.username)+'</div></div>'
       +'<span class="tag t-gr" style="font-size:9px">✓ Login</span>'
       +'</div>';
-  }).join('');
+  });
+
+  if(!found){sugEl.style.display='none';return;}
+  sugEl.style.display='block';
+  sugEl.innerHTML=html;
+}
+
+function apSelectKatalogLief(liefId){
+  if(typeof GemaProdukte==='undefined')return;
+  var l=GemaProdukte.getLieferant(liefId);
+  if(!l)return;
+  document.getElementById('apF').value=l.firma||'';
+  document.getElementById('apP').value=l.kontaktPerson||'';
+  document.getElementById('apE').value=l.email||'';
+  document.getElementById('apT').value=l.telefon||'';
+  document.getElementById('apSuggestions').style.display='none';
+  // Merke Katalog-ID für spätere Verknüpfung
+  document.getElementById('apF').dataset.katalogId=liefId;
 }
 
 function apSelectSuggestion(userId){
@@ -2460,6 +2495,7 @@ function apSelectSuggestion(userId){
   document.getElementById('apE').value=u.profile?.email||u.username||'';
   document.getElementById('apT').value=u.profile?.telefon||'';
   document.getElementById('apSuggestions').style.display='none';
+  document.getElementById('apF').dataset.katalogId='';
 }
 
 
@@ -3303,7 +3339,27 @@ function findUserByEmail(email){
 
 function addPerson(){var r=document.getElementById('apR').value,f=document.getElementById('apF').value.trim();if(!f){toast('Firma?','error');return;}
   var email=document.getElementById('apE').value.trim();
-  var obj={id:r.substring(0,4)+'-'+Date.now(),rolle:r,userId:null,firma:f,person:document.getElementById('apP').value.trim(),email:email,tel:document.getElementById('apT').value.trim(),gewerke:'',profil:{},_loginStatus:'none'};
+  var person=document.getElementById('apP').value.trim();
+  var tel=document.getElementById('apT').value.trim();
+  var katalogId=document.getElementById('apF').dataset.katalogId||'';
+
+  // Lieferant: Zentralen Katalog nutzen/erstellen
+  if(r==='lieferant'&&typeof GemaProdukte!=='undefined'){
+    var zentralLief=null;
+    if(katalogId){
+      zentralLief=GemaProdukte.getLieferant(katalogId);
+    }
+    if(!zentralLief){
+      // Schnell-Erfassung: erstellt oder findet existierenden
+      zentralLief=GemaProdukte.quickCreateLieferant(f,email);
+      if(zentralLief&&person&&!zentralLief.kontaktPerson){
+        GemaProdukte.updateLieferant(zentralLief.id,{kontaktPerson:person,telefon:tel||zentralLief.telefon});
+      }
+    }
+    if(zentralLief)katalogId=zentralLief.id;
+  }
+
+  var obj={id:r.substring(0,4)+'-'+Date.now(),rolle:r,userId:null,firma:f,person:person,email:email,tel:tel,gewerke:'',profil:{},_loginStatus:'none',katalogLieferantId:katalogId||null};
   // Auto-Verknüpfung: prüfe ob ein User mit dieser Email existiert
   var existingUser=findUserByEmail(email);
   if(existingUser){
@@ -3312,7 +3368,7 @@ function addPerson(){var r=document.getElementById('apR').value,f=document.getEl
     toast(f+' ✓ (mit bestehendem Account verknüpft)');
   }
   if(r==='lieferant')obj.abo={aktiv:false,typ:'gratis',gewerke:[]};if(r==='installateur')obj.abo={typ:'gratis',aktiv:true};
-  S.beteiligte.push(obj);save();lg('👥','+',f);cM('mPerson');['apF','apP','apE','apT'].forEach(function(x){document.getElementById(x).value='';});if(!existingUser)toast(f+' ✓');buildTabs();nav(S.currentRole==='planer'?'pbet':defP());}
+  S.beteiligte.push(obj);save();lg('👥','+',f);cM('mPerson');['apF','apP','apE','apT'].forEach(function(x){document.getElementById(x).value='';});document.getElementById('apF').dataset.katalogId='';if(!existingUser)toast(f+' ✓');buildTabs();nav(S.currentRole==='planer'?'pbet':defP());}
 
 function inviteLieferant(beteiligterIdx){
   var b=S.beteiligte[beteiligterIdx];if(!b)return;
