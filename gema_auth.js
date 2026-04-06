@@ -129,34 +129,56 @@
   ];
 
   var DEFAULT_USERS = [
+    // ── Admin ──
     {id:'user_admin', username:'admin', name:'Administrator',
      password:_hash('gema2025'), roleIds:['role_admin'], orgId:'org_default',
-     active:true, createdAt:new Date().toISOString(),
-     profile:{email:'',telefon:'',sprache:'de',benachrichtigungen:true,standardObjekt:'',einheiten:'metrisch'}},
-    // Demo-Lieferanten (Login-Light + verschiedene Abo-Stufen)
+     active:true, createdAt:'2025-01-01T08:00:00Z',
+     profile:{email:'admin@gema.ch',telefon:'',sprache:'de',benachrichtigungen:true,standardObjekt:'',einheiten:'metrisch'}},
+    // ── Planer ──
+    {id:'user_planer_1', username:'planer', name:'Felix Jäggi',
+     password:_hash('planer2025'), roleIds:['role_planer'], orgId:'org_default',
+     active:true, createdAt:'2025-01-01T08:00:00Z',
+     kontotyp:'vollzugang', abo:{typ:'premium'},
+     profile:{email:'felix@jaeggivollmer.ch',telefon:'061 692 03 11',firma:'Jäggi Vollmer GmbH',person:'Felix Jäggi',sprache:'de',benachrichtigungen:true,dynamischeBKP:true}},
+    // ── Unternehmer / Installateur ──
+    {id:'user_unternehmer_1', username:'installateur', name:'Peter Meier',
+     password:_hash('inst2025'), roleIds:['role_unternehmer'], orgId:'org_default',
+     active:true, createdAt:'2025-03-15T08:00:00Z',
+     kontotyp:'vollzugang', abo:{typ:'basic'},
+     profile:{email:'meier@meiersanitaer.ch',telefon:'061 333 44 55',firma:'Meier Sanitär AG',person:'Peter Meier',sprache:'de',benachrichtigungen:true},
+     einladung:{token:'inv_meier',eingeladenVon:'user_planer_1',eingeladenAm:'2025-03-10T08:00:00Z',angenommenAm:'2025-03-15T08:00:00Z',passwortGesetzt:true}},
+    {id:'user_unternehmer_2', username:'steiner@steinersanitaer.ch', name:'Thomas Steiner',
+     password:_hash('steiner2025'), roleIds:['role_unternehmer'], orgId:'org_default',
+     active:true, createdAt:'2025-04-01T08:00:00Z',
+     kontotyp:'vollzugang', abo:{typ:'basic'},
+     profile:{email:'steiner@steinersanitaer.ch',telefon:'044 222 33 44',firma:'Steiner Sanitär GmbH',person:'Thomas Steiner',sprache:'de',benachrichtigungen:true},
+     einladung:{token:'inv_steiner',eingeladenVon:'user_planer_1',eingeladenAm:'2025-03-25T08:00:00Z',angenommenAm:'2025-04-01T08:00:00Z',passwortGesetzt:true}},
+    // ── Architekt ──
+    {id:'user_architekt_1', username:'architekt', name:'Sarah Müller',
+     password:_hash('arch2025'), roleIds:['role_architekt'], orgId:'org_default',
+     active:true, createdAt:'2025-02-01T08:00:00Z',
+     kontotyp:'vollzugang', abo:{typ:'basic'},
+     profile:{email:'mueller@archmuster.ch',telefon:'061 555 66 77',firma:'Architektur Muster AG',person:'Sarah Müller',sprache:'de',benachrichtigungen:true},
+     einladung:{token:'inv_arch',eingeladenVon:'user_planer_1',eingeladenAm:'2025-01-20T08:00:00Z',angenommenAm:'2025-02-01T08:00:00Z',passwortGesetzt:true}},
+    // ── Lieferanten ──
     {id:'user_lief_bwt', username:'keller@bwt.ch', name:'Hans Keller',
      password:_hash('bwt2025'), roleIds:['role_lieferant'], orgId:'org_default',
      active:true, createdAt:'2025-01-15T10:00:00Z',
      profile:{email:'keller@bwt.ch',telefon:'061 755 88 99',firma:'BWT',person:'Hans Keller',sprache:'de'},
      kontotyp:'vollzugang', abo:{typ:'premium'},
-     einladung:{token:'inv_bwt',eingeladenVon:'admin',eingeladenAm:'2025-01-10T08:00:00Z',angenommenAm:'2025-01-15T10:00:00Z',passwortGesetzt:true}},
+     einladung:{token:'inv_bwt',eingeladenVon:'user_planer_1',eingeladenAm:'2025-01-10T08:00:00Z',angenommenAm:'2025-01-15T10:00:00Z',passwortGesetzt:true}},
     {id:'user_lief_gruenbeck', username:'weber@gruenbeck.ch', name:'Martin Weber',
      password:_hash('gruen2025'), roleIds:['role_lieferant'], orgId:'org_default',
      active:true, createdAt:'2025-06-01T08:00:00Z',
      profile:{email:'weber@gruenbeck.ch',telefon:'044 820 33 44',firma:'Grünbeck',person:'Martin Weber',sprache:'de'},
      kontotyp:'vollzugang', abo:{typ:'basic'},
-     einladung:{token:'inv_gruenbeck',eingeladenVon:'admin',eingeladenAm:'2025-05-20T08:00:00Z',angenommenAm:'2025-06-01T08:00:00Z',passwortGesetzt:true}},
+     einladung:{token:'inv_gruenbeck',eingeladenVon:'user_planer_1',eingeladenAm:'2025-05-20T08:00:00Z',angenommenAm:'2025-06-01T08:00:00Z',passwortGesetzt:true}},
     {id:'user_lief_judo', username:'meier@judo.ch', name:'Claudia Meier',
      password:_hash('judo2025'), roleIds:['role_lieferant'], orgId:'org_default',
      active:true, createdAt:'2026-03-01T09:00:00Z',
      profile:{email:'meier@judo.ch',telefon:'031 920 11 22',firma:'Judo',person:'Claudia Meier',sprache:'de'},
-     kontotyp:'login_light', abo:{typ:'testphase',testphaseEnde:'2026-03-31'},
-     einladung:{token:'inv_judo',eingeladenVon:'admin',eingeladenAm:'2026-02-25T08:00:00Z',angenommenAm:'2026-03-01T09:00:00Z',passwortGesetzt:true}},
-    // Demo-Planer
-    {id:'user_planer_1', username:'planer', name:'Felix Jäggi',
-     password:_hash('planer2025'), roleIds:['role_planer'], orgId:'org_default',
-     active:true, createdAt:'2025-01-01T08:00:00Z',
-     profile:{email:'felix@jaeggivollmer.ch',telefon:'061 692 03 11',sprache:'de',benachrichtigungen:true,dynamischeBKP:true}}
+     kontotyp:'login_light', abo:{typ:'testphase',testphaseEnde:'2026-06-30'},
+     einladung:{token:'inv_judo',eingeladenVon:'user_planer_1',eingeladenAm:'2026-02-25T08:00:00Z',angenommenAm:'2026-03-01T09:00:00Z',passwortGesetzt:true}}
   ];
 
   // ── Storage ────────────────────────────────────────────────────────
