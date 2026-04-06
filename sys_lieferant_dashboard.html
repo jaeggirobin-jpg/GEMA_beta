@@ -327,7 +327,8 @@ textarea.fc{resize:vertical;min-height:60px;line-height:1.5}
     </div>
     <div style="padding:16px 20px;display:flex;flex-direction:column;gap:12px">
       <div id="oaAnswerDetails"></div>
-      <div><label class="fl">Ihre Antwort</label><textarea class="fc" id="oaAnswerMsg" rows="4" placeholder="Offerte-Details, Preis, Lieferzeit…"></textarea></div>
+      <div><label class="fl">Brutto-Preis (CHF)</label><input type="text" inputmode="decimal" class="fc" id="oaAnswerPreis" placeholder="z.B. 4850.00" onblur="fixLeadingZero(this)" style="max-width:200px"/></div>
+      <div><label class="fl">Ihre Antwort</label><textarea class="fc" id="oaAnswerMsg" rows="4" placeholder="Offerte-Details, Lieferzeit, Konditionen…"></textarea></div>
       <div><label class="fl">Offerte als PDF (optional)</label><input type="file" class="fc" id="oaAnswerPdf" accept=".pdf" style="padding:6px"/></div>
     </div>
     <div style="padding:14px 20px;border-top:1.5px solid var(--brd);display:flex;gap:8px;justify-content:flex-end">
@@ -790,6 +791,7 @@ function openOaAnswer(oaId){
       (oa.nachricht?'<strong>Nachricht:</strong> '+E(oa.nachricht):'')+
     '</div>';
   document.getElementById('oaAnswerMsg').value = '';
+  document.getElementById('oaAnswerPreis').value = '';
   document.getElementById('oaAnswerPdf').value = '';
   document.getElementById('oaAnswerOverlay').style.display = 'flex';
 }
@@ -799,9 +801,10 @@ function closeOaAnswer(){ document.getElementById('oaAnswerOverlay').style.displ
 function sendOaAnswer(){
   if(!_answerOaId) return;
   var msg = document.getElementById('oaAnswerMsg').value.trim();
-  if(!msg){ toast('Bitte Antwort-Text eingeben.','error'); return; }
+  var preis = parseFloat((document.getElementById('oaAnswerPreis').value||'').replace(/'/g,'')) || 0;
+  if(!msg && !preis){ toast('Bitte Preis oder Antwort-Text eingeben.','error'); return; }
   var fi = document.getElementById('oaAnswerPdf');
-  var antwort = { nachricht: msg };
+  var antwort = { nachricht: msg, bruttoPreis: preis };
 
   if(fi.files&&fi.files.length){
     var file = fi.files[0];

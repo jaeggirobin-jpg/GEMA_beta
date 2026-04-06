@@ -971,6 +971,56 @@ function getCurLos(a){
   return a.lose.find(function(l){return l.id===a._activeLosId;})||a.lose[0];
 }
 
+function _renderVormerkungen(a,los){
+  if(typeof GemaProdukte==='undefined'||!GemaProdukte.getVormerkungen)return'';
+  var objektId=a.objektId;if(!objektId)return'';
+  var vms=GemaProdukte.getVormerkungen(objektId);
+  if(!vms.length)return'';
+
+  // Automatisch in BKP einsetzen
+  var inserted=0;
+  vms.forEach(function(vm){
+    if(!vm.bkpCode||!vm.bruttoPreis)return;
+    // Finde passende Position in LOS
+    var pos=los.positionen.find(function(p){return p.bkp===vm.bkpCode&&p.istLieferung;});
+    if(pos&&!pos.offerte){
+      pos.offerte={
+        lieferantId:vm.lieferantId,
+        lieferantFirma:vm.lieferantFirma,
+        produktName:vm.produktName,
+        bruttoPreis:vm.bruttoPreis,
+        uploadDatum:new Date().toISOString().split('T')[0],
+        offertanfrageId:vm.offertanfrageId||'',
+        berechnungsdaten:{}
+      };
+      pos.status='erledigt';
+      GemaProdukte.markVormerkungUebernommen(vm.id);
+      inserted++;
+    }
+  });
+  if(inserted){sv();}
+
+  // Verbleibende (nicht zugeordnete) Vormerkungen anzeigen
+  var remaining=GemaProdukte.getVormerkungen(objektId);
+  if(!remaining.length)return'';
+
+  var h='<div style="padding:12px 16px;background:#eff4ff;border:1.5px solid #93c5fd;border-radius:10px;margin-bottom:16px;font-size:12px">';
+  h+='<div style="font-weight:700;color:#1d4ed8;margin-bottom:6px">📨 '+remaining.length+' Vormerkung'+(remaining.length>1?'en':'')+' aus Berechnungen</div>';
+  h+='<div style="color:#374151;line-height:1.5">';
+  remaining.forEach(function(vm){
+    h+='<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid #dbeafe">';
+    h+='<span style="font-weight:600">'+E(vm.lieferantFirma)+'</span>';
+    h+='<span style="color:#6b7280">'+E(vm.produktName)+'</span>';
+    if(vm.bruttoPreis)h+='<span style="font-weight:700;color:#15803d">CHF '+fC(vm.bruttoPreis)+'</span>';
+    h+='<span style="color:#9ca3af;font-size:10px">BKP '+(vm.bkpCode||'–')+'</span>';
+    h+='</div>';
+  });
+  h+='</div>';
+  h+='<div style="margin-top:6px;color:#6b7280;font-size:11px">Diese Positionen konnten keiner BKP-Position automatisch zugeordnet werden. Bitte manuell in die passende Position eintragen.</div>';
+  h+='</div>';
+  return h;
+}
+
 VIEWS.pbkp=function(){
   var a=curA();if(!a)return '<div class="wp">Zuerst eine Ausschreibung wählen.</div>';
   ensureLose(a);
@@ -987,6 +1037,9 @@ VIEWS.pbkp=function(){
   h+='<div style="flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden"><div id="bkpProgressBar" style="height:100%;width:'+pct+'%;background:var(--grn);border-radius:4px;transition:width .3s"></div></div>';
   h+='<span id="bkpProgressPct" style="font-size:12px;font-weight:700;color:var(--grn)">'+pct+'%</span>';
   h+='</div>';
+
+  // Vormerkungen aus Berechnungen anzeigen + automatisch einsetzen
+  h+=_renderVormerkungen(a,los);
 
   // LOS-Tabs
   h+='<div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;align-items:center">';
