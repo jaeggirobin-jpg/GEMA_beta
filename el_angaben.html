@@ -274,12 +274,26 @@ input::placeholder,textarea::placeholder{color:#cbd5e1!important}
       <button class="g-nav-btn" id="btnExportJson">⬇ JSON</button>
       <button class="g-nav-btn" id="btnExportCsv">📊 CSV</button>
       <button class="g-nav-btn" id="btnPrint">🖨 Druckliste</button>
+      <button class="g-nav-btn" onclick="GemaPDF.export({title:'Elektroangaben',color:'#d97706'})">📄 PDF</button>
+      <button class="g-nav-btn" onclick="if(typeof GemaFeedback!=='undefined')GemaFeedback.start()">🔴 Feedback</button>
       <button class="g-nav-btn dr" id="btnClearAll">✕ Alle löschen</button>
-      
     </div>
   </div>
 </nav>
 <input type="file" id="fileImport" accept=".json" style="display:none"/>
+
+<!-- PROJECT META -->
+<div style="max-width:1440px;margin:0 auto;padding:12px 20px 0">
+  <div class="project-bar" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:0">
+    <div class="pf" style="display:flex;flex-direction:column;gap:4px"><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Objekt <a href="pm_objekte.html" title="Neues Objekt anlegen" style="margin-left:6px;width:16px;height:16px;border-radius:4px;background:var(--acc);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:400;text-decoration:none;line-height:0;flex-shrink:0;vertical-align:middle">+</a></label>
+      <select id="metaObjektDropdown" onchange="onObjektSelect()" style="padding:7px 10px;border:1.5px solid var(--border2);border-radius:var(--r-sm);font-size:13px;font-family:var(--sans);font-weight:600;background:var(--surface);color:var(--text)">
+        <option value="">– Objekt wählen –</option>
+      </select>
+    </div>
+    <div class="pf" style="display:flex;flex-direction:column;gap:4px"><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Bearbeiter</label><input type="text" id="metaBearbeiter" placeholder="Name" style="padding:7px 10px;border:1.5px solid var(--border2);border-radius:var(--r-sm);font-size:13px;font-family:var(--sans);background:var(--surface);color:var(--text)"></div>
+    <div class="pf" style="display:flex;flex-direction:column;gap:4px"><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Datum</label><input type="date" id="metaDatum" style="padding:7px 10px;border:1.5px solid var(--border2);border-radius:var(--r-sm);font-size:13px;font-family:var(--sans);background:var(--surface);color:var(--text)"></div>
+  </div>
+</div>
 
 <!-- HERO -->
 <div class="hero-strip">
@@ -632,11 +646,42 @@ if(typeof _GemaDB!=='undefined'){try{await _GemaDB.init('elektroangaben', ['elek
 
   /* ── PERSIST ── */
   function load(){ try{ items=JSON.parse(typeof _GemaDB!=="undefined"&&_GemaDB.c?_GemaDB.c[SK]||'[]':'[]'); if(!Array.isArray(items))items=[]; }catch{ items=[]; } }
-  function loadMeta(){ try{ const m=JSON.parse(typeof _GemaDB!=="undefined"&&_GemaDB.c?_GemaDB.c[MK]||'null':'null'); if(m){ $('project').value=m.project||''; $('phase').value=m.phase||''; } }catch{} }
+  function loadMeta(){
+    try{ const m=JSON.parse(typeof _GemaDB!=="undefined"&&_GemaDB.c?_GemaDB.c[MK]||'null':'null');
+      if(m){ $('project').value=m.project||''; $('phase').value=m.phase||'';
+        if(m.bearbeiter&&document.getElementById('metaBearbeiter'))document.getElementById('metaBearbeiter').value=m.bearbeiter;
+        if(m.datum&&document.getElementById('metaDatum'))document.getElementById('metaDatum').value=m.datum;
+        if(m.objektId&&document.getElementById('metaObjektDropdown'))document.getElementById('metaObjektDropdown').value=m.objektId;
+      }
+    }catch{}
+    // Datum default
+    var d=document.getElementById('metaDatum');if(d&&!d.value)d.value=new Date().toISOString().split('T')[0];
+    // Objekt-Dropdown befüllen
+    _populateObjektDropdown();
+  }
   function persist(){
     try{if(typeof _GemaDB!=="undefined")_GemaDB.save(SK,JSON.stringify(items));}catch(e){}
-    try{if(typeof _GemaDB!=="undefined")_GemaDB.save(MK,JSON.stringify({project:$('project').value.trim(),phase:$('phase').value}));}catch(e){}
+    var metaObj={project:$('project').value.trim(),phase:$('phase').value};
+    var be=document.getElementById('metaBearbeiter');if(be)metaObj.bearbeiter=be.value;
+    var da=document.getElementById('metaDatum');if(da)metaObj.datum=da.value;
+    var od=document.getElementById('metaObjektDropdown');if(od)metaObj.objektId=od.value;
+    try{if(typeof _GemaDB!=="undefined")_GemaDB.save(MK,JSON.stringify(metaObj));}catch(e){}
   }
+  function _populateObjektDropdown(){
+    var sel=document.getElementById('metaObjektDropdown');if(!sel||typeof GemaObjekte==='undefined')return;
+    var all=GemaObjekte.getAll();var activeId=GemaObjekte.getActiveId()||'';
+    sel.innerHTML='<option value="">– Objekt wählen –</option>';
+    all.forEach(function(o){
+      var label=[o.name||'Projekt'];if(o.strasse)label.push(o.strasse);if(o.plz||o.ort)label.push([o.plz,o.ort].filter(Boolean).join(' '));
+      var opt=document.createElement('option');opt.value=o.id;opt.textContent=label.join(' · ');
+      if(o.id===activeId)opt.selected=true;sel.appendChild(opt);
+    });
+  }
+  window.onObjektSelect=function(){
+    var sel=document.getElementById('metaObjektDropdown');
+    if(sel&&sel.value&&typeof GemaObjekte!=='undefined')GemaObjekte.setActiveId(sel.value);
+    persist();
+  };
 
   /* ── TOAST ── */
   let tT; function toast(m){ const e=$('toast'); e.textContent=m; e.classList.add('show'); clearTimeout(tT); tT=setTimeout(()=>e.classList.remove('show'),2200); }
@@ -967,6 +1012,10 @@ if(typeof _GemaDB!=='undefined'){try{await _GemaDB.init('elektroangaben', ['elek
 
   /* ── INIT ── */
   loadMeta(); load(); renderTable(); updateStats(); updateAnlageFilter(); resetForm();
+  // Meta-Felder speichern bei Änderung
+  ['metaBearbeiter','metaDatum'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',persist);});
+  $('project').addEventListener('input',persist);
+  $('phase').addEventListener('change',persist);
 })().catch(function(e){console.error("[GEMA] Kritischer Fehler:",e),document.body.insertAdjacentHTML("beforeend","<div style='position:fixed;bottom:10px;right:10px;background:#dc2626;color:#fff;padding:10px 16px;border-radius:10px;font-size:12px;font-weight:700;z-index:9999'>⚠ Skript-Fehler: "+e.message+"</div>");});</script>
 <script>document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('elektro', 'Elektroangaben');});</script>
 <script>if(typeof GemaAutoSave!=='undefined') GemaAutoSave.init('elektroangaben');</script>
