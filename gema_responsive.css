@@ -4,6 +4,195 @@
    Breakpoints: 768px (Tablet), 640px (Phone), 480px (Small)
    ═══════════════════════════════════════════════════════ */
 
+/* ── 0. MOBILE HAMBURGER MENU ── */
+
+/* Hamburger button (hidden on desktop by JS) */
+.gema-hamburger {
+  display: none; /* JS controls visibility */
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border2, #cdd4e4);
+  background: var(--surface, #fff);
+  color: var(--text2, #374151);
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+  flex-shrink: 0;
+  padding: 0;
+  margin-left: auto;
+}
+.gema-hamburger:hover {
+  background: var(--bg2, #edf0f7);
+}
+.gema-hamburger.active {
+  background: var(--accent-bg, #eff4ff);
+  border-color: var(--accent-bd, #bfcfff);
+  color: var(--accent, #2563eb);
+}
+
+/* Overlay (blurred backdrop) */
+.gema-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: rgba(15, 23, 42, 0);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  pointer-events: none;
+  transition: background .3s ease, backdrop-filter .3s ease, -webkit-backdrop-filter .3s ease;
+}
+.gema-menu-overlay.open {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: auto;
+}
+
+/* Slide-in panel from right */
+.gema-menu-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  width: 280px;
+  max-width: 85vw;
+  background: var(--surface, #fff);
+  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform .32s cubic-bezier(0.32, 0.72, 0, 1);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.gema-menu-panel.open {
+  transform: translateX(0);
+}
+
+/* Panel header */
+.gema-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1.5px solid var(--border, #e2e7f0);
+  flex-shrink: 0;
+}
+.gema-menu-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text, #111827);
+  letter-spacing: -0.3px;
+}
+.gema-menu-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border2, #cdd4e4);
+  background: var(--surface, #fff);
+  color: var(--muted, #6b7280);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: .15s;
+  padding: 0;
+}
+.gema-menu-close:hover {
+  background: var(--bg2, #edf0f7);
+  color: var(--text, #111827);
+}
+
+/* Menu item list */
+.gema-menu-list {
+  flex: 1;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Menu item */
+.gema-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: var(--text2, #374151);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+}
+.gema-menu-item:hover {
+  background: var(--bg2, #edf0f7);
+}
+.gema-menu-item:active {
+  background: var(--border, #e2e7f0);
+  transform: scale(0.98);
+}
+
+.gema-menu-icon {
+  font-size: 20px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--bg2, #edf0f7);
+  flex-shrink: 0;
+}
+
+.gema-menu-label {
+  flex: 1;
+}
+
+/* Feedback item special */
+.gema-menu-item--feedback {
+  color: #dc2626;
+}
+.gema-menu-item--feedback .gema-menu-icon {
+  background: #fef2f2;
+}
+
+/* Logout item special */
+.gema-menu-item--logout {
+  color: var(--muted, #6b7280);
+  margin-top: 4px;
+  border-top: 1px solid var(--border, #e2e7f0);
+  border-radius: 0 0 12px 12px;
+  padding-top: 16px;
+}
+
+/* Footer */
+.gema-menu-footer {
+  padding: 16px 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted2, #9ca3af);
+  text-align: center;
+  border-top: 1px solid var(--border, #e2e7f0);
+  flex-shrink: 0;
+}
+
+/* Safe area for iPhone bottom */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .gema-menu-panel {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+
 /* ── 1. PREVENT HORIZONTAL SCROLL (Global) ── */
 html {
   overflow-x: hidden;
@@ -233,27 +422,7 @@ body {
     font-size: 12px;
     padding: 2px 4px;
   }
-  .g-nav-right {
-    gap: 4px;
-  }
-  .g-nav-btn,
-  .nav-pill {
-    padding: 4px 8px;
-    font-size: 10.5px;
-    gap: 3px;
-  }
-  /* Feedback button compact on mobile */
-  .gema-feedback-btn {
-    padding: 4px 8px;
-    font-size: 10px;
-  }
-
-  /* Overflow-safe nav-right */
-  .g-nav-right {
-    overflow: hidden;
-    flex-shrink: 1;
-    min-width: 0;
-  }
+  /* Nav-right is hidden by hamburger JS on mobile — no overrides needed */
 
   /* Page wrapper */
   .g-page {
