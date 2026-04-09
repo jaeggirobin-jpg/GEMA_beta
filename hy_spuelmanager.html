@@ -1362,6 +1362,7 @@ function printLabel() {
       ${qrSrc ? `<img class="qr-img" src="${qrSrc}">` : ''}
       <div class="inst">QR scannen → Spülung starten</div>
     </div>`).join('')}
+<script src="gema_mobile_menu.js"></script>
 </body></html>`);
   win.document.close();
   win.onload = () => { win.focus(); win.print(); };
@@ -2009,5 +2010,6 @@ function loadDemoData() {
 <script>document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('spuel', 'Spuelmanager');});</script>
 <script>if(typeof GemaAutoSave!=='undefined') GemaAutoSave.init('spuelmanager');</script>
 <script src="gema_scroll.js"></script>
+<script src="gema_mobile_menu.js"></script>
 </body>
 </html>
