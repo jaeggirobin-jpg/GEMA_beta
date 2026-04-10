@@ -743,6 +743,113 @@ renderKPIs();
 renderList();
 </script>
 <script>document.addEventListener('DOMContentLoaded', function(){if(typeof GemaFeedback!=='undefined')GemaFeedback.init('lieferanten', 'Lieferanten-Verwaltung');});</script>
+<script src="gema_coachmarks.js"></script>
+<script>
+// ── Onboarding-Coachmarks (#34) ──
+// Führt Erstnutzer durch das Lieferanten-Dashboard: KPIs, Stamm-Filter,
+// Filter-Toolbar, Neuer-Lieferant-Button und die Stern/Haus-Toggles.
+// Die Editor-Tabs werden über einen separaten Coach beim ersten Öffnen
+// eines Lieferanten angezeigt.
+(function(){
+  function startCoach(){
+    if(typeof GemaCoachmarks==='undefined')return;
+    if(GemaCoachmarks.isDone('sys_lieferanten'))return;
+    // Warten bis KPIs gerendert sind
+    var tries=0;
+    var timer=setInterval(function(){
+      tries++;
+      var kpis=document.getElementById('kpis');
+      if((kpis&&kpis.children.length)||tries>20){
+        clearInterval(timer);
+        var canStamm = (typeof GemaProdukte!=='undefined' && GemaProdukte.canEditOrgStamm) ? GemaProdukte.canEditOrgStamm() : false;
+        var steps=[
+          {
+            selector:'#kpis',
+            title:'Lieferanten-Übersicht auf einen Blick',
+            text:'Oben siehst du die wichtigsten Kennzahlen: Anzahl Lieferanten, aktive, Premium-Partner, laufende Testphasen und offene Offertanfragen.',
+            placement:'bottom',icon:'📊'
+          },
+          {
+            selector:'[data-stamm="fav"]',
+            title:'Stamm-Filter: ⭐ Meine Favoriten, 🏢 Büro-Stamm',
+            text:'Markiere die Lieferanten, mit denen du am häufigsten arbeitest — sie erscheinen dann immer zuoberst in allen Listen. Persönliche Favoriten (⭐) sind nur für dich, Büro-Stamm (🏢) für dein ganzes Team.',
+            placement:'bottom',icon:'⭐'
+          },
+          {
+            selector:'#filterKategorie',
+            title:'Filter nach Kategorie, Region & SIA-Phase',
+            text:'Wähle Lieferanten passend zur aktuellen Projektphase: Im Bauprojekt brauchst du alle Komponenten, in der Ausführung nur noch Rohre und Armaturen. Kombiniere mit Kanton-Filter für regionale Nähe.',
+            placement:'bottom',icon:'🎯'
+          },
+          {
+            selector:'.btn-p',
+            title:'Neuen Lieferanten anlegen',
+            text:'Klick hier, um einen neuen Lieferanten zu erfassen. Du kannst Firma, Kontakt, Adresse, Abo-Status und Premium-Platzierung setzen. Produkte und Offertanfragen werden später verlinkt.',
+            placement:'bottom',icon:'➕'
+          },
+          {
+            selector:'.lief-star-btn',
+            title:'Sofort als Favorit markieren',
+            text:canStamm
+              ? 'Der gelbe Stern (☆/⭐) markiert persönliche Favoriten — nur für dich sichtbar. Das Haus-Symbol (🏢) setzt den Lieferanten als Büro-Stamm für dein ganzes Team. Favoriten und Büro-Stamm werden in Listen automatisch oben angezeigt.'
+              : 'Der gelbe Stern markiert persönliche Favoriten — nur für dich sichtbar. Favoriten werden in Listen automatisch oben angezeigt. Das Büro-Stamm-Symbol (🏢) sehen nur Admins und Planer.',
+            placement:'right',icon:'⭐'
+          }
+        ];
+        GemaCoachmarks.init('sys_lieferanten',steps,{delay:300});
+      }
+    },150);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startCoach);
+  else setTimeout(startCoach,600);
+
+  // Zweiter Coach: Editor-Tabs beim ersten Öffnen eines Lieferanten erklären.
+  // Wir hooken uns in openLieferant() ein und zeigen nach kurzer Verzögerung
+  // einen zweiten Walkthrough.
+  var _editorCoachDone = false;
+  var _origOpen = null;
+  document.addEventListener('DOMContentLoaded', function(){
+    if(typeof window.openLieferant !== 'function')return;
+    _origOpen = window.openLieferant;
+    window.openLieferant = function(id){
+      _origOpen(id);
+      if(_editorCoachDone)return;
+      if(typeof GemaCoachmarks==='undefined')return;
+      if(GemaCoachmarks.isDone('sys_lieferanten_editor'))return;
+      _editorCoachDone = true;
+      setTimeout(function(){
+        var editorSteps = [
+          {
+            selector:'#edTabs .tab:nth-child(1)',
+            title:'Tab «Profil» — Grunddaten',
+            text:'Firma, Rechtsform, UID, Kontaktperson, Adresse und Beschreibung. Alle Basisdaten des Lieferanten.',
+            placement:'bottom',icon:'👤'
+          },
+          {
+            selector:'#edTabs .tab:nth-child(2)',
+            title:'Tab «Abo & Premium»',
+            text:'Abo-Typ (Basis/Premium/Enterprise), Status, Testphase, Mahnungen. Hier steuerst du die Monetarisierung und schaltest Premium-Platzierungen frei.',
+            placement:'bottom',icon:'⭐'
+          },
+          {
+            selector:'#edTabs .tab:nth-child(3)',
+            title:'Tab «Produkte»',
+            text:'Alle Produkte dieses Lieferanten auf einen Blick. Details werden im Produktkatalog gepflegt.',
+            placement:'bottom',icon:'📦'
+          },
+          {
+            selector:'#edTabs .tab:nth-child(4)',
+            title:'Tab «Offertanfragen»',
+            text:'Alle eingegangenen Anfragen aus Berechnungen der Planer. Status, Antworten und Verlauf siehst du hier auf einen Blick.',
+            placement:'bottom',icon:'📨'
+          }
+        ];
+        GemaCoachmarks.init('sys_lieferanten_editor', editorSteps, {delay:400});
+      }, 500);
+    };
+  });
+})();
+</script>
 <script src="gema_mobile_menu.js"></script>
 </body>
 </html>

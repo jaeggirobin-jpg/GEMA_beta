@@ -236,6 +236,77 @@ Zwei Ebenen kombiniert:
 
 ---
 
+### Coachmarks im Lieferanten-Dashboard
+**Quelle:** Persona-Test #34
+**Datum:** 2026-04-10
+**Status:** Umgesetzt
+
+Wiederverwendung des bestehenden `gema_coachmarks.js`-Moduls (siehe #29) in `sys_lieferanten.html`. Zwei separate Walkthroughs:
+
+**Haupt-Walkthrough** (`sys_lieferanten`, 5 Steps) — beim ersten Besuch der Liste:
+1. **KPI-Übersicht** (Total, Aktiv, Premium, Testphase, Offene Anfragen)
+2. **Stamm-Filter** ⭐ Favoriten / 🏢 Büro-Stamm (Verweis auf #31)
+3. **Filter nach Kategorie, Region, SIA-Phase** (SIA-Phase → typische Lieferanten-Kategorien)
+4. **Neuer-Lieferant-Button** (CRUD)
+5. **Stern/Haus-Toggle** auf jeder Zeile — rollenspezifischer Text (Admin/Planer sehen Büro-Stamm-Hinweis, andere nicht)
+
+**Editor-Walkthrough** (`sys_lieferanten_editor`, 4 Steps) — beim ersten Öffnen eines Lieferanten im Detail:
+1. Tab «Profil» — Grunddaten, Adresse, Kontakt
+2. Tab «Abo & Premium» — Monetarisierung
+3. Tab «Produkte» — verknüpfte Produkte
+4. Tab «Offertanfragen» — eingehende Anfragen
+
+Realisiert via Monkey-Patching der globalen `openLieferant()`-Funktion: Beim ersten Öffnen wird der Editor-Coach mit 400ms Delay gestartet (warten bis Overlay-Animation fertig ist). Ein Flag `_editorCoachDone` verhindert wiederholtes Auslösen in derselben Session.
+
+---
+
+### Materiallisten-Export aus Ausschreibung
+**Quelle:** Persona-Test #35
+**Datum:** 2026-04-10
+**Status:** Übersprungen — wird später priorisiert
+
+Nach der Ausschreibung eine Materialliste generieren und als Anfrage an Lieferanten senden. Nicht jetzt umgesetzt.
+
+---
+
+### BKP-Strukturierung im Offertvergleich
+**Quelle:** Persona-Test #36
+**Datum:** 2026-04-10
+**Status:** Bereits vorhanden
+
+Ein BKP-strukturierter Preisvergleich existiert bereits in `pm_ausschreibungsunterlagen.html` über die Funktion `_renderBKPVergleich()` im Vergabeantrag-View (siehe `VIEWS.pvga`, Zeile ~2548). Die 3-stellige BKP-Gruppierung mit Summen pro Gruppe ist im Vergabeantrag sichtbar.
+
+**Offen für später:** Diese BKP-Struktur-Logik optional auch als Toggle im normalen Offertvergleich (`VIEWS.pvgl`) anbieten, nicht nur im Vergabeantrag.
+
+---
+
+### Preislisten-Upload pro Lieferant
+**Quelle:** Persona-Test #37
+**Datum:** 2026-04-10
+**Status:** Offen — Brainstorm, passt besser zum späteren Lieferanten-Self-Service
+
+Lieferanten sollen Excel/PDF-Preislisten mit Gültigkeitsdatum hochladen können. Zwei diskutierte Varianten:
+
+**Variante A — Upload im Lieferanten-Editor** (Admin/Planer lädt hoch):
+- Neuer Tab «Preislisten» in `sys_lieferanten.html`
+- Upload Excel/PDF mit Gültigkeitsdatum (von/bis) und Notiz
+- Mehrere Versionen pro Lieferant, ältere automatisch archiviert
+- Speicherung als Array `l.preislisten[]` im Lieferanten-Objekt
+
+**Variante B — Pro Produkt** (granularer, mehr Pflegeaufwand):
+- Preislisten werden pro Produkt im Produktkatalog-Detail hinterlegt
+- Ein Produkt hat mehrere Preislisten-Versionen mit Datum
+
+**Entscheidung:** Vorerst nur als Idee festhalten. Das Feature gehört in den grösseren Kontext des **Supplier Portals** (siehe #39), wo Lieferanten ihre Daten selbst pflegen. Vor dem Portal ist ein Upload-Flow im Lieferanten-Editor technisch einfach (Variante A), aber inhaltlich fragwürdig — der Admin/Planer müsste fremde Preislisten pflegen.
+
+**Offene Fragen:**
+- Welches Dateiformat hat Priorität? Excel (strukturiert, parsebar) oder PDF (flexibler, aber statisch)?
+- Soll GEMA Preise aus Excel parsen und in die Datenbank übernehmen (automatisch)?
+- Versionierung: sichtbar alle Versionen oder nur die aktuelle?
+- Verbindung mit #40 (Preisentwicklung/Historik): beide Features zusammenlegen?
+
+---
+
 ### Ausschreibungs-Vorlagen pro Gebäudetyp (EFH/MFH/Schule)
 **Quelle:** Persona-Test #16
 **Datum:** 2026-04-10
