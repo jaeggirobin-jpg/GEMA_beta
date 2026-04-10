@@ -64,6 +64,20 @@ input,select,textarea,button{font-family:inherit}
 
 /* Vergleich */
 .ov-ch{background:var(--grn-bg)!important;font-weight:700;color:var(--grn)}.ov-z{background:var(--red-bg)!important;color:var(--red);font-weight:700}
+/* ── Info-Tooltips im Offertvergleich (#29c) ── */
+.gcm-info{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:#e5e7eb;color:#4b5563;font-size:10px;font-weight:800;margin-left:5px;cursor:help;vertical-align:middle;border:none;padding:0;font-family:inherit;transition:.15s;position:relative}
+.gcm-info:hover{background:#2563eb;color:#fff}
+.gcm-info::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 14px;border-radius:8px;font-size:12px;font-weight:500;line-height:1.55;white-space:normal;width:280px;text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:opacity .2s;z-index:500}
+.gcm-info::before{content:'';position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#0f172a;opacity:0;transition:opacity .2s;z-index:500}
+.gcm-info:hover::after,.gcm-info:hover::before,.gcm-info:focus::after,.gcm-info:focus::before{opacity:1}
+/* Tooltip im rechten Rand abklemmen, damit er nicht abgeschnitten wird */
+.dt th .gcm-info::after,.dt th .gcm-info:last-child::after{left:auto;right:0;transform:none}
+.dt th .gcm-info::before,.dt th .gcm-info:last-child::before{left:auto;right:8px;transform:none}
+.gcm-legend{background:var(--sur);border:1.5px solid var(--brd);border-left:4px solid #2563eb;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:var(--txt2);line-height:1.6}
+.gcm-legend strong{color:var(--txt);font-weight:800}
+.gcm-legend-chip{display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:5px;font-weight:700;font-size:11px;margin:0 2px}
+.gcm-legend-chip.ch{background:var(--grn-bg);color:var(--grn);border:1px solid var(--grn-bd)}
+.gcm-legend-chip.z{background:var(--red-bg);color:var(--red);border:1px solid #fecaca}
 /* Modal */
 .mo{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px}.mo.open{display:flex}.ml{background:var(--sur);border-radius:var(--r-lg);max-width:700px;width:100%;max-height:85vh;overflow:auto;box-shadow:var(--sh-lg)}.ml-hd{padding:18px 24px;border-bottom:1.5px solid var(--brd);display:flex;align-items:center;gap:12px}.ml-hd h2{font-size:16px;font-weight:800;flex:1}.ml-bd{padding:20px 24px}.ml-ft{padding:14px 24px;border-top:1.5px solid var(--brd);display:flex;gap:8px;justify-content:flex-end}.cl-btn{background:none;border:none;font-size:20px;cursor:pointer;color:var(--mut);padding:4px}
 /* Empty */
@@ -2441,15 +2455,34 @@ VIEWS.pein=function(){
   return h;
 };
 
+// Wiederverwendbarer Info-Icon-Helper für den Offertvergleich (#29c).
+// Rendert einen ℹ-Button mit CSS-Tooltip. Der Text darf keine doppelten Quotes
+// enthalten — wir ersetzen sie durch Guillemets und verwenden HTML-Entities.
+function infoIcon(tip){
+  var safe=String(tip||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  return '<button class="gcm-info" type="button" aria-label="Erklärung" data-tip="'+safe+'" onclick="event.stopPropagation();this.blur();">ℹ</button>';
+}
+
 VIEWS.pvgl=function(){
   const a=curA();if(!a)return '<div class="wp">Ausschreibung wählen.</div>';
   const eins=S.einreichungen.filter(e=>e.ausId===a.id);
   let h=`<h2 style="font-size:20px;font-weight:700;margin-bottom:16px">📊 Offertvergleich — ${E(a.name)}</h2>`;
   if(!eins.length){h+=`<div class="es"><p>Keine Offerten.</p></div>`;return h;}
+  // Erklärungs-Legende für Einsteiger (#29c)
+  h+=`<div class="gcm-legend">
+    <strong>So liest du den Vergleich:</strong>
+    <span class="gcm-legend-chip ch">Grün</span> = günstigste Offerte pro Position,
+    <span class="gcm-legend-chip z">Rot</span> = fehlende Position (Preis 0).
+    Die Info-Icons <span class="gcm-info" data-tip="Kleine Erklärungen zu jeder Kennzahl — fahre mit der Maus drüber oder tippe auf das Icon.">ℹ</span>
+    neben jeder Kennzahl zeigen beim Überfahren eine kurze Erklärung. <strong>Kartellrecht:</strong> Den nicht berücksichtigten Unternehmern werden keine Preise der Konkurrenz mitgeteilt (KG Art. 5).
+  </div>`;
 
   if(a.modell==='global'){
     // Global: just totals
-    h+=`<table class="dt"><thead><tr><th>Firma</th><th class="tr">Brutto</th>${(a.abzuege||[]).filter(z=>z.aktiv).map(z=>`<th class="tr">${E(z.name)}</th>`).join('')}<th class="tr">MwSt 8.1%</th><th class="tr" style="font-weight:800">Netto inkl.</th></tr></thead><tbody>`;
+    var brTipG='Brutto = Angebotspreis ohne Abzüge, ohne MwSt. Vergleichsbasis vor Verhandlungen.';
+    var mwTipG='Mehrwertsteuer 8.1% gemäss Bundesratsentscheid 2024. Wird auf den Zwischenbetrag nach allen Abzügen angewendet.';
+    var ntTipG='Netto inkl. MwSt = Brutto abzüglich aller aktiven Abzüge (kaskadiert) + MwSt. Die günstigste Offerte wird grün hervorgehoben.';
+    h+=`<table class="dt"><thead><tr><th>Firma</th><th class="tr">Brutto${infoIcon(brTipG)}</th>${(a.abzuege||[]).filter(z=>z.aktiv).map(z=>`<th class="tr">${E(z.name)}${infoIcon('Abzug «'+(z.name||'')+'» wird kaskadiert vom jeweiligen Zwischentotal berechnet.')}</th>`).join('')}<th class="tr">MwSt 8.1%${infoIcon(mwTipG)}</th><th class="tr" style="font-weight:800">Netto inkl.${infoIcon(ntTipG)}</th></tr></thead><tbody>`;
     const nettos=eins.map(e=>calcNetto(a,e));const minN=Math.min(...nettos.filter(n=>n>0));
     eins.forEach((e,i)=>{const brutto=e.globalPreis||0;const detail=calcAbzugDetail(a,e,brutto);
       h+=`<tr><td><strong>${E(e.firma)}</strong></td><td class="tr">${fC(brutto)}</td>${detail.lines.map(l=>`<td class="tr">${l.val?'-'+fC(l.val)+(l.pct?' ('+l.pct+'%)':''):'–'}</td>`).join('')}<td class="tr">${fC(detail.mwst)}</td><td class="tr" style="font-weight:800;${nettos[i]===minN&&eins.length>1?'color:var(--grn)':''}">${fC(nettos[i])}</td></tr>`;
@@ -2471,9 +2504,11 @@ VIEWS.pvgl=function(){
     });
     // Grand totals
     const grandT=eins.map(e=>e.total||0);const nettos=eins.map(e=>calcNetto(a,e));const minN=Math.min(...nettos.filter(n=>n>0));
-    h+=`<tr style="font-weight:800;border-top:3px solid var(--txt);background:var(--bg2)"><td class="tr">Brutto</td>${grandT.map(t=>`<td class="tr">${fC(t)}</td>`).join('')}</tr>`;
-    (a.abzuege||[]).filter(z=>z.aktiv).forEach(z=>{h+=`<tr><td class="tr" style="padding-left:24px">${E(z.name)}</td>${eins.map(e=>{const d=calcAbzugDetail(a,e,e.total);const l=d.lines.find(x=>x.id===z.id);return `<td class="tr">${l?.val?'-'+fC(l.val):'–'}</td>`;}).join('')}</tr>`;});
-    h+=`<tr style="font-weight:800;border-top:2px solid var(--txt)"><td class="tr">Netto inkl. MwSt</td>${nettos.map((n,i)=>`<td class="tr" style="${n===minN&&eins.length>1?'color:var(--grn)':''}">${fC(n)}</td>`).join('')}</tr>`;
+    var brTip='Brutto = Summe aller Positionspreise dieser Offerte, ohne Abzüge, ohne MwSt.';
+    var ntTip='Netto inkl. MwSt = Brutto − alle aktiven Abzüge (kaskadiert) + 8.1% MwSt. Die günstigste Offerte ist grün markiert.';
+    h+=`<tr style="font-weight:800;border-top:3px solid var(--txt);background:var(--bg2)"><td class="tr">Brutto${infoIcon(brTip)}</td>${grandT.map(t=>`<td class="tr">${fC(t)}</td>`).join('')}</tr>`;
+    (a.abzuege||[]).filter(z=>z.aktiv).forEach(z=>{h+=`<tr><td class="tr" style="padding-left:24px">${E(z.name)}${infoIcon('Abzug «'+(z.name||'')+'» wird kaskadiert vom jeweiligen Zwischentotal berechnet.')}</td>${eins.map(e=>{const d=calcAbzugDetail(a,e,e.total);const l=d.lines.find(x=>x.id===z.id);return `<td class="tr">${l?.val?'-'+fC(l.val):'–'}</td>`;}).join('')}</tr>`;});
+    h+=`<tr style="font-weight:800;border-top:2px solid var(--txt)"><td class="tr">Netto inkl. MwSt${infoIcon(ntTip)}</td>${nettos.map((n,i)=>`<td class="tr" style="${n===minN&&eins.length>1?'color:var(--grn)':''}">${fC(n)}</td>`).join('')}</tr>`;
     h+=`</tbody></table>`;
   } else {
     // CRBX — position-level comparison (reuse v3 logic)
@@ -4264,6 +4299,69 @@ function initDropZones(){
 </script>
 <script>document.addEventListener("DOMContentLoaded",function(){if(typeof GemaFeedback!=="undefined")GemaFeedback.init("ausschrunterlagen","Ausschreibungsunterlagen");});</script>
 <script>if(typeof GemaAutoSave!=="undefined")GemaAutoSave.init("ausschreibungsunterlagen");</script>
+<script src="gema_coachmarks.js"></script>
+<script>
+// ── Onboarding-Coachmarks (#29) ──
+// Wird beim ersten Besuch dieser Seite gezeigt und führt durch den
+// typischen Ausschreibungs-Workflow (Tab-Navigation → neue Ausschreibung
+// → BKP-Checkliste → Offerten → Vergleich → Vergabe).
+(function(){
+  function startCoach(){
+    if(typeof GemaCoachmarks==='undefined')return;
+    if(GemaCoachmarks.isDone('pm_ausschreibungsunterlagen'))return;
+    // Warten bis buildTabs() gerendert hat
+    var tries=0;
+    var timer=setInterval(function(){
+      tries++;
+      var tabBar=document.getElementById('tabBar');
+      if((tabBar&&tabBar.children.length)||tries>20){
+        clearInterval(timer);
+        var steps=[
+          {
+            selector:'#tabBar',
+            title:'Dein Ausschreibungs-Workflow',
+            text:'Oben siehst du alle Schritte: Übersicht, Ausschreibungen, BKP-Checkliste, Detail, Verteilen, Offerten, Vergleich, Vergabeantrag. Du durchläufst sie von links nach rechts.',
+            placement:'bottom',icon:'📋'
+          },
+          {
+            selector:'.tab-btn[data-tab="paus"]',
+            title:'Ausschreibungen verwalten',
+            text:'Hier erstellst du neue Ausschreibungen — entweder aus einer Vorlage (persönlich oder büroweit) oder leer. Du kannst Ausschreibungen auch als Vorlage speichern.',
+            placement:'bottom',icon:'📝'
+          },
+          {
+            selector:'.tab-btn[data-tab="pbkp"]',
+            title:'BKP-Checkliste & Lose',
+            text:'BKP-Baum nach SIA 451: Positionen aktivieren, gruppieren, Materialspezifikationen festlegen. Alternativ CRBX-Import für Grossprojekte.',
+            placement:'bottom',icon:'☑'
+          },
+          {
+            selector:'.tab-btn[data-tab="pvrt"]',
+            title:'Offertanfragen verteilen',
+            text:'Unternehmer aus deinem Adressbuch auswählen, Anfrage zusammenstellen und versenden. Status verfolgen in «Offerten».',
+            placement:'bottom',icon:'📤'
+          },
+          {
+            selector:'.tab-btn[data-tab="pvgl"]',
+            title:'Offertvergleich mit Erklärungen',
+            text:'Sobald Offerten eingegangen sind, zeigt der Vergleich den günstigsten Preis pro Position grün, fehlende Positionen rot. Info-Icons ℹ erklären jede Kennzahl im Detail.',
+            placement:'bottom',icon:'📊'
+          },
+          {
+            selector:'.tab-btn[data-tab="pvga"]',
+            title:'Vergabeantrag & Zuschlag',
+            text:'Empfehlung, BKP-Vergleich und Checkliste zusammenstellen, einreichen an Bauherr/Architekt. Nach Genehmigung: Zuschlag erteilen — kartellrechts-konform (keine Preise an Absagen).',
+            placement:'left',icon:'🏆'
+          }
+        ];
+        GemaCoachmarks.init('pm_ausschreibungsunterlagen',steps,{delay:300});
+      }
+    },150);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startCoach);
+  else setTimeout(startCoach,600);
+})();
+</script>
 <script src="gema_scroll.js"></script>
 <script src="gema_mobile_menu.js"></script>
 </body></html>

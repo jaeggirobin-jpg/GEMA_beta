@@ -1374,5 +1374,39 @@ window.addEventListener('online',function(){
 });
 </script>
 <script src="gema_mobile_menu.js"></script>
+<script src="gema_coachmarks.js"></script>
+<script>
+// ── Onboarding-Coachmarks (#29) — Startseite ──
+document.addEventListener('DOMContentLoaded',function(){
+  if(typeof GemaCoachmarks==='undefined')return;
+  var steps=[
+    {
+      selector:'.filter-btn[data-filter="all"]',
+      title:'Willkommen bei GEMA',
+      text:'GEMA bündelt alle Werkzeuge für Sanitäringenieurwesen und Bauprojektmanagement in einer Suite. Die Modul-Kategorien helfen dir, schnell das Richtige zu finden.',
+      placement:'bottom',icon:'👋'
+    },
+    {
+      selector:'.filter-btn[data-filter="plan"]',
+      title:'Projektmanagement zuerst',
+      text:'Lege dein erstes Bauvorhaben in «Objekte & Beteiligte» an. Alle Berechnungen und Ausschreibungen beziehen sich später auf dieses Objekt.',
+      placement:'bottom',icon:'🏗'
+    },
+    {
+      selector:'.filter-btn[data-filter="san"]',
+      title:'Sanitärberechnungen',
+      text:'LU-Zusammenstellung ist die zentrale Datenquelle: Verbraucher einmal erfassen, Ergebnisse fliessen automatisch in Druckerhöhung, Osmose und Enthärtung.',
+      placement:'bottom',icon:'💧'
+    },
+    {
+      selector:'.search-inp',
+      title:'Schnelle Modulsuche',
+      text:'Über 40 Module — tippe hier einfach ein Stichwort (z.B. «Enthärtung» oder «Ausschreibung»), um das passende Werkzeug zu finden.',
+      placement:'bottom',icon:'🔍'
+    }
+  ];
+  GemaCoachmarks.init('index',steps,{delay:1200});
+});
+</script>
 </body>
 </html>

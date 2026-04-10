@@ -132,6 +132,38 @@ Zwei Vorlagen-Ebenen mit klarer visueller Kennzeichnung:
 
 ---
 
+### Guided Mode / Onboarding für Einsteiger
+**Quelle:** Persona-Test #29
+**Datum:** 2026-04-10
+**Status:** Teilweise umgesetzt (Coachmarks + Offertvergleich-Erklärungen)
+
+Dreiteilig:
+
+**#29a Kontextuelle Coachmarks pro Seite — umgesetzt**
+- Wiederverwendbares Modul `gema_coachmarks.js` mit Spotlight-Overlay, Tooltip-Karten, Pfeilen, Schritt-Dots, Keyboard-Navigation (Enter/Arrows/ESC) und Persistenz pro Seiten-Key (`gema_coachmarks_done_<key>` in localStorage).
+- Eingebunden auf drei Schlüsselseiten mit je 4–6 Schritten:
+  - `index.html`: Modulsuche, Projektmanagement, Sanitär-Berechnungen
+  - `pm_objekte.html`: Objekte vs. Beteiligte, neues Objekt anlegen, Suche & Filter, Feedback-Button
+  - `pm_ausschreibungsunterlagen.html`: kompletter Workflow tab-für-tab (Ausschreibungen → BKP → Verteilen → Vergleich → Vergabe)
+- API: `GemaCoachmarks.init(pageKey, steps, {delay, force})`, `.restart()`, `.isDone()`, `.markDone()`.
+
+**#29b Typische Positionen vorschlagen — übersprungen**
+- Überlappt stark mit #16 (Gebäudetyp-Vorlagen, noch offen) und #28 (Vorlagen-Bibliothek, umgesetzt). Wird über die bestehende Vorlagen-Bibliothek abgedeckt.
+
+**#29c Offertvergleich mit Erklärungen — umgesetzt (Inline-Info-Icons)**
+- Neue CSS-Klasse `.gcm-info` für ℹ-Icons mit CSS-Tooltip (hover/focus).
+- Erklärungs-Legende `.gcm-legend` oben im Vergleich: erklärt Grün/Rot-Markierung, Kartellrecht-Hinweis, Verweis auf die Info-Icons.
+- Info-Icons an: Brutto, MwSt 8.1%, Netto inkl., jeder aktive Abzug. Tooltips erklären Berechnungsbasis und Kaskadierung.
+- Helper-Funktion `infoIcon(tip)` für konsistente Tooltips, HTML-safe encoding der Tips.
+
+**Offene Folgepunkte:**
+- Coachmarks auf weiteren Modulen ergänzen (sb_ Module, Lieferanten-Dashboard, W12).
+- „? Onboarding wiederholen"-Link in den Nav-Bar (ruft `GemaCoachmarks.restart(pageKey, steps)`).
+- Info-Icons auch im CRBX-Vergleich und Vergabeantrag (aktuell nur Haupt-Offertvergleich).
+- Tutorial-Slide (Variante 3 aus der Entscheidung) als Ergänzung bei komplexen Features.
+
+---
+
 ### Ausschreibungs-Vorlagen pro Gebäudetyp (EFH/MFH/Schule)
 **Quelle:** Persona-Test #16
 **Datum:** 2026-04-10

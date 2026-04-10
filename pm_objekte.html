@@ -1153,6 +1153,40 @@ updateBadges();
 </script>
 <script>document.addEventListener('DOMContentLoaded',function(){GemaFeedback.init('objekte','Objekte & Beteiligte');});</script>
 <script>if(typeof GemaAutoSave!=='undefined') GemaAutoSave.init('objekte');</script>
+<script src="gema_coachmarks.js"></script>
+<script>
+// ── Onboarding-Coachmarks (#29) ──
+document.addEventListener('DOMContentLoaded',function(){
+  if(typeof GemaCoachmarks==='undefined')return;
+  var steps=[
+    {
+      selector:'.tab-btn',
+      title:'Zwei Tabs: Objekte & Beteiligte',
+      text:'Im Tab «Objekte» verwaltest du Bauvorhaben. Im Tab «Beteiligte» erfasst du Bauherrschaft, Architekten, Unternehmer etc. pro Objekt.',
+      placement:'bottom',icon:'🗂'
+    },
+    {
+      selector:'.btn-primary',
+      title:'Dein erstes Bauvorhaben anlegen',
+      text:'Klick auf «+ Neues Objekt», um ein Projekt zu erfassen. Adresse, Bauvorhaben-Typ, SIA-Phase und optional ein übergeordnetes Objekt (für Bauetappen).',
+      placement:'bottom',icon:'🏗'
+    },
+    {
+      selector:'#objSearch',
+      title:'Schnelle Suche & Filter',
+      text:'Bei vielen Projekten findest du hier blitzschnell Objekte per Name oder Ort. Daneben filterst du nach Status (Aktiv / Abgeschlossen / Archiviert) und Bauvorhaben-Typ.',
+      placement:'bottom',icon:'🔍'
+    },
+    {
+      selector:'.gema-feedback-btn',
+      title:'Feedback direkt an uns',
+      text:'Siehst du einen Fehler oder hast du einen Verbesserungsvorschlag? Klick hier, mach einen Screenshot und markiere die Stelle — wir sehen alles.',
+      placement:'left',icon:'💬'
+    }
+  ];
+  GemaCoachmarks.init('pm_objekte',steps,{delay:900});
+});
+</script>
 <script src="gema_scroll.js"></script>
 <script src="gema_mobile_menu.js"></script>
 </body>
