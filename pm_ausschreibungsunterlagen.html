@@ -81,7 +81,7 @@ input,select,textarea,button{font-family:inherit}
 /* New Ausschreibung typ cards */
 .na-typ-card{flex:1;border:2px solid var(--brd);border-radius:var(--r);padding:16px;cursor:pointer;transition:.2s;text-align:center}.na-typ-card:hover{border-color:var(--acc-bd);box-shadow:var(--sh-sm)}.na-typ-card.active{border-color:var(--acc);background:var(--acc-bg)}
 /* New Ausschreibung checkbox rows */
-.na-cb-row{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1.5px solid var(--brd);border-radius:var(--r-sm);cursor:pointer;transition:.15s}.na-cb-row:hover{border-color:var(--acc-bd);background:var(--sur2)}.na-cb-row:has(input:checked){border-color:var(--acc);background:var(--acc-bg)}.na-cb-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--acc);margin-top:2px;flex-shrink:0}
+.na-cb-row{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1.5px solid var(--brd);border-radius:var(--r-sm);cursor:pointer;transition:.15s}.na-cb-row:hover{border-color:var(--acc-bd);background:var(--sur2)}.na-cb-row:has(input:checked){border-color:var(--acc);background:var(--acc-bg)}.na-cb-row input[type=checkbox],.na-cb-row input[type=radio]{width:16px;height:16px;accent-color:var(--acc);margin-top:2px;flex-shrink:0}
 /* Abzug row */
 .abz-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--brd)}.abz-row:last-child{border-bottom:none}
 /* Position picker */
@@ -133,6 +133,12 @@ input,select,textarea,button{font-family:inherit}
 <div class="mo" id="mNewA"><div class="ml" style="max-width:680px">
   <div class="ml-hd"><h2>Neue Ausschreibung</h2><button class="cl-btn" onclick="cM('mNewA')">✕</button></div>
   <div class="ml-bd" style="padding:16px 24px">
+    <div class="fg" style="margin-bottom:10px"><label class="fl">Aus Vorlage erstellen <span style="font-weight:500;color:var(--mut);text-transform:none;letter-spacing:0">(optional)</span></label>
+      <select class="fc" id="naVorlageId" onchange="naVorlageChanged()">
+        <option value="">— Leere Ausschreibung (keine Vorlage) —</option>
+      </select>
+      <span id="naVorlageHint" style="font-size:11px;color:var(--mut);margin-top:3px;display:none">BKP-Baum, Lose und Positionen werden aus der Vorlage übernommen.</span>
+    </div>
     <div class="g2">
       <div class="fg"><label class="fl">Projekt (aus Objekte)</label>
         <select class="fc" id="naObjektId" onchange="naObjektChanged()"><option value="">— Projekt wählen —</option></select>
@@ -166,6 +172,50 @@ input,select,textarea,button{font-family:inherit}
     </div>
   </div>
   <div class="ml-ft"><button class="btn btn-g" onclick="cM('mNewA')">Abbrechen</button><button class="btn btn-p" onclick="createAusschreibung()">Erstellen</button></div>
+</div></div>
+
+<!-- Modal: Vorlagen-Bibliothek -->
+<div class="mo" id="mVorlagen"><div class="ml" style="max-width:720px">
+  <div class="ml-hd"><h2>📋 Ausschreibungs-Vorlagen</h2><button class="cl-btn" onclick="cM('mVorlagen')">✕</button></div>
+  <div class="ml-bd" style="padding:16px 24px">
+    <div class="ip" style="font-size:12px;margin-bottom:12px">Wiederverwendbare Positionslisten. <strong>👤 Persönlich</strong> sind nur für dich sichtbar, <strong>🏢 Büro</strong> für die ganze Organisation.</div>
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+      <button class="btn btn-g btn-sm" id="vlFilterAll" onclick="vlFilter('all')" style="background:var(--acc-bg);border-color:var(--acc-bd);color:var(--acc)">Alle</button>
+      <button class="btn btn-g btn-sm" id="vlFilterPers" onclick="vlFilter('personal')">👤 Persönlich</button>
+      <button class="btn btn-g btn-sm" id="vlFilterOrg" onclick="vlFilter('org')">🏢 Büro</button>
+    </div>
+    <div id="vlList" style="max-height:400px;overflow-y:auto;border:1px solid var(--brd);border-radius:8px"></div>
+    <div id="vlEmpty" style="display:none;text-align:center;padding:40px 20px;color:var(--mut)">
+      <div style="font-size:36px;margin-bottom:8px">📋</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px">Noch keine Vorlagen</div>
+      <div style="font-size:12px">Aus einer bestehenden Ausschreibung kannst du eine Vorlage speichern.</div>
+    </div>
+  </div>
+  <div class="ml-ft"><button class="btn btn-g" onclick="cM('mVorlagen')">Schliessen</button></div>
+</div></div>
+
+<!-- Modal: Als Vorlage speichern -->
+<div class="mo" id="mSaveVorlage"><div class="ml" style="max-width:520px">
+  <div class="ml-hd"><h2>💾 Als Vorlage speichern</h2><button class="cl-btn" onclick="cM('mSaveVorlage')">✕</button></div>
+  <div class="ml-bd" style="padding:16px 24px">
+    <input type="hidden" id="svAusId"/>
+    <div class="fg"><label class="fl">Vorlagenname</label><input type="text" class="fc" id="svName" placeholder="z.B. MFH-Neubau Basis, Sanierung Bad Standard"/></div>
+    <div class="fg"><label class="fl">Beschreibung <span style="font-weight:500;color:var(--mut);text-transform:none">(optional)</span></label><textarea class="fc" id="svDesc" rows="2" placeholder="Kurzbeschrieb, Gebäudetyp, Einsatzzweck…"></textarea></div>
+    <div class="fg"><label class="fl">Sichtbarkeit</label>
+      <div style="display:flex;gap:8px">
+        <label class="na-cb-row" style="padding:10px 14px;flex:1;cursor:pointer">
+          <input type="radio" name="svScope" value="personal" checked/>
+          <div><strong style="font-size:13px">👤 Persönlich</strong><div style="font-size:11px;color:var(--mut);margin-top:2px">Nur für dich sichtbar</div></div>
+        </label>
+        <label class="na-cb-row" style="padding:10px 14px;flex:1;cursor:pointer">
+          <input type="radio" name="svScope" value="org"/>
+          <div><strong style="font-size:13px">🏢 Büro-Vorlage</strong><div style="font-size:11px;color:var(--mut);margin-top:2px">Für die ganze Organisation</div></div>
+        </label>
+      </div>
+    </div>
+    <div class="ip" style="font-size:11px;margin-top:8px">Gespeichert werden: BKP-Baum, Lose, Positionen, Typ und Offertmodelle. <strong>Nicht</strong> gespeichert: Projekt/Objekt, Frist, Beteiligte, Offerten.</div>
+  </div>
+  <div class="ml-ft"><button class="btn btn-g" onclick="cM('mSaveVorlage')">Abbrechen</button><button class="btn btn-p" onclick="saveAsVorlageSubmit()">💾 Speichern</button></div>
 </div></div>
 
 <!-- Modal: Unterposition bearbeiten -->
@@ -855,7 +905,8 @@ VIEWS.pub=function(){
 };
 
 VIEWS.paus=function(){
-  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="font-size:20px;font-weight:700">Ausschreibungen</h2><button class="btn btn-p" onclick="oM('mNewA')">+ Neue Ausschreibung</button></div>`;
+  var vlCount=getVisibleVorlagen().length;
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:8px;flex-wrap:wrap"><h2 style="font-size:20px;font-weight:700">Ausschreibungen</h2><div style="display:flex;gap:8px"><button class="btn btn-g" onclick="openVorlagenModal()" title="Vorlagen-Bibliothek">📋 Vorlagen${vlCount?' <span style="background:var(--acc);color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:999px;margin-left:2px">'+vlCount+'</span>':''}</button><button class="btn btn-p" onclick="oM('mNewA')">+ Neue Ausschreibung</button></div></div>`;
   h+=`<div style="margin-bottom:14px"><input type="text" id="ausSearch" placeholder="Ausschreibung suchen…" oninput="filterAusList()" style="width:100%;padding:10px 14px 10px 38px;border:1.5px solid var(--brd2);border-radius:10px;font-size:13px;font-family:inherit;background:var(--sur) url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%239ca3af%22><circle cx=%2210%22 cy=%2210%22 r=%227%22 stroke=%22%239ca3af%22 stroke-width=%222%22 fill=%22none%22/><line x1=%2215%22 y1=%2215%22 x2=%2221%22 y2=%2221%22 stroke=%22%239ca3af%22 stroke-width=%222%22/></svg>') no-repeat 10px center;background-size:18px;outline:none" onfocus="this.style.borderColor='#1d4ed8'" onblur="this.style.borderColor='var(--brd2)'"/></div>`;
   if(!S.ausschreibungen.length){h+=`<div class="es"><span class="ei">📋</span><div class="et">Noch keine Ausschreibungen</div><p>Erstelle deine erste Ausschreibung.</p></div>`;return h;}
   h+=`<div id="ausListContainer">`;
@@ -869,7 +920,8 @@ VIEWS.paus=function(){
         <span class="tag ${a.typ==='crbx'?'t-pu':'t-ac'}">${a.typ==='crbx'?'CRBX':'Funktional'}</span>
         <span class="tag t-gy">${(a.modelle||[a.modell]).join(' + ')}</span>
         <span class="ml-a tag ${a.status==='vergeben'?'t-gr':a.status==='aktiv'||a.status==='crbx_geprueft'?'t-bl':'t-am'}">${a.status==='vergeben'?'Vergeben':a.status==='crbx_geprueft'?'Freigegeben':a.status==='aktiv'?'Aktiv':'Entwurf'}</span>
-        ${a.status!=='vergeben'?'<button class="btn btn-d btn-sm" onclick="event.stopPropagation();deleteAusschreibung(\''+a.id+'\')" style="margin-left:8px;opacity:.3;padding:2px 7px;font-size:10px" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.3" title="Löschen">✕</button>':''}
+        <button class="btn btn-g btn-sm" onclick="event.stopPropagation();openSaveVorlageModal('${a.id}')" style="margin-left:4px;opacity:.4;padding:2px 7px;font-size:10px" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.4" title="Als Vorlage speichern">💾</button>
+        ${a.status!=='vergeben'?'<button class="btn btn-d btn-sm" onclick="event.stopPropagation();deleteAusschreibung(\''+a.id+'\')" style="margin-left:4px;opacity:.3;padding:2px 7px;font-size:10px" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.3" title="Löschen">✕</button>':''}
       </div>
       <div style="font-size:12px;color:var(--mut)">${E(a.objekt||'')} · Frist: ${a.frist||'—'} · ${nUp} Positionen · ${nV} verteilt · ${nE} Offerten${bkpInfo}</div>
     </div>`;
@@ -900,6 +952,273 @@ function deleteAusschreibung(ausId){
   sv();lg('🗑','Ausschreibung gelöscht',a.name);
   toast('🗑 «'+a.name+'» gelöscht');
   buildTabs();nav('paus');
+}
+
+// ═══════════════════════════════════════════════
+// VORLAGEN-BIBLIOTHEK (#28)
+// ═══════════════════════════════════════════════
+// Zwei Ebenen: 'personal' (scoped auf userId) + 'org' (scoped auf orgId).
+// Vorlagen enthalten einen Snapshot von typ, modelle, bkp, lose. Projekt/Objekt,
+// Frist, Beteiligte und Offerten werden bewusst NICHT in die Vorlage übernommen,
+// damit sie projektunabhängig wiederverwendbar sind.
+const SK_VORLAGEN='gema_ausschreibung_vorlagen_v1';
+var _vlFilter='all'; // 'all'|'personal'|'org'
+
+function getCurrentUserInfo(){
+  var info={userId:'anonymous',orgId:'org_default',userName:'Unbekannt'};
+  try{
+    if(typeof GemaAuth!=='undefined'){
+      var u=GemaAuth.getCurrentUser();
+      if(u){
+        info.userId=u.id||info.userId;
+        info.orgId=u.orgId||info.orgId;
+        info.userName=u.name||u.username||info.userName;
+      }
+    }
+  }catch(e){}
+  return info;
+}
+
+function ldVorlagen(){
+  try{
+    var raw=localStorage.getItem(SK_VORLAGEN);
+    if(raw)return JSON.parse(raw)||[];
+  }catch(e){}
+  try{
+    if(typeof _GemaDB!=='undefined'&&_GemaDB.c&&_GemaDB.c[SK_VORLAGEN]){
+      return JSON.parse(_GemaDB.c[SK_VORLAGEN])||[];
+    }
+  }catch(e){}
+  return [];
+}
+
+function svVorlagen(list){
+  var json=JSON.stringify(list||[]);
+  try{localStorage.setItem(SK_VORLAGEN,json);}catch(e){}
+  try{if(typeof _GemaDB!=='undefined')_GemaDB.put(SK_VORLAGEN,json).catch(function(){});}catch(e){}
+}
+
+// Gibt Vorlagen zurück, die für den aktuellen User sichtbar sind:
+// - Persönliche Vorlagen des Users
+// - Büro-Vorlagen der eigenen Organisation
+function getVisibleVorlagen(){
+  var info=getCurrentUserInfo();
+  var all=ldVorlagen();
+  return all.filter(function(v){
+    if(v.scope==='personal')return v.ownerUserId===info.userId;
+    if(v.scope==='org')return v.orgId===info.orgId;
+    return false;
+  });
+}
+
+// ── Als Vorlage speichern (aus bestehender Ausschreibung) ──
+function openSaveVorlageModal(ausId){
+  var a=S.ausschreibungen.find(function(x){return x.id===ausId;});
+  if(!a){toast('Ausschreibung nicht gefunden','error');return;}
+  document.getElementById('svAusId').value=ausId;
+  document.getElementById('svName').value=a.name?(a.name+' — Vorlage'):'';
+  document.getElementById('svDesc').value='';
+  var radios=document.querySelectorAll('input[name=svScope]');
+  radios.forEach(function(r){r.checked=(r.value==='personal');});
+  oM('mSaveVorlage');
+  setTimeout(function(){var el=document.getElementById('svName');if(el){el.focus();el.select();}},100);
+}
+
+function saveAsVorlageSubmit(){
+  var ausId=document.getElementById('svAusId').value;
+  var a=S.ausschreibungen.find(function(x){return x.id===ausId;});
+  if(!a){toast('Ausschreibung nicht gefunden','error');return;}
+  var name=(document.getElementById('svName').value||'').trim();
+  if(!name){toast('Bitte Vorlagenname angeben','error');return;}
+  var desc=(document.getElementById('svDesc').value||'').trim();
+  var scope='personal';
+  var r=document.querySelector('input[name=svScope]:checked');
+  if(r)scope=r.value;
+  var info=getCurrentUserInfo();
+  // Snapshot: nur übertragbare Felder, ohne projekt-/objektspezifische Daten
+  var vorlage={
+    id:'vl-'+Date.now()+'-'+Math.random().toString(36).slice(2,6),
+    name:name,
+    beschreibung:desc,
+    scope:scope,
+    ownerUserId:info.userId,
+    ownerUserName:info.userName,
+    orgId:info.orgId,
+    createdAt:new Date().toISOString(),
+    // Snapshot der wiederverwendbaren Struktur
+    snapshot:{
+      typ:a.typ||'funktional',
+      modelle:(a.modelle||[a.modell||'pauschal']).slice(),
+      bkp:a.bkp?JSON.parse(JSON.stringify(a.bkp)):[],
+      lose:a.lose?JSON.parse(JSON.stringify(a.lose)):[],
+      abzuege:a.abzuege?JSON.parse(JSON.stringify(a.abzuege)):null,
+      vorbedingungen:a.vorbedingungen?JSON.parse(JSON.stringify(a.vorbedingungen)):null
+    }
+  };
+  var list=ldVorlagen();
+  list.push(vorlage);
+  svVorlagen(list);
+  cM('mSaveVorlage');
+  toast('✓ Vorlage «'+name+'» gespeichert ('+(scope==='org'?'🏢 Büro':'👤 Persönlich')+')');
+  try{lg('📋','Vorlage gespeichert',name+' ('+scope+')');}catch(e){}
+}
+
+// ── Vorlagen-Bibliothek öffnen ──
+function openVorlagenModal(){
+  _vlFilter='all';
+  renderVorlagenList();
+  oM('mVorlagen');
+}
+
+function vlFilter(f){
+  _vlFilter=f;
+  ['vlFilterAll','vlFilterPers','vlFilterOrg'].forEach(function(id){
+    var el=document.getElementById(id);if(!el)return;
+    el.style.background='';el.style.borderColor='';el.style.color='';
+  });
+  var activeId=f==='all'?'vlFilterAll':f==='personal'?'vlFilterPers':'vlFilterOrg';
+  var ae=document.getElementById(activeId);
+  if(ae){ae.style.background='var(--acc-bg)';ae.style.borderColor='var(--acc-bd)';ae.style.color='var(--acc)';}
+  renderVorlagenList();
+}
+
+function renderVorlagenList(){
+  var list=getVisibleVorlagen();
+  if(_vlFilter!=='all')list=list.filter(function(v){return v.scope===_vlFilter;});
+  list.sort(function(a,b){return (b.createdAt||'').localeCompare(a.createdAt||'');});
+  var container=document.getElementById('vlList');
+  var empty=document.getElementById('vlEmpty');
+  if(!list.length){
+    container.innerHTML='';container.style.display='none';
+    empty.style.display='';
+    return;
+  }
+  empty.style.display='none';container.style.display='';
+  var info=getCurrentUserInfo();
+  container.innerHTML=list.map(function(v){
+    var scopeLabel=v.scope==='org'?'<span class="tag t-bl" style="font-size:10px">🏢 Büro-Vorlage</span>':'<span class="tag t-pu" style="font-size:10px">👤 Persönlich</span>';
+    var typLabel=v.snapshot&&v.snapshot.typ==='crbx'?'<span class="tag t-gy" style="font-size:10px">CRBX</span>':'<span class="tag t-gy" style="font-size:10px">Funktional</span>';
+    var nBkp=v.snapshot&&v.snapshot.bkp?v.snapshot.bkp.length:0;
+    var nLose=v.snapshot&&v.snapshot.lose?v.snapshot.lose.length:0;
+    var nPos=0;
+    if(v.snapshot&&v.snapshot.lose){v.snapshot.lose.forEach(function(l){nPos+=(l.positionen||[]).length;});}
+    (v.snapshot&&v.snapshot.bkp||[]).forEach(function(b){nPos+=(b.unterpositionen||[]).length;});
+    var canDelete=(v.scope==='personal'&&v.ownerUserId===info.userId)||(v.scope==='org'&&v.orgId===info.orgId);
+    var when='';
+    try{when=new Date(v.createdAt).toLocaleDateString('de-CH');}catch(e){}
+    return '<div style="padding:12px 14px;border-bottom:1px solid var(--brd);display:flex;align-items:flex-start;gap:10px">'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">'+
+          '<strong style="font-size:14px">'+E(v.name)+'</strong>'+
+          scopeLabel+typLabel+
+        '</div>'+
+        (v.beschreibung?'<div style="font-size:12px;color:var(--txt2);margin-bottom:4px">'+E(v.beschreibung)+'</div>':'')+
+        '<div style="font-size:11px;color:var(--mut)">'+
+          nBkp+' BKP-Gruppen · '+nLose+' Los'+(nLose!==1?'e':'')+' · '+nPos+' Position'+(nPos!==1?'en':'')+
+          (v.ownerUserName?' · von '+E(v.ownerUserName):'')+
+          (when?' · '+when:'')+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">'+
+        '<button class="btn btn-p btn-sm" onclick="useVorlageFromLibrary(\''+v.id+'\')" title="Neue Ausschreibung aus Vorlage">+ Verwenden</button>'+
+        (canDelete?'<button class="btn btn-d btn-sm" onclick="deleteVorlage(\''+v.id+'\')" title="Vorlage löschen">🗑</button>':'')+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function deleteVorlage(vid){
+  var list=ldVorlagen();
+  var v=list.find(function(x){return x.id===vid;});
+  if(!v)return;
+  if(!confirm('Vorlage «'+v.name+'» wirklich löschen?'))return;
+  var info=getCurrentUserInfo();
+  // Berechtigung: personal nur eigene, org nur innerhalb eigener Organisation
+  if(v.scope==='personal'&&v.ownerUserId!==info.userId){toast('Keine Berechtigung','error');return;}
+  if(v.scope==='org'&&v.orgId!==info.orgId){toast('Keine Berechtigung','error');return;}
+  list=list.filter(function(x){return x.id!==vid;});
+  svVorlagen(list);
+  renderVorlagenList();
+  toast('🗑 Vorlage «'+v.name+'» gelöscht');
+  try{lg('🗑','Vorlage gelöscht',v.name);}catch(e){}
+}
+
+// Öffnet das "Neue Ausschreibung"-Modal mit bereits vorausgewählter Vorlage.
+function useVorlageFromLibrary(vid){
+  cM('mVorlagen');
+  oM('mNewA');
+  // Warten bis mNewA gerendert ist, dann Vorlage im Dropdown selektieren
+  setTimeout(function(){
+    var sel=document.getElementById('naVorlageId');
+    if(sel){sel.value=vid;naVorlageChanged();}
+  },50);
+}
+
+// Befüllt das Vorlagen-Dropdown im "Neue Ausschreibung"-Modal
+function naPopulateVorlagen(){
+  var sel=document.getElementById('naVorlageId');
+  if(!sel)return;
+  var list=getVisibleVorlagen();
+  list.sort(function(a,b){
+    // Büro-Vorlagen zuerst (Team-Defaults), dann persönliche
+    if(a.scope!==b.scope)return a.scope==='org'?-1:1;
+    return (a.name||'').localeCompare(b.name||'','de');
+  });
+  var opts=['<option value="">— Leere Ausschreibung (keine Vorlage) —</option>'];
+  var orgItems=list.filter(function(v){return v.scope==='org';});
+  var persItems=list.filter(function(v){return v.scope==='personal';});
+  if(orgItems.length){
+    opts.push('<optgroup label="🏢 Büro-Vorlagen">');
+    orgItems.forEach(function(v){opts.push('<option value="'+v.id+'">'+E(v.name)+'</option>');});
+    opts.push('</optgroup>');
+  }
+  if(persItems.length){
+    opts.push('<optgroup label="👤 Persönliche Vorlagen">');
+    persItems.forEach(function(v){opts.push('<option value="'+v.id+'">'+E(v.name)+'</option>');});
+    opts.push('</optgroup>');
+  }
+  sel.innerHTML=opts.join('');
+}
+
+function naVorlageChanged(){
+  var sel=document.getElementById('naVorlageId');
+  var hint=document.getElementById('naVorlageHint');
+  if(!sel||!hint)return;
+  if(sel.value){
+    // Vorlage gewählt → typ/modelle aus Vorlage vorausfüllen
+    var v=ldVorlagen().find(function(x){return x.id===sel.value;});
+    if(v&&v.snapshot){
+      hint.style.display='';
+      hint.textContent='✓ Vorlage «'+v.name+'» wird angewendet: BKP-Baum, Lose und Positionen werden übernommen.';
+      // Typ-Card visuell anpassen
+      if(v.snapshot.typ)naPickTyp(v.snapshot.typ);
+      // Modell-Checkboxen setzen
+      var modelle=v.snapshot.modelle||[];
+      document.querySelectorAll('#naModellWrap input[type=checkbox]').forEach(function(cb){
+        cb.checked=modelle.indexOf(cb.value)>=0;
+      });
+    }
+  } else {
+    hint.style.display='none';
+  }
+}
+
+// Wendet eine Vorlage auf eine frisch erstellte Ausschreibung an.
+// Überschreibt bkp, lose, abzuege, vorbedingungen mit dem Snapshot-Inhalt.
+function applyVorlageSnapshot(ausObj,vorlageId){
+  var v=ldVorlagen().find(function(x){return x.id===vorlageId;});
+  if(!v||!v.snapshot)return false;
+  var snap=v.snapshot;
+  if(snap.bkp)ausObj.bkp=JSON.parse(JSON.stringify(snap.bkp));
+  if(snap.lose&&snap.lose.length){
+    // Neue Los-IDs vergeben, damit keine Kollisionen entstehen
+    ausObj.lose=JSON.parse(JSON.stringify(snap.lose)).map(function(los,i){
+      return Object.assign({},los,{id:'los_'+Date.now()+'_'+i});
+    });
+  }
+  if(snap.abzuege)ausObj.abzuege=JSON.parse(JSON.stringify(snap.abzuege));
+  if(snap.vorbedingungen)ausObj.vorbedingungen=JSON.parse(JSON.stringify(snap.vorbedingungen));
+  return true;
 }
 
 // ═══════════════════════════════════════════════
@@ -3093,9 +3412,20 @@ function createAusschreibung(){
     {code:'259',name:'Übriges',unterpositionen:[],materialSpec:[]}
   ]:[];
   var objektId=objSel.value||'';
-  S.ausschreibungen.push({id,name,typ,modelle,modell:modelle[0],objekt,objektId,region,frist,status:'entwurf',bkp:stdBKP,abzuege:JSON.parse(JSON.stringify(DEF_ABZUEGE)),crbx:{lv:null},beilagen,plaene,unterlagen,vorbedingungen:{modus:'gema',kapitel:{},pdfName:''},materialSpec:{},vergabe:null,lose:[],crbxVergleich:null});
-  S.activeAusId=id;save();lg('📋','Ausschreibung erstellt',name+' ('+typ+', '+modelle.join('+')+')');
-  cM('mNewA');toast('Ausschreibung erstellt');buildTabs();nav('pbkp');
+  var vorlageId=(document.getElementById('naVorlageId')||{}).value||'';
+  var neuAus={id,name,typ,modelle,modell:modelle[0],objekt,objektId,region,frist,status:'entwurf',bkp:stdBKP,abzuege:JSON.parse(JSON.stringify(DEF_ABZUEGE)),crbx:{lv:null},beilagen,plaene,unterlagen,vorbedingungen:{modus:'gema',kapitel:{},pdfName:''},materialSpec:{},vergabe:null,lose:[],crbxVergleich:null};
+  var appliedVorlage=false;
+  if(vorlageId){appliedVorlage=applyVorlageSnapshot(neuAus,vorlageId);}
+  S.ausschreibungen.push(neuAus);
+  S.activeAusId=id;save();
+  var logDetail=name+' ('+typ+', '+modelle.join('+')+')';
+  if(appliedVorlage){
+    var v=ldVorlagen().find(function(x){return x.id===vorlageId;});
+    if(v)logDetail+=' · aus Vorlage «'+v.name+'»';
+  }
+  lg('📋','Ausschreibung erstellt',logDetail);
+  cM('mNewA');toast(appliedVorlage?'✓ Ausschreibung aus Vorlage erstellt':'Ausschreibung erstellt');
+  buildTabs();nav('pbkp');
 }
 
 // ── GEMA Internal Dialogs ──
@@ -3892,7 +4222,7 @@ function fmtWG(c){if(!c)return'';c=c.replace(/\s/g,'');if(c.length<=3)return c;i
 // Clean unit: "StA+"→"St", "LE"→"LE", "m A+"→"m", "m²A+"→"m²"
 function cleanUnit(u){if(!u)return'';if(u.length<=2)return u.trim();return u.replace(/\s*[A-Z][\+\-]\s*$/,'').trim()||u.trim();}
 function E(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
-function oM(id){document.getElementById(id).classList.add('open');if(id==='mAbzug')renderAbzModal();if(id==='mNewA')naPopulateObjekte();if(id==='mProfil')loadProfil();}
+function oM(id){document.getElementById(id).classList.add('open');if(id==='mAbzug')renderAbzModal();if(id==='mNewA'){naPopulateObjekte();naPopulateVorlagen();}if(id==='mProfil')loadProfil();}
 function cM(id){document.getElementById(id).classList.remove('open');}
 function toast(m,t='success'){const c=document.getElementById('toasts'),d=document.createElement('div');d.style.cssText=`padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;color:#fff;background:${t==='error'?'var(--red)':t==='info'?'var(--blue)':'var(--grn)'};box-shadow:var(--sh);animation:fu .2s ease;max-width:360px`;d.textContent=m;c.appendChild(d);setTimeout(()=>{d.style.opacity='0';d.style.transition='opacity .3s';setTimeout(()=>d.remove(),300);},3500);}
 

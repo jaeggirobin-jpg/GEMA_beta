@@ -188,6 +188,50 @@
     if (!id) return [];
     return (_load().beteiligte || []).filter(function(b) { return b.objektId === id; });
   }
+
+  // ── Parent-Child-Hierarchie ──
+  // Gibt das Parent-Objekt zurück (oder null). Respektiert Org-Filter.
+  function getParent(objektId) {
+    var obj = getAllUnfiltered().find(function(o){ return o.id === objektId; });
+    if (!obj || !obj.parentObjektId) return null;
+    return getAllUnfiltered().find(function(o){ return o.id === obj.parentObjektId; }) || null;
+  }
+  // Direkte Kinder (erste Ebene) eines Objekts.
+  function getChildren(objektId) {
+    return getAllUnfiltered().filter(function(o){ return o.parentObjektId === objektId; });
+  }
+  // Alle Nachkommen (rekursiv, beliebig tief).
+  function getDescendants(objektId) {
+    var all = getAllUnfiltered();
+    var out = [];
+    var stack = [objektId];
+    var seen = {};
+    while (stack.length) {
+      var cur = stack.pop();
+      all.forEach(function(o){
+        if (o.parentObjektId === cur && !seen[o.id]) {
+          seen[o.id] = true;
+          out.push(o);
+          stack.push(o.id);
+        }
+      });
+    }
+    return out;
+  }
+  // Breadcrumb vom Root bis zum Objekt: ['Spital', 'Etappe 2 Rohbau', 'Sub-Los A']
+  function getBreadcrumb(objektId) {
+    var all = getAllUnfiltered();
+    var names = [];
+    var cur = all.find(function(o){ return o.id === objektId; });
+    var guard = 0;
+    while (cur && guard < 10) {
+      names.unshift(cur.name || '–');
+      if (!cur.parentObjektId) break;
+      cur = all.find(function(o){ return o.id === cur.parentObjektId; });
+      guard++;
+    }
+    return names;
+  }
   function getByRolle(rolle, objektId) {
     return getBeteiligte(objektId).filter(function(b) { return b.rolle === rolle; });
   }
@@ -307,6 +351,7 @@
     getAll: getAll, getAllUnfiltered: getAllUnfiltered, getAktive: getAktive, getActive: getActive, getActiveId: getActiveId,
     setObjektStatus: setObjektStatus, setActiveId: setActiveId,
     getBeteiligte: getBeteiligte, getByRolle: getByRolle, getBeteiligterById: getBeteiligterById,
+    getParent: getParent, getChildren: getChildren, getDescendants: getDescendants, getBreadcrumb: getBreadcrumb,
     getBauherrschaft: getBauherrschaft, getArchitekt: getArchitekt, getPlaner: getPlaner, getUnternehmer: getUnternehmer,
     formatKurz: formatKurz, formatAdresse: formatAdresse,
     renderObjektSelect: renderObjektSelect, renderBeteiligteSelect: renderBeteiligteSelect,
