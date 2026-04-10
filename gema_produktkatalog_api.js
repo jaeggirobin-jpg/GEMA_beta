@@ -814,6 +814,7 @@ function addDokument(produktId, dok){
     name: dok.name || '',
     typ: dok.typ || 'datenblatt',
     format: dok.format || 'pdf',
+    sprache: dok.sprache || '', // #38: DE/FR/IT/EN
     datum: new Date().toISOString().split('T')[0],
     groesse: dok.groesse || 0,
     hochgeladenVon: _getUsername(),

@@ -307,6 +307,91 @@ Lieferanten sollen Excel/PDF-Preislisten mit Gültigkeitsdatum hochladen können
 
 ---
 
+### Datenblätter beim Produkt hinterlegen
+**Quelle:** Persona-Test #38
+**Datum:** 2026-04-10
+**Status:** Umgesetzt
+
+Erweiterung des bestehenden Dokument-Systems in `sys_produktkatalog.html`:
+
+- **Neuer Typ «Montageanleitung»** zusätzlich zu Datenblatt, Zertifikat, Schema, Bild
+- **Sprach-Feld** (DE/FR/IT/EN) pro Dokument, wird als Flag-Tag angezeigt
+- **Dateigrössen-Limit** von 5 MB → **10 MB** erhöht
+- **Gruppierte Anzeige**: Dokumente werden nach Typ gruppiert dargestellt — Datenblätter zuerst, dann Anleitungen, Zertifikate, Schemata, Bilder. Jede Gruppe mit Icon und Count-Anzeige
+- **Dateigrösse** wird pro Dokument angezeigt (B/KB/MB-formatiert)
+- **Icons & Badges** klarer: 📄 Datenblatt, 📘 Anleitung, 🏅 Zertifikat, 📐 Schema, 🖼 Bild
+- **Empty-State** verbessert mit Icon und erklärendem Text
+
+API-Erweiterung in `gema_produktkatalog_api.js`: `sprache`-Feld im Dokument-Objekt. Backwards-compatible — bestehende Dokumente ohne `sprache` zeigen einfach kein Sprach-Tag.
+
+**Offen für später:** Automatisches Parsen der Sprache aus PDF-Metadaten, Datenblätter beim Produkt-Import (CSV/JSON) automatisch verlinken.
+
+---
+
+### Supplier Portal (Lieferanten-Self-Service)
+**Quelle:** Persona-Test #39
+**Datum:** 2026-04-10
+**Status:** Offen — Brainstorm, grosses Feature für später
+
+Lieferanten sollen ihre Produkte, Preise und Datenblätter eigenständig pflegen können, statt dass der GEMA-Admin alles manuell erfasst.
+
+**Präferierte Variante — Eigene Login-Ansicht mit Rollen-Gate:**
+
+Eigener Menüpunkt «Lieferanten-Bereich» mit Auth-Gate:
+- Lieferant loggt sich mit seiner Lieferanten-E-Mail ein
+- Sieht nur seine eigenen Produkte
+- Kann sie bearbeiten, verifizieren, Datenblätter hochladen
+- Kann Offertanfragen beantworten
+- Admin-User sehen alles (wie bisher in `sys_lieferanten.html`)
+
+**Technische Skizze:**
+- Neue Rolle `role_lieferant` (evtl. schon vorhanden via `GemaAuth`)
+- Filterung in `GemaProdukte.getProdukte()` via `lieferantId === currentUser.lieferantId`
+- Eigene Seite `sys_supplier_portal.html` mit eingeschränkter Navigation
+- Verifizierungs-Flow: Bestätigen-Button setzt `status = 'verifiziert'`, löst Log-Eintrag und Activity-Benachrichtigung aus
+- Datenblatt-Upload nutzt bereits vorhandene API (#38)
+
+**Offene Fragen:**
+- Wie läuft der Lieferanten-Onboarding-Flow ab? Einladung per Mail-Link vom Admin? Self-Registration?
+- Wer darf Lieferanten-User anlegen (Admin only oder auch Planer aus seinem Büro)?
+- Rechtemodell: Darf ein Lieferant mehrere Mitarbeitende einladen (Org-Struktur auch für Lieferanten)?
+- Preis-Sichtbarkeit: Sind vom Lieferanten gepflegte Preise für alle Planer sichtbar, oder nur nach expliziter Freigabe?
+- Verbindung mit #37 (Preislisten-Upload), #38 (Datenblätter), #40 (Preishistorik)
+
+**Abhängigkeiten:** Braucht eine saubere Auth-Rollen-Trennung, isolierte Produkt-Ownership, einen klaren Verifizierungs-Workflow. Eigenes Mini-Projekt.
+
+---
+
+### Preisentwicklung / Historik pro Produkt
+**Quelle:** Persona-Test #40
+**Datum:** 2026-04-10
+**Status:** Verworfen — nicht umsetzen
+
+Die Persona wünschte historische Preisdaten für Trendanalyse. **Entscheidung: Nicht umsetzen.** Preise sind in GEMA ohnehin nicht die zentrale Datenquelle — der Fokus liegt auf Berechnungen, Ausschreibungen und Produkt-Technik. Preisentwicklung und Trendanalyse sind ein separates Business-Intelligence-Thema, das ausserhalb des Kernfokus liegt.
+
+---
+
+### Undo / Eingabe-History bei Berechnungen
+**Quelle:** Persona-Test #41
+**Datum:** 2026-04-10
+**Status:** Umgesetzt (Modul + 1 Integration)
+
+**Neues Modul `gema_undo.js`:**
+- In-Memory Undo/Redo-Stack pro Modul-Key (max. 50 Einträge, konfigurierbar)
+- **Keyboard-Shortcuts**: Cmd/Ctrl+Z (Undo), Cmd/Ctrl+Shift+Z und Cmd/Ctrl+Y (Redo). In editierbaren Elementen (Input/Textarea/contenteditable) bleibt das Browser-Default-Verhalten erhalten — nur ausserhalb greift GemaUndo
+- **Auto-Attach**: `GemaUndo.attachTo(inputs)` hängt sich per focus/change/blur an Input-Felder, nimmt beim focus den alten Wert auf und erstellt bei Änderung automatisch einen Undo-Eintrag mit Label «Feldname: alterWert → neuerWert»
+- **Manuelles API**: `record(label, oldValue, newValue, applyFn)` für komplexere Snapshots (z.B. ganze Arrays / Objekte), `applyFn(value)` wird bei Undo/Redo ausgeführt
+- **Optional History-Panel**: `showPanel()` zeigt einen kleinen Panel unten links mit Liste aller Einträge, Undo/Redo/Clear-Buttons und aktueller Position
+- **Toast**: Rückgängig-Aktionen werden per Mini-Toast unten am Screen quittiert (integriert sich mit `window.toast()` falls vorhanden)
+
+**Integration:** Beispielhaft in `sb_laengenausdehnung.html` eingebunden. Alle numerischen Inputs (`inputmode="decimal"`) werden auto-attached, und ein Intervall re-attacht dynamisch hinzugefügte Felder (idempotent durch `_gemaUndoAttached`-Flag pro Element).
+
+**Persistenz:** Bewusst in-memory — Undo ist ein Session-Feature. Beim Seitenwechsel wird der Stack geleert. Für persistente Versionshistorie wäre ein anderes Pattern (Server-seitige Events, Operational Transform) nötig, das hier nicht erforderlich ist.
+
+**Offene Folgepunkte:** Undo in weiteren sb_-Modulen einbauen (via dasselbe Pattern: `gema_undo.js` einbinden + `GemaUndo.init() + attachTo()` im DOMContentLoaded).
+
+---
+
 ### Ausschreibungs-Vorlagen pro Gebäudetyp (EFH/MFH/Schule)
 **Quelle:** Persona-Test #16
 **Datum:** 2026-04-10

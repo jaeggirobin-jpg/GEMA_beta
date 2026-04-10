@@ -1353,6 +1353,25 @@ document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('laen
   window.addEventListener('gema-objekte-loaded',function(){populateObjektDropdown();if(typeof GemaAutoSave!=='undefined') GemaAutoSave.init('laengenausdehnung');});
   ['metaProjekt','metaBearbeiter','metaDatum'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',saveMeta);});
 })();</script>
+<script src="gema_undo.js"></script>
+<script>
+// ── Undo-Integration (#41) ──
+// Initialisiert den Undo-Stack für dieses Modul und hängt sich automatisch
+// an alle numerischen Inputs. Cmd/Ctrl+Z macht Eingaben rückgängig,
+// Cmd/Ctrl+Shift+Z (oder Cmd/Ctrl+Y) stellt sie wieder her.
+document.addEventListener('DOMContentLoaded', function(){
+  if (typeof GemaUndo === 'undefined') return;
+  GemaUndo.init('sb_laengenausdehnung', { max: 50 });
+  // Alle Zahleneingaben auto-attachen
+  var inputs = document.querySelectorAll('input[inputmode="decimal"], input[type="text"][id^="len"], input[type="text"][id="dt_inp"], input[type="text"][id="k_la"]');
+  GemaUndo.attachTo(inputs);
+  // Nach jedem attachTo auch neu hinzugefügte Zeilen (wenn dynamisch) erfassen
+  // — durch periodisches Re-Attach (safe: idempotent via _gemaUndoAttached-Flag).
+  setInterval(function(){
+    try { GemaUndo.attachTo(document.querySelectorAll('input[inputmode="decimal"]')); } catch(e) {}
+  }, 3000);
+});
+</script>
 <script src="gema_scroll.js"></script>
 <script src="gema_mobile_menu.js"></script>
 </body>

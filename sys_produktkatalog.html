@@ -204,14 +204,29 @@ input::placeholder,textarea::placeholder{color:#cbd5e1!important}
 
         <!-- Documents -->
         <div class="card">
-          <div class="card-hd"><h3>Dokumente & Bilder</h3></div>
+          <div class="card-hd"><h3>📄 Datenblätter & Dokumente</h3></div>
           <div class="card-bd">
             <div id="docList"></div>
-            <div style="margin-top:10px">
-              <div class="g2">
-                <select class="fc" id="docTyp"><option value="datenblatt">Datenblatt (PDF)</option><option value="bild">Produktbild</option><option value="zertifikat">Zertifikat</option><option value="schema">Schema / Zeichnung</option></select>
-                <div style="display:flex;gap:6px"><input type="file" class="fc" id="docFile" accept=".pdf,.jpg,.png,.svg" style="padding:6px"/><button class="btn btn-s btn-sm" onclick="addDoc()">+</button></div>
+            <div style="margin-top:12px;padding-top:12px;border-top:1.5px dashed var(--brd);background:var(--bg);margin-left:-20px;margin-right:-20px;margin-bottom:-20px;padding:12px 20px;border-radius:0 0 var(--r-lg) var(--r-lg)">
+              <div style="font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">+ Neues Dokument hochladen</div>
+              <div class="g3">
+                <select class="fc" id="docTyp" title="Dokumenttyp">
+                  <option value="datenblatt">📄 Datenblatt (PDF)</option>
+                  <option value="anleitung">📘 Montageanleitung</option>
+                  <option value="zertifikat">🏅 Zertifikat (SVGW, KTI, …)</option>
+                  <option value="schema">📐 Schema / Zeichnung</option>
+                  <option value="bild">🖼 Produktbild</option>
+                </select>
+                <select class="fc" id="docSprache" title="Sprache">
+                  <option value="de">🇩🇪 Deutsch</option>
+                  <option value="fr">🇫🇷 Français</option>
+                  <option value="it">🇮🇹 Italiano</option>
+                  <option value="en">🇬🇧 English</option>
+                  <option value="">— Keine Sprache —</option>
+                </select>
+                <div style="display:flex;gap:6px"><input type="file" class="fc" id="docFile" accept=".pdf,.jpg,.jpeg,.png,.svg" style="padding:6px"/><button class="btn btn-s btn-sm" onclick="addDoc()">+ Upload</button></div>
               </div>
+              <div style="font-size:10px;color:var(--mut);margin-top:4px">PDF, JPG, PNG, SVG · max. 10 MB · Speicherung aktuell lokal als Data-URL</div>
             </div>
           </div>
         </div>
@@ -515,35 +530,73 @@ function saveProdukt(){
   toast('Gespeichert');
 }
 
-// ── Documents ──
+// ── Documents (#38: Datenblätter, Anleitungen, Zertifikate, …) ──
+// Gruppierung nach Typ in fester Reihenfolge: Datenblätter zuerst, dann
+// Montageanleitungen, Zertifikate, Schemata, Bilder. Jede Gruppe bekommt
+// einen farbigen Header und zeigt Sprach-Flag + Dateigrösse pro Eintrag.
+var DOC_TYPEN = [
+  { id:'datenblatt', label:'Datenblätter',      icon:'📄', cls:'t-bl' },
+  { id:'anleitung',  label:'Montageanleitungen', icon:'📘', cls:'t-bl' },
+  { id:'zertifikat', label:'Zertifikate',        icon:'🏅', cls:'t-gr' },
+  { id:'schema',     label:'Schemata / Zeichnungen', icon:'📐', cls:'t-gy' },
+  { id:'bild',       label:'Produktbilder',      icon:'🖼', cls:'t-gy' }
+];
+var DOC_SPRACHEN = { de:'🇩🇪 DE', fr:'🇫🇷 FR', it:'🇮🇹 IT', en:'🇬🇧 EN' };
+function _fmtBytes(b){
+  if (!b) return '';
+  if (b < 1024) return b + ' B';
+  if (b < 1024 * 1024) return Math.round(b / 1024) + ' KB';
+  return (b / 1024 / 1024).toFixed(1) + ' MB';
+}
 function renderDocs(){
   const p=currentProdukt;if(!p)return;
   const docs=GemaProdukte.getDokumente(p.id);
-  if(!docs.length){document.getElementById('docList').innerHTML='<p style="color:var(--mut);font-size:13px">Noch keine Dokumente.</p>';return;}
-  document.getElementById('docList').innerHTML=docs.map(d=>{
-    const hasData=!!d.dataUrl;
-    const previewBtn=hasData?`<button class="btn btn-s btn-sm" onclick="previewDoc('${E(d.id)}')">👁</button>`:'';
-    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--brd)">
-      <span class="tag ${d.typ==='datenblatt'?'t-bl':d.typ==='zertifikat'?'t-gr':'t-gy'}">${E(d.typ)}</span>
-      <span style="flex:1;font-size:13px">${E(d.name)}</span>
-      <span style="font-size:11px;color:var(--mut)">${d.hochgeladenVon?E(d.hochgeladenVon)+' · ':''}${d.datum||''}</span>
-      ${previewBtn}
-      <button class="btn btn-d btn-sm" onclick="rmDoc('${E(d.id)}')">✕</button>
-    </div>`;
-  }).join('');
+  const box=document.getElementById('docList');
+  if(!docs.length){
+    box.innerHTML='<div style="padding:18px;text-align:center;color:var(--mut);background:var(--bg);border-radius:var(--r-sm)"><div style="font-size:24px;margin-bottom:4px">📄</div><div style="font-size:13px">Noch keine Dokumente hochgeladen.</div><div style="font-size:11px;margin-top:2px">Datenblätter, Anleitungen und Zertifikate direkt beim Produkt verfügbar.</div></div>';
+    return;
+  }
+  // Gruppieren
+  var byTyp={};
+  docs.forEach(function(d){var t=d.typ||'datenblatt';(byTyp[t]=byTyp[t]||[]).push(d);});
+  var html='';
+  DOC_TYPEN.forEach(function(typInfo){
+    var list=byTyp[typInfo.id];if(!list||!list.length)return;
+    html+='<div style="margin-bottom:10px">'
+      +'<div style="font-size:10px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;padding:6px 0 4px;border-bottom:1px solid var(--brd);margin-bottom:4px">'
+      + typInfo.icon+' '+typInfo.label+' <span style="color:var(--mut2);font-weight:600">('+list.length+')</span>'
+      +'</div>';
+    list.forEach(function(d){
+      var hasData=!!d.dataUrl;
+      var spr=d.sprache?(DOC_SPRACHEN[d.sprache]||d.sprache):'';
+      var size=_fmtBytes(d.groesse);
+      var previewBtn=hasData?'<button class="btn btn-s btn-sm" onclick="previewDoc(\''+E(d.id)+'\')" title="Vorschau">👁</button>':'';
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--brd)">'
+        + (spr?'<span class="tag t-gy" style="font-size:10px">'+spr+'</span>':'')
+        + '<span style="flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+E(d.name)+'</span>'
+        + (size?'<span style="font-size:11px;color:var(--mut)">'+size+'</span>':'')
+        + '<span style="font-size:11px;color:var(--mut)">'+(d.hochgeladenVon?E(d.hochgeladenVon)+' · ':'')+(d.datum||'')+'</span>'
+        + previewBtn
+        + '<button class="btn btn-d btn-sm" onclick="rmDoc(\''+E(d.id)+'\')" title="Entfernen">✕</button>'
+        + '</div>';
+    });
+    html+='</div>';
+  });
+  box.innerHTML=html;
 }
 
 function addDoc(){
   const fi=document.getElementById('docFile');
   const typ=document.getElementById('docTyp').value;
+  const sprache=(document.getElementById('docSprache')||{value:''}).value;
   if(!fi.files?.length){toast('Datei wählen','error');return;}
   const file=fi.files[0];
-  if(file.size>5*1024*1024){toast('Max. 5 MB','error');return;}
+  if(file.size>10*1024*1024){toast('Max. 10 MB','error');return;}
   const reader=new FileReader();
   reader.onload=function(){
     const fmt=file.name.split('.').pop().toLowerCase();
     GemaProdukte.addDokument(currentProdukt.id,{
-      name:file.name, typ:typ, format:fmt,
+      name:file.name, typ:typ, format:fmt, sprache:sprache,
       groesse:file.size, dataUrl:reader.result
     });
     currentProdukt=GemaProdukte.getProdukt(currentProdukt.id);
