@@ -532,9 +532,13 @@ input::placeholder,textarea::placeholder{color:#cbd5e1!important}
 <script src="gema_db.js"></script>
 <script src="gema_feedback.js"></script>
 <script src="gema_objekte_api.js"></script>
+<script src="gema_varianten.js"></script>
 <script src="gema_pdf.js"></script>
 <script src="gema_autosave.js"></script>
 <script src="gema_lu_api.js"></script>
+<script src="gema_produktkatalog_api.js"></script>
+<script src="gema_offer_request.js"></script>
+<script src="gema_anlagenwahl.js"></script>
 <link rel="stylesheet" href="gema_responsive.css"/>
 </head>
 <body>
@@ -566,6 +570,7 @@ input::placeholder,textarea::placeholder{color:#cbd5e1!important}
     <div class="gema-hero-ic">⬆️</div>
     <div>
       <div class="gema-hero-title">Druckerhöhungsanlage</div>
+      <div class="gema-hero-norm" title="Berechnungsgrundlage" style="display:inline-block;font-size:11px;color:rgba(255,255,255,.92);background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:2px 8px;border-radius:6px;margin-top:6px;font-weight:700;letter-spacing:.2px">📖 SVGW W3 + DIN 1988-500</div>
       <div class="gema-hero-sub">Auslegung DEA · Drehzahlreguliert · Förderköhe · Motorleistung · Ampel</div>
     </div>
   </div>
@@ -1329,6 +1334,34 @@ document.querySelectorAll('.g-tab').forEach(btn => {
 
 // GEMA Feedback init
 document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('druckerhoehung', 'Druckerhöhungsanlage');});
+</script>
+
+<!-- Anlagen-Wahl (Produktkatalog) — rendert Lieferanten-Pills + Typen-
+     Grid + Offertanfrage-Dialog fuer die Kategorie "druckerhoehung".
+     Sobald Lieferanten Produkte erfassen, erscheinen sie hier. -->
+<div class="g-page"><div id="dheAnlagenWahl"></div></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if (typeof GemaAnlagenwahl === 'undefined') return;
+  GemaAnlagenwahl.init({
+    container: '#dheAnlagenWahl',
+    kategorie: 'druckerhoehung',
+    titel: 'Druckerhöhungsanlagen',
+    accent: '#2563eb',
+    getBerechnungswerte: function(){
+      function _txt(id){ var el=document.getElementById(id); return el ? parseFloat((el.textContent||'').replace(',', '.')) || 0 : 0; }
+      var vz = _txt('vfd_out_vz') || _txt('ves_out_vz');
+      var pN = _txt('vfd_out_pN') || _txt('ves_out_pN');
+      var bauart = document.getElementById('vfd_out_vz') && document.getElementById('vfd_out_vz').textContent!=='–' ? 'VFD (Frequenzgeregelt)' : 'VES (Druckkessel)';
+      return { volumenstrom: vz, nachdruck: pN, bauart: bauart };
+    },
+    getProjekt: function(){
+      var name=(document.getElementById('metaProjekt')||{}).value||'';
+      var objektId=''; try{ if(typeof GemaObjekte!=='undefined') objektId=GemaObjekte.getActiveId()||''; }catch(e){}
+      return { name: name, ort:'', objektId: objektId };
+    }
+  });
+});
 </script>
 <script>
 // ── PROJECT META (auto-save) ──

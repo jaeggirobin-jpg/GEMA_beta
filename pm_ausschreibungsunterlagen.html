@@ -64,6 +64,20 @@ input,select,textarea,button{font-family:inherit}
 
 /* Vergleich */
 .ov-ch{background:var(--grn-bg)!important;font-weight:700;color:var(--grn)}.ov-z{background:var(--red-bg)!important;color:var(--red);font-weight:700}
+/* ── Info-Tooltips im Offertvergleich (#29c) ── */
+.gcm-info{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:#e5e7eb;color:#4b5563;font-size:10px;font-weight:800;margin-left:5px;cursor:help;vertical-align:middle;border:none;padding:0;font-family:inherit;transition:.15s;position:relative}
+.gcm-info:hover{background:#2563eb;color:#fff}
+.gcm-info::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 14px;border-radius:8px;font-size:12px;font-weight:500;line-height:1.55;white-space:normal;width:280px;text-align:left;box-shadow:0 8px 24px rgba(0,0,0,.3);opacity:0;pointer-events:none;transition:opacity .2s;z-index:500}
+.gcm-info::before{content:'';position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#0f172a;opacity:0;transition:opacity .2s;z-index:500}
+.gcm-info:hover::after,.gcm-info:hover::before,.gcm-info:focus::after,.gcm-info:focus::before{opacity:1}
+/* Tooltip im rechten Rand abklemmen, damit er nicht abgeschnitten wird */
+.dt th .gcm-info::after,.dt th .gcm-info:last-child::after{left:auto;right:0;transform:none}
+.dt th .gcm-info::before,.dt th .gcm-info:last-child::before{left:auto;right:8px;transform:none}
+.gcm-legend{background:var(--sur);border:1.5px solid var(--brd);border-left:4px solid #2563eb;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:var(--txt2);line-height:1.6}
+.gcm-legend strong{color:var(--txt);font-weight:800}
+.gcm-legend-chip{display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:5px;font-weight:700;font-size:11px;margin:0 2px}
+.gcm-legend-chip.ch{background:var(--grn-bg);color:var(--grn);border:1px solid var(--grn-bd)}
+.gcm-legend-chip.z{background:var(--red-bg);color:var(--red);border:1px solid #fecaca}
 /* Modal */
 .mo{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px}.mo.open{display:flex}.ml{background:var(--sur);border-radius:var(--r-lg);max-width:700px;width:100%;max-height:85vh;overflow:auto;box-shadow:var(--sh-lg)}.ml-hd{padding:18px 24px;border-bottom:1.5px solid var(--brd);display:flex;align-items:center;gap:12px}.ml-hd h2{font-size:16px;font-weight:800;flex:1}.ml-bd{padding:20px 24px}.ml-ft{padding:14px 24px;border-top:1.5px solid var(--brd);display:flex;gap:8px;justify-content:flex-end}.cl-btn{background:none;border:none;font-size:20px;cursor:pointer;color:var(--mut);padding:4px}
 /* Empty */
@@ -71,7 +85,13 @@ input,select,textarea,button{font-family:inherit}
 /* Contact row */
 .cr{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--sur);border:1.5px solid var(--brd);border-radius:9px;margin-bottom:8px;transition:.12s}.cr:hover{box-shadow:var(--sh-sm)}.ca{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;font-weight:800;color:#fff}.ci{flex:1;min-width:0}.cn{font-weight:700;font-size:13px}.cd{font-size:11px;color:var(--mut)}
 /* Anfrage card */
-.ac{background:var(--sur);border:1.5px solid var(--brd);border-radius:var(--r);padding:16px 18px;margin-bottom:10px;transition:.12s}.ac:hover{box-shadow:var(--sh-sm)}
+.ac{background:var(--sur);border:1.5px solid var(--brd);border-radius:var(--r);padding:16px 18px;margin-bottom:10px;transition:.12s}.ac:hover{box-shadow:var(--sh-sm);border-color:var(--acc-bd)}
+.ac.is-active{border-color:var(--acc);background:var(--acc-bg);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.ac.is-active::before{content:'✓ Aktuell geöffnet';display:inline-block;font-size:10px;font-weight:800;color:var(--acc);background:#fff;padding:2px 8px;border-radius:999px;border:1.5px solid var(--acc);margin-bottom:6px;letter-spacing:.03em;text-transform:uppercase}
+/* Filter/Sort selects in Ausschreibungsliste */
+.aus-filter-sel{padding:6px 10px;border:1.5px solid var(--brd2);border-radius:8px;font-size:12px;font-weight:600;font-family:inherit;background:var(--sur);color:var(--txt);cursor:pointer;outline:none;transition:.12s}
+.aus-filter-sel:hover{border-color:var(--acc-bd)}
+.aus-filter-sel:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
 /* Abo plan */
 .abo-plan{border:2px solid var(--brd);border-radius:var(--r);padding:20px;text-align:center;transition:.2s;cursor:pointer;position:relative}.abo-plan:hover{border-color:var(--acc-bd);box-shadow:var(--sh)}.abo-plan.active{border-color:var(--acc);background:var(--acc-bg)}.abo-plan .pn{font-size:16px;font-weight:800;margin-bottom:4px}.abo-plan .pp{font-size:28px;font-weight:800;color:var(--acc);margin-bottom:4px}.abo-plan .ps{font-size:12px;color:var(--mut)}.abo-plan .pk{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;background:var(--grn);color:#fff;display:none;align-items:center;justify-content:center;font-size:12px;font-weight:800}.abo-plan.active .pk{display:flex}
 /* Abo gate overlay */
@@ -81,7 +101,7 @@ input,select,textarea,button{font-family:inherit}
 /* New Ausschreibung typ cards */
 .na-typ-card{flex:1;border:2px solid var(--brd);border-radius:var(--r);padding:16px;cursor:pointer;transition:.2s;text-align:center}.na-typ-card:hover{border-color:var(--acc-bd);box-shadow:var(--sh-sm)}.na-typ-card.active{border-color:var(--acc);background:var(--acc-bg)}
 /* New Ausschreibung checkbox rows */
-.na-cb-row{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1.5px solid var(--brd);border-radius:var(--r-sm);cursor:pointer;transition:.15s}.na-cb-row:hover{border-color:var(--acc-bd);background:var(--sur2)}.na-cb-row:has(input:checked){border-color:var(--acc);background:var(--acc-bg)}.na-cb-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--acc);margin-top:2px;flex-shrink:0}
+.na-cb-row{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1.5px solid var(--brd);border-radius:var(--r-sm);cursor:pointer;transition:.15s}.na-cb-row:hover{border-color:var(--acc-bd);background:var(--sur2)}.na-cb-row:has(input:checked){border-color:var(--acc);background:var(--acc-bg)}.na-cb-row input[type=checkbox],.na-cb-row input[type=radio]{width:16px;height:16px;accent-color:var(--acc);margin-top:2px;flex-shrink:0}
 /* Abzug row */
 .abz-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--brd)}.abz-row:last-child{border-bottom:none}
 /* Position picker */
@@ -100,16 +120,14 @@ input,select,textarea,button{font-family:inherit}
   <div class="g-nav-bc" style="flex:0 0 auto">
     <a class="bc-cat" href="pm_ausschreibung.html">Ausschreibung</a><span class="bc-sep">›</span><span class="bc-cur" id="topP">Ausschreibungsunterlagen</span>
   </div>
-  <!-- Projekt-Schnellwahl (Mitte) -->
-  <div class="obj-quick" id="objQuick" style="position:relative;flex:1;display:flex;justify-content:center">
-    <button type="button" id="objQuickBtn" onclick="toggleObjQuick()" style="display:flex;align-items:center;gap:8px;padding:6px 18px;border:1.5px solid var(--brd2);border-radius:8px;background:var(--sur);font-size:13px;font-weight:700;color:var(--txt);cursor:pointer;font-family:inherit;max-width:400px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
-      <span style="font-size:14px">📁</span><span id="objQuickLabel" style="overflow:hidden;text-overflow:ellipsis">Projekt wählen</span><span style="font-size:9px;color:var(--mut2)">▼</span>
-    </button>
-    <div id="objQuickDrop" style="display:none;position:absolute;top:calc(100% + 4px);left:50%;transform:translateX(-50%);min-width:380px;max-height:360px;background:var(--sur);border:1.5px solid var(--brd2);border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.15);z-index:500;overflow:hidden">
-      <div style="padding:8px;border-bottom:1px solid var(--brd)">
-        <input type="text" id="objQuickSearch" placeholder="Projekt suchen…" oninput="filterObjQuick(this.value)" style="width:100%;padding:7px 10px;border:1.5px solid var(--brd2);border-radius:8px;font-size:13px;font-family:inherit;outline:none"/>
+  <!-- Projekt-Titel (Mitte) — wird durch die aktive Ausschreibung bestimmt -->
+  <div class="obj-title" id="objQuick" style="flex:1;display:flex;justify-content:center;align-items:center;min-width:0;padding:0 16px">
+    <div id="objTitleBox" style="display:flex;align-items:center;gap:10px;min-width:0;max-width:560px">
+      <span style="font-size:18px;flex-shrink:0">📁</span>
+      <div style="display:flex;flex-direction:column;min-width:0;line-height:1.15">
+        <span id="objQuickLabel" style="font-size:15px;font-weight:800;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Kein Projekt aktiv</span>
+        <span id="objAusLabel" style="font-size:11px;font-weight:600;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
       </div>
-      <div id="objQuickList" style="max-height:280px;overflow-y:auto"></div>
     </div>
   </div>
   <div class="g-nav-right">
@@ -133,6 +151,12 @@ input,select,textarea,button{font-family:inherit}
 <div class="mo" id="mNewA"><div class="ml" style="max-width:680px">
   <div class="ml-hd"><h2>Neue Ausschreibung</h2><button class="cl-btn" onclick="cM('mNewA')">✕</button></div>
   <div class="ml-bd" style="padding:16px 24px">
+    <div class="fg" style="margin-bottom:10px"><label class="fl">Aus Vorlage erstellen <span style="font-weight:500;color:var(--mut);text-transform:none;letter-spacing:0">(optional)</span></label>
+      <select class="fc" id="naVorlageId" onchange="naVorlageChanged()">
+        <option value="">— Leere Ausschreibung (keine Vorlage) —</option>
+      </select>
+      <span id="naVorlageHint" style="font-size:11px;color:var(--mut);margin-top:3px;display:none">BKP-Baum, Lose und Positionen werden aus der Vorlage übernommen.</span>
+    </div>
     <div class="g2">
       <div class="fg"><label class="fl">Projekt (aus Objekte)</label>
         <select class="fc" id="naObjektId" onchange="naObjektChanged()"><option value="">— Projekt wählen —</option></select>
@@ -166,6 +190,50 @@ input,select,textarea,button{font-family:inherit}
     </div>
   </div>
   <div class="ml-ft"><button class="btn btn-g" onclick="cM('mNewA')">Abbrechen</button><button class="btn btn-p" onclick="createAusschreibung()">Erstellen</button></div>
+</div></div>
+
+<!-- Modal: Vorlagen-Bibliothek -->
+<div class="mo" id="mVorlagen"><div class="ml" style="max-width:720px">
+  <div class="ml-hd"><h2>📋 Ausschreibungs-Vorlagen</h2><button class="cl-btn" onclick="cM('mVorlagen')">✕</button></div>
+  <div class="ml-bd" style="padding:16px 24px">
+    <div class="ip" style="font-size:12px;margin-bottom:12px">Wiederverwendbare Positionslisten. <strong>👤 Persönlich</strong> sind nur für dich sichtbar, <strong>🏢 Büro</strong> für die ganze Organisation.</div>
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+      <button class="btn btn-g btn-sm" id="vlFilterAll" onclick="vlFilter('all')" style="background:var(--acc-bg);border-color:var(--acc-bd);color:var(--acc)">Alle</button>
+      <button class="btn btn-g btn-sm" id="vlFilterPers" onclick="vlFilter('personal')">👤 Persönlich</button>
+      <button class="btn btn-g btn-sm" id="vlFilterOrg" onclick="vlFilter('org')">🏢 Büro</button>
+    </div>
+    <div id="vlList" style="max-height:400px;overflow-y:auto;border:1px solid var(--brd);border-radius:8px"></div>
+    <div id="vlEmpty" style="display:none;text-align:center;padding:40px 20px;color:var(--mut)">
+      <div style="font-size:36px;margin-bottom:8px">📋</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px">Noch keine Vorlagen</div>
+      <div style="font-size:12px">Aus einer bestehenden Ausschreibung kannst du eine Vorlage speichern.</div>
+    </div>
+  </div>
+  <div class="ml-ft"><button class="btn btn-g" onclick="cM('mVorlagen')">Schliessen</button></div>
+</div></div>
+
+<!-- Modal: Als Vorlage speichern -->
+<div class="mo" id="mSaveVorlage"><div class="ml" style="max-width:520px">
+  <div class="ml-hd"><h2>💾 Als Vorlage speichern</h2><button class="cl-btn" onclick="cM('mSaveVorlage')">✕</button></div>
+  <div class="ml-bd" style="padding:16px 24px">
+    <input type="hidden" id="svAusId"/>
+    <div class="fg"><label class="fl">Vorlagenname</label><input type="text" class="fc" id="svName" placeholder="z.B. MFH-Neubau Basis, Sanierung Bad Standard"/></div>
+    <div class="fg"><label class="fl">Beschreibung <span style="font-weight:500;color:var(--mut);text-transform:none">(optional)</span></label><textarea class="fc" id="svDesc" rows="2" placeholder="Kurzbeschrieb, Gebäudetyp, Einsatzzweck…"></textarea></div>
+    <div class="fg"><label class="fl">Sichtbarkeit</label>
+      <div style="display:flex;gap:8px">
+        <label class="na-cb-row" style="padding:10px 14px;flex:1;cursor:pointer">
+          <input type="radio" name="svScope" value="personal" checked/>
+          <div><strong style="font-size:13px">👤 Persönlich</strong><div style="font-size:11px;color:var(--mut);margin-top:2px">Nur für dich sichtbar</div></div>
+        </label>
+        <label class="na-cb-row" style="padding:10px 14px;flex:1;cursor:pointer">
+          <input type="radio" name="svScope" value="org"/>
+          <div><strong style="font-size:13px">🏢 Büro-Vorlage</strong><div style="font-size:11px;color:var(--mut);margin-top:2px">Für die ganze Organisation</div></div>
+        </label>
+      </div>
+    </div>
+    <div class="ip" style="font-size:11px;margin-top:8px">Gespeichert werden: BKP-Baum, Lose, Positionen, Typ und Offertmodelle. <strong>Nicht</strong> gespeichert: Projekt/Objekt, Frist, Beteiligte, Offerten.</div>
+  </div>
+  <div class="ml-ft"><button class="btn btn-g" onclick="cM('mSaveVorlage')">Abbrechen</button><button class="btn btn-p" onclick="saveAsVorlageSubmit()">💾 Speichern</button></div>
 </div></div>
 
 <!-- Modal: Unterposition bearbeiten -->
@@ -640,7 +708,12 @@ let S={
   ],
   verteilungen:[],
   anfragen:[
-    {id:'anf-1',ausId:'aus-demo-1',installateurId:'inst-1',status:'interessiert',datum:'2026-03-21T10:00:00Z',antwortDatum:'2026-03-21T14:00:00Z',nachricht:''},
+    // Demo zeigt einen realistischen Zwischenstand: ein Unternehmer hat
+    // abgelehnt, einer wartet noch auf Antwort. Keine interessierten
+    // Antworten — das Badge «Interesse-Anfragen» bleibt bei 0, bis der
+    // User selbst eine Anfrage bekommt, auf die jemand mit Interesse
+    // antwortet (und die noch nicht verteilt ist).
+    {id:'anf-1',ausId:'aus-demo-1',installateurId:'inst-1',status:'abgelehnt',datum:'2026-03-21T10:00:00Z',antwortDatum:'2026-03-21T14:00:00Z',nachricht:'Kapazitäten aktuell ausgelastet'},
     {id:'anf-2',ausId:'aus-demo-1',installateurId:'inst-2',status:'angefragt',datum:'2026-03-21T10:00:00Z',antwortDatum:null,nachricht:''}
   ],
   nettoAnfragen:[],
@@ -699,6 +772,20 @@ function ld(){try{let r;try{r=localStorage.getItem(SK)}catch(e){r=_m[SK]||null}i
   if(!S.verteilungen)S.verteilungen=[];if(!S.anfragen)S.anfragen=[];if(!S.nettoAnfragen)S.nettoAnfragen=[];
   if(!S.marktplatzOfferten)S.marktplatzOfferten=[];if(!S.einreichungen)S.einreichungen=[];
   if(!S.emails)S.emails=[];if(!S.log)S.log=[];
+  // Migration: bestehender Demo-State hatte anf-1 als 'interessiert'
+  // ohne zugehoerige Verteilung, wodurch das Badge «Interesse-Anfragen»
+  // initial 1 zeigte. Neu setzen wir anf-1 auf 'abgelehnt' (wenn noch
+  // nicht vom User veraendert), damit die Demo mit einem sauberen 0
+  // startet. Läuft nur einmal pro Browser (via Flag).
+  if(!S._migratedAnfDemo){
+    var af = S.anfragen.find(function(x){return x.id==='anf-1';});
+    if (af && af.status==='interessiert' && af.ausId==='aus-demo-1' && af.installateurId==='inst-1'){
+      af.status='abgelehnt';
+      if(!af.nachricht) af.nachricht='Kapazitäten aktuell ausgelastet';
+    }
+    S._migratedAnfDemo = true;
+    try { sv(); } catch(e) {}
+  }
   // Set active ausschreibung
   if(!S.ausschreibung&&S.ausschreibungen.length)S.ausschreibung=S.ausschreibungen[0];
   // Load per-object BKP data
@@ -769,12 +856,19 @@ function renderObjQuickList(filter){
   document.getElementById('objQuickList').innerHTML=h;
 }
 function filterObjQuick(q){renderObjQuickList(q);}
-// Event delegation für Projekt-Klick im Dropdown
+// Event delegation für Projekt-Klick im (ehemaligen) Dropdown — bleibt als
+// Fallback erhalten, falls die Dropdown-Liste je wieder aktiviert wird.
 document.addEventListener('DOMContentLoaded',function(){
   var list=document.getElementById('objQuickList');
   if(list)list.addEventListener('click',function(e){
     var item=e.target.closest('[data-objid]');
     if(item)selectObjQuick(item.dataset.objid);
+  });
+  // Projekt-Titel im Header initial setzen, sobald S geladen ist und
+  // GemaObjekte verfuegbar ist. GemaObjekte laedt asynchron, daher warten.
+  try { updateObjQuickLabel(); } catch(e) {}
+  window.addEventListener('gema-objekte-loaded', function(){
+    try { updateObjQuickLabel(); } catch(e) {}
   });
 });
 function selectObjQuick(id){
@@ -794,27 +888,116 @@ function selectObjQuick(id){
   toast('Projekt gewechselt');
 }
 
+// Guard fuer den gema-objekt-changed-Listener: waehrend selectAusschreibung
+// laeuft wollen wir keine doppelten Renders, weil die Funktion den Objekt-
+// wechsel und das Rerender selbst orchestriert.
+var _inSelectAus = false;
 function selectAusschreibung(ausId){
-  S.activeAusId=ausId;save();
-  // Wenn die Ausschreibung einem Objekt zugeordnet ist, Projekt oben wechseln
-  var a=S.ausschreibungen.find(function(x){return x.id===ausId;});
-  if(a&&a.objektId&&typeof GemaObjekte!=='undefined'){
-    var curObjId=GemaObjekte.getActiveId();
-    if(curObjId!==a.objektId){
-      GemaObjekte.setActiveId(a.objektId);
-      updateObjQuickLabel();
+  // Idempotent und robust: ein einziger Klick auf eine Ausschreibung in der
+  // Liste soll garantiert dazu fuehren, dass
+  //   (1) S.activeAusId gesetzt ist,
+  //   (2) das Projekt oben im Header stimmt,
+  //   (3) die Tab-Leiste passend zur Rolle gebaut ist,
+  //   (4) die BKP-Checkliste der Ausschreibung geoeffnet wird.
+  // Jeder Schritt ist in try/catch gekapselt, damit ein Fehler in einem
+  // spaeteren Schritt die frueheren nicht invalidiert.
+  _inSelectAus = true;
+  try {
+    var a = S.ausschreibungen.find(function(x){return x.id===ausId;});
+    if (!a) { toast('Ausschreibung nicht gefunden','error'); return; }
+
+    // 1) activeAusId setzen und speichern
+    S.activeAusId = ausId;
+    try { save(); } catch(e) {}
+
+    // 2) Projekt (Objekt) im Header umstellen, falls die Ausschreibung
+    //    einem anderen Objekt zugeordnet ist.
+    if (a.objektId && typeof GemaObjekte !== 'undefined') {
+      try {
+        if (GemaObjekte.getActiveId() !== a.objektId) {
+          GemaObjekte.setActiveId(a.objektId);
+        }
+      } catch(e) {}
     }
+
+    // 3) Titel im Header aktualisieren (Projekt + Ausschreibung)
+    try { updateObjQuickLabel(); } catch(e) {}
+
+    // 4) BKP-Daten der gewaehlten Ausschreibung aus dem per-Objekt-Storage
+    //    nachladen, damit die Checkliste korrekt angezeigt wird.
+    try { ldBKP(a); } catch(e) {}
+
+    // 5) Tabs neu bauen (u.a. wegen CRBX-Abgleich-Tab, das nur fuer crbx-
+    //    Ausschreibungen aktiv ist) und zur BKP-Checkliste navigieren.
+    try { buildTabs(); } catch(e) {}
+    try { nav('pbkp'); } catch(e) { console.error('[GEMA] nav(pbkp) failed', e); }
+  } catch(err) {
+    console.error('[GEMA] selectAusschreibung failed', err);
+    try { toast('Ausschreibung konnte nicht geoeffnet werden: ' + (err.message||err), 'error'); } catch(e) {}
+  } finally {
+    _inSelectAus = false;
   }
-  // BKP-Daten der gewählten Ausschreibung laden
-  if(a)ldBKP(a);
-  buildTabs();nav('pbkp');
 }
 
+// ── Reaktion auf Projekt-Wechsel ─────────────────────────────────────
+// Wenn das aktive Objekt (Projekt) aus einer anderen Quelle gewechselt
+// wird — z.B. durch gema_objekte_api in einem anderen Tab oder durch
+// kuenftige UI-Elemente — sollen Tab-Badges und der aktuelle View
+// automatisch aktualisiert werden. Waehrend selectAusschreibung() laeuft
+// ueberspringen wir das, weil die Funktion das Rerender selbst uebernimmt.
+window.addEventListener('gema-objekt-changed', function(){
+  if (_inSelectAus) return;
+  // Wenn die bisher aktive Ausschreibung nicht mehr zum neuen Projekt
+  // gehoert, die Auswahl auf die erste passende Ausschreibung setzen —
+  // oder auf null, wenn das Projekt keine hat.
+  try {
+    var cur = S.ausschreibungen.find(function(x){return x.id===S.activeAusId;});
+    var pid = currentObjektId();
+    if (!cur || (pid && cur.objektId !== pid)) {
+      var scoped = scopedAus();
+      S.activeAusId = scoped.length ? scoped[0].id : '';
+      try { save(); } catch(e) {}
+    }
+  } catch(e) {}
+  // Tabs + Titel neu aufbauen
+  try { buildTabs(); } catch(e) {}
+  try { updateObjQuickLabel(); } catch(e) {}
+  // Aktuellen Tab neu rendern, damit Listen und Badges synchron sind.
+  try {
+    var act = document.querySelector('#tabBar .tab-btn.active');
+    var tab = act && act.getAttribute('data-tab');
+    if (tab) nav(tab);
+  } catch(e) {}
+});
+
 function updateObjQuickLabel(){
+  // Projekt-Titel im Header aktualisieren. Zeigt den Namen des aktiven
+  // Projekts (Objekts) oben und darunter den Namen der aktuell gewaehlten
+  // Ausschreibung, damit klar ist, in welchem Kontext man arbeitet.
+  // Das Projekt ist rein textlich — es gibt kein Dropdown mehr.
   var label=document.getElementById('objQuickLabel');if(!label)return;
-  if(typeof GemaObjekte==='undefined'){label.textContent='Projekt wählen';return;}
-  var o=GemaObjekte.getActive();
-  label.textContent=o?(o.name||'Ohne Name'):'Projekt wählen';
+  var subLabel=document.getElementById('objAusLabel');
+  // Projekt-Name aus GemaObjekte
+  var projName='Kein Projekt aktiv';
+  try {
+    if (typeof GemaObjekte !== 'undefined') {
+      var o = GemaObjekte.getActive();
+      if (o) projName = o.name || 'Ohne Name';
+    }
+  } catch(e) {}
+  label.textContent = projName;
+  // Ausschreibungs-Name aus S.activeAusId
+  if (subLabel) {
+    var ausName = '';
+    try {
+      if (S && S.activeAusId && S.ausschreibungen) {
+        var ax = S.ausschreibungen.find(function(x){return x.id === S.activeAusId;});
+        if (ax && ax.name) ausName = '› ' + ax.name;
+      }
+    } catch(e) {}
+    subLabel.textContent = ausName;
+    subLabel.style.display = ausName ? '' : 'none';
+  }
 }
 // Close dropdown on outside click
 document.addEventListener('click',function(e){
@@ -827,16 +1010,77 @@ document.addEventListener('click',function(e){
 });
 
 function isAdmin(){try{if(typeof GemaAuth!=='undefined'){const u=GemaAuth.getCurrentUser();return u&&u.roleIds&&u.roleIds.indexOf('role_admin')>=0;}return true;}catch(e){return true;}}
+
+// ── Projekt-Scoping ──────────────────────────────────────────────────
+// Alle Listen und Badge-Counter im Ausschreibungsmodul sollen das aktive
+// Projekt (Objekt aus GemaObjekte) respektieren. Diese Helper stellen
+// sicher, dass der gesamte Code nur noch die Daten des aktuellen Projekts
+// sieht — Wechsel eines anderen Projekts via selectAusschreibung() oder
+// ueber das gema-objekt-changed Event zieht automatisch alles nach.
+function currentObjektId(){
+  try { if(typeof GemaObjekte!=='undefined') return GemaObjekte.getActiveId(); } catch(e) {}
+  return null;
+}
+// Ausschreibungen des aktiven Projekts. Fallback (kein aktives Objekt):
+// alle Ausschreibungen, damit das Modul auch ohne gesetztes Projekt
+// grundsaetzlich nutzbar bleibt (z.B. bei Erst-Nutzung).
+function scopedAus(){
+  var pid = currentObjektId();
+  if (!pid) return S.ausschreibungen;
+  return S.ausschreibungen.filter(function(a){ return a.objektId === pid; });
+}
+// Map { ausId: true } der sichtbaren Ausschreibungen — nuetzlich um
+// Child-Listen (Anfragen, Einreichungen, Verteilungen) performant zu
+// filtern ohne jedes Mal ueber das Array zu iterieren.
+function scopedAusIds(){
+  var m={};
+  scopedAus().forEach(function(a){ m[a.id]=true; });
+  return m;
+}
 function switchRole(r){S.currentRole=r;if(r==='planer')S.currentUserId='planer-1';else{const b=S.beteiligte.find(x=>x.rolle===r);if(b)S.currentUserId=b.id;}sv();document.querySelectorAll('.role-pill').forEach(p=>p.classList.remove('active'));document.querySelector(`.role-pill.${r==='planer'?'rp':r==='installateur'?'ri':r==='lieferant'?'rl':'ra'}`)?.classList.add('active');updRU();buildTabs();nav(defP());}
 function updRU(){const el=document.getElementById('roleUser');if(!el)return;if(S.currentRole==='planer'){el.textContent='👤 Planer';return;}const list=S.beteiligte.filter(x=>x.rolle===S.currentRole);if(!list.length){el.textContent='—';return;}el.innerHTML=`<select onchange="S.currentUserId=this.value;sv();nav(defP())" style="font-size:12px;font-weight:600;border:1px solid var(--brd);border-radius:6px;padding:2px 8px;background:var(--sur);font-family:var(--sans);cursor:pointer">${list.map(x=>`<option value="${x.id}" ${x.id===S.currentUserId?'selected':''}>${x.firma}</option>`).join('')}</select>`;}
 function defP(){return{planer:'pub',installateur:'iub',lieferant:'lub',architekt:'aub'}[S.currentRole]||'pub';}
 
 function buildTabs(){
-  const b=document.getElementById('tabBar');let t=[];const nE=S.einreichungen.filter(e=>e.ausId===S.activeAusId).length;
-  if(S.currentRole==='planer'){const nAnf=S.anfragen.filter(x=>x.status==='interessiert').length;var curA_=S.ausschreibungen.find(function(a){return a.id===S.activeAusId;});var isCrbx=curA_&&curA_.typ==='crbx';t=[{id:'pub',ic:'◫',l:'Übersicht'},{id:'paus',ic:'📋',l:'Ausschreibungen',bg:S.ausschreibungen.length},{id:'pbkp',ic:'☑',l:'BKP-Checkliste'},{id:'pcrbx',ic:'📦',l:'CRBX-Abgleich',disabled:!isCrbx},{id:'pdet',ic:'📝',l:'Detail'},{id:'panf',ic:'🤝',l:'Interesse-Anfragen',bg:nAnf},{id:'pvrt',ic:'📤',l:'Verteilen'},{id:'pein',ic:'💰',l:'Offerten',bg:nE},{id:'pvgl',ic:'📊',l:'Vergleich'},{id:'pvga',ic:'📋',l:'Vergabeantrag'},{id:'pber',ic:'🔬',l:'Berechnungen'},{id:'pbet',ic:'👥',l:'Beteiligte'}];}
-  else if(S.currentRole==='installateur'){const nIA=S.anfragen.filter(x=>x.installateurId===S.currentUserId&&x.status==='angefragt').length;t=[{id:'iub',ic:'◫',l:'Übersicht'},{id:'ianf',ic:'🤝',l:'Interesse-Anfragen',bg:nIA},{id:'iaus',ic:'📋',l:'Ausschreibungen'},{id:'idet',ic:'📝',l:'Offerte ausfüllen'},{id:'ipro',ic:'👤',l:'Profil'},{id:'ina',ic:'🔄',l:'Netto-Anfragen',bg:S.nettoAnfragen.filter(x=>x.installateurId===S.currentUserId).length},{id:'iin',ic:'📨',l:'Eingegangene',bg:S.marktplatzOfferten.filter(x=>!x.installateurId||x.installateurId===S.currentUserId).length}];}
+  const b=document.getElementById('tabBar');let t=[];
+  // Alle Counter sind auf das aktive Projekt gescoped: Wir bilden erst
+  // die Menge der Ausschreibungs-IDs des aktiven Projekts und filtern
+  // Einreichungen/Anfragen/Vergabeantraege danach.
+  var scoped=scopedAus();
+  var ausIdMap=scopedAusIds();
+  const nE=S.einreichungen.filter(function(e){return e.ausId===S.activeAusId && ausIdMap[e.ausId];}).length;
+  if(S.currentRole==='planer'){
+    // Interesse-Anfragen-Badge: zaehlt nur offene Aktionen — also
+    // Unternehmer die Interesse bekundet haben, die der Planer aber
+    // noch nicht verteilt hat. Sobald verteilt ist, verschwindet der
+    // Eintrag aus dem Badge (Aktion erledigt). Abgelehnte und erst
+    // angefragte Einträge zählen nicht als offene Aktion im Sinne
+    // dieses Badges.
+    const nAnf=S.anfragen.filter(function(x){
+      if (x.status !== 'interessiert') return false;
+      if (!ausIdMap[x.ausId]) return false;
+      // Noch keine Verteilung fuer dieses Paar (Ausschreibung, Unternehmer)?
+      return !S.verteilungen.some(function(v){
+        return v.ausId===x.ausId && v.installateurId===x.installateurId;
+      });
+    }).length;
+    var curA_=S.ausschreibungen.find(function(a){return a.id===S.activeAusId;});
+    var isCrbx=curA_&&curA_.typ==='crbx';
+    t=[{id:'pub',ic:'◫',l:'Übersicht'},{id:'paus',ic:'📋',l:'Ausschreibungen',bg:scoped.length},{id:'pbkp',ic:'☑',l:'BKP-Checkliste'},{id:'pcrbx',ic:'📦',l:'CRBX-Abgleich',disabled:!isCrbx},{id:'pdet',ic:'📝',l:'Detail'},{id:'panf',ic:'🤝',l:'Interesse-Anfragen',bg:nAnf},{id:'pvrt',ic:'📤',l:'Verteilen'},{id:'pein',ic:'💰',l:'Offerten',bg:nE},{id:'pvgl',ic:'📊',l:'Vergleich'},{id:'pvga',ic:'📋',l:'Vergabeantrag'},{id:'pber',ic:'🔬',l:'Berechnungen'},{id:'pbet',ic:'👥',l:'Beteiligte'}];
+  }
+  else if(S.currentRole==='installateur'){
+    // Installateur sieht nur Anfragen an sich selber — trotzdem aufs
+    // aktive Projekt scopen, damit Projekt-Wechsel zu sauberen Zahlen
+    // fuehrt.
+    const nIA=S.anfragen.filter(function(x){return x.installateurId===S.currentUserId && x.status==='angefragt' && ausIdMap[x.ausId];}).length;
+    t=[{id:'iub',ic:'◫',l:'Übersicht'},{id:'ianf',ic:'🤝',l:'Interesse-Anfragen',bg:nIA},{id:'iaus',ic:'📋',l:'Ausschreibungen'},{id:'idet',ic:'📝',l:'Offerte ausfüllen'},{id:'ipro',ic:'👤',l:'Profil'},{id:'ina',ic:'🔄',l:'Netto-Anfragen',bg:S.nettoAnfragen.filter(x=>x.installateurId===S.currentUserId).length},{id:'iin',ic:'📨',l:'Eingegangene',bg:S.marktplatzOfferten.filter(x=>!x.installateurId||x.installateurId===S.currentUserId).length}];
+  }
   else if(S.currentRole==='lieferant'){t=[{id:'lub',ic:'◫',l:'Übersicht'},{id:'lab',ic:'⭐',l:'Mein Abo'},{id:'lmk',ic:'🏪',l:'Marktplatz'},{id:'lan',ic:'📨',l:'Anfragen',bg:S.nettoAnfragen.filter(x=>x.lieferantId===S.currentUserId&&x.status==='angefragt').length}];}
-  else{var nVga=S.ausschreibungen.filter(function(x){return x.vergabe&&x.vergabe.status==='eingereicht';}).length;t=[{id:'aub',ic:'◫',l:'Projektstatus'},{id:'avga',ic:'📋',l:'Vergabeanträge',bg:nVga}];}
+  else{
+    // Architekt: Vergabeantraege des aktiven Projekts
+    var nVga=scoped.filter(function(x){return x.vergabe && x.vergabe.status==='eingereicht';}).length;
+    t=[{id:'aub',ic:'◫',l:'Projektstatus'},{id:'avga',ic:'📋',l:'Vergabeanträge',bg:nVga}];
+  }
   b.innerHTML=t.map(x=>`<button class="tab-btn${x.disabled?' disabled':''}" data-tab="${x.id}" onclick="${x.disabled?'toast(\'Nur bei CRBX-Ausschreibungen\',\'info\')':'nav(\''+x.id+'\')'}" ${x.disabled?'style="opacity:.4;cursor:not-allowed"':''}><span>${x.ic}</span> ${x.l}${x.bg?`<span class="tab-badge">${x.bg}</span>`:''}</button>`).join('');
 }
 function nav(p){document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.tab-btn[data-tab="${p}"]`)?.classList.add('active');const el=document.getElementById('PA');const fn=VIEWS[p];el.innerHTML=fn?fn():'<div class="es"><p>Seite nicht gefunden.</p></div>';setTimeout(initDropZones,50);if(p==='pbkp'){setTimeout(restoreBKPOpenState,10);setTimeout(initBKPDragDrop,20);}}
@@ -846,45 +1090,223 @@ const VIEWS={};
 // PLANER VIEWS
 // ═══════════════════════════════════════════════
 VIEWS.pub=function(){
-  const nA=S.ausschreibungen.length,nI=S.beteiligte.filter(b=>b.rolle==='installateur').length,nE=S.einreichungen.length;
+  // Kennzahlen auf das aktive Projekt gescoped. Ausschreibungen kommen
+  // aus scopedAus(), Offerten/Einreichungen werden via ausIdMap gefiltert.
+  var scoped=scopedAus();
+  var ausIdMap=scopedAusIds();
+  const nA=scoped.length;
+  const nI=S.beteiligte.filter(function(b){return b.rolle==='installateur';}).length;
+  const nE=S.einreichungen.filter(function(e){return ausIdMap[e.ausId];}).length;
+  const nVergeben=scoped.filter(function(a){return a.status==='vergeben';}).length;
   let h=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><button class="btn btn-p btn-sm" onclick="tutOpen()">🎓 So funktioniert's</button><button class="btn btn-s btn-sm" onclick="showFlowchart()">📊 Prozessübersicht</button></div>`;
-  h+=`<div class="sr"><div class="sc"><div class="sc-l">Ausschreibungen</div><div class="sc-v">${nA}</div></div><div class="sc"><div class="sc-l">Installateure</div><div class="sc-v">${nI}</div></div><div class="sc"><div class="sc-l">Offerten</div><div class="sc-v">${nE}</div></div><div class="sc"><div class="sc-l">Vergeben</div><div class="sc-v">${S.ausschreibungen.filter(a=>a.status==='vergeben').length}</div></div></div>`;
+  h+=`<div class="sr"><div class="sc"><div class="sc-l">Ausschreibungen</div><div class="sc-v">${nA}</div></div><div class="sc"><div class="sc-l">Installateure</div><div class="sc-v">${nI}</div></div><div class="sc"><div class="sc-l">Offerten</div><div class="sc-v">${nE}</div></div><div class="sc"><div class="sc-l">Vergeben</div><div class="sc-v">${nVergeben}</div></div></div>`;
   // Activity log with filters
   h+=renderActivityLog();
   return h;
 };
 
+// ── Filter/Sort-Zustand fuer Ausschreibungsliste ──
+// Persistent in S gespeichert, damit Filter beim Seitenwechsel erhalten
+// bleiben. Werte: q (Suche), status, typ, projekt (objektId), sort.
+function _getAusFilter(){
+  if(!S._ausListFilter) S._ausListFilter = { q:'', status:'', typ:'', projekt:'', sort:'name-asc' };
+  return S._ausListFilter;
+}
+function setAusFilter(key,val){
+  var f=_getAusFilter();
+  f[key]=val;
+  try { save(); } catch(e) {}
+  renderAusList();
+}
+function resetAusFilter(){
+  S._ausListFilter = { q:'', status:'', typ:'', projekt:'', sort:'name-asc' };
+  try { save(); } catch(e) {}
+  // Ganze View neu zeichnen, damit auch die Toolbar-Inputs zurueckgesetzt werden.
+  nav('paus');
+}
+// Liefert alle Objekte (Projekte), die min. eine Ausschreibung haben.
+function _getAusProjekte(){
+  var ids={}, list=[];
+  S.ausschreibungen.forEach(function(a){
+    if(!a.objektId) return;
+    if(ids[a.objektId]) return;
+    ids[a.objektId]=true;
+    var name='';
+    try {
+      if(typeof GemaObjekte!=='undefined'){
+        var o=GemaObjekte.getAll().find(function(x){return x.id===a.objektId;});
+        if(o) name=o.name||'';
+      }
+    } catch(e) {}
+    if(!name) name = a.objekt || '(ohne Name)';
+    list.push({id:a.objektId, name:name});
+  });
+  list.sort(function(a,b){return (a.name||'').localeCompare(b.name||'','de');});
+  return list;
+}
+// Wendet Filter + Sortierung auf die Ausschreibungen des aktiven Projekts
+// an und liefert ein frisches Array. Nicht destruktiv. Basis ist
+// scopedAus() — ausserhalb des aktiven Projekts liegende Ausschreibungen
+// werden erst gar nicht beruecksichtigt.
+function _filterSortAus(){
+  var f=_getAusFilter();
+  var list = scopedAus().slice();
+  // Status
+  if(f.status) list = list.filter(function(a){return (a.status||'entwurf')===f.status;});
+  // Typ
+  if(f.typ) list = list.filter(function(a){return (a.typ||'funktional')===f.typ;});
+  // Suche
+  if(f.q){
+    var q=f.q.trim().toLowerCase();
+    if(q){
+      list = list.filter(function(a){
+        var hay = [a.name,a.objekt,a.frist,(a.modelle||[a.modell]).join(' ')].join(' ').toLowerCase();
+        return hay.indexOf(q)>=0;
+      });
+    }
+  }
+  // Sortieren
+  var statusOrder = {entwurf:1, aktiv:2, crbx_geprueft:3, vergeben:4};
+  list.sort(function(a,b){
+    switch(f.sort){
+      case 'name-desc':   return (b.name||'').localeCompare(a.name||'','de');
+      case 'frist-asc':   return (a.frist||'9999').localeCompare(b.frist||'9999');
+      case 'frist-desc':  return (b.frist||'0').localeCompare(a.frist||'0');
+      case 'status':      return (statusOrder[a.status]||99) - (statusOrder[b.status]||99);
+      case 'offerten':    {
+        var oA = S.einreichungen.filter(function(e){return e.ausId===a.id;}).length;
+        var oB = S.einreichungen.filter(function(e){return e.ausId===b.id;}).length;
+        return oB - oA;
+      }
+      case 'name-asc':
+      default:            return (a.name||'').localeCompare(b.name||'','de');
+    }
+  });
+  return list;
+}
+// Baut das HTML fuer eine einzelne Card.
+function _renderAusCard(a){
+  var nE=S.einreichungen.filter(function(e){return e.ausId===a.id;}).length;
+  var nV=S.verteilungen.filter(function(v){return v.ausId===a.id;}).length;
+  var nUp=(a.bkp||[]).reduce(function(s,b){return s+(b.unterpositionen||[]).length;},0);
+  var bkpInfo='';
+  if(a.lose&&a.lose.length){
+    var allP=a.lose.reduce(function(s,l){return s.concat(l.positionen||[]);},[]);
+    var ch=allP.filter(function(p){return p.checked;});
+    var er=ch.filter(function(p){return p.status==='erledigt';});
+    if(ch.length) bkpInfo=' · BKP '+er.length+'/'+ch.length;
+  }
+  var isActive=(a.id===S.activeAusId);
+  var statusLbl=a.status==='vergeben'?'Vergeben':a.status==='crbx_geprueft'?'Freigegeben':a.status==='aktiv'?'Aktiv':'Entwurf';
+  var statusCls=a.status==='vergeben'?'t-gr':a.status==='aktiv'||a.status==='crbx_geprueft'?'t-bl':'t-am';
+  return '<div class="ac'+(isActive?' is-active':'')+'" data-aus-id="'+a.id+'" style="cursor:pointer">'
+    + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'
+    +   '<strong style="font-size:15px">'+E(a.name)+'</strong>'
+    +   '<span class="tag '+(a.typ==='crbx'?'t-pu':'t-ac')+'">'+(a.typ==='crbx'?'CRBX':'Funktional')+'</span>'
+    +   '<span class="tag t-gy">'+(a.modelle||[a.modell]).join(' + ')+'</span>'
+    +   '<span class="ml-a tag '+statusCls+'">'+statusLbl+'</span>'
+    +   '<button class="btn btn-g btn-sm" data-nosel="1" onclick="event.stopPropagation();openSaveVorlageModal(\''+a.id+'\')" style="margin-left:4px;opacity:.4;padding:2px 7px;font-size:10px" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.4" title="Als Vorlage speichern">💾</button>'
+    +   (a.status!=='vergeben'?'<button class="btn btn-d btn-sm" data-nosel="1" onclick="event.stopPropagation();deleteAusschreibung(\''+a.id+'\')" style="margin-left:4px;opacity:.3;padding:2px 7px;font-size:10px" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.3" title="Löschen">✕</button>':'')
+    + '</div>'
+    + '<div style="font-size:12px;color:var(--mut)">'+E(a.objekt||'')+' · Frist: '+(a.frist||'—')+' · '+nUp+' Positionen · '+nV+' verteilt · '+nE+' Offerten'+bkpInfo+'</div>'
+    + '</div>';
+}
+// Re-rendert NUR den Listen-Container und den Treffer-Zaehler, ohne die
+// View komplett neu zu bauen. So bleibt der Fokus auf dem Such-Input
+// erhalten und die Select-Werte gehen nicht verloren.
+function renderAusList(){
+  var cont=document.getElementById('ausListContainer');
+  if(!cont)return;
+  var f=_getAusFilter();
+  var list=_filterSortAus();
+  // Gesamt-Zahl bezieht sich auf die Ausschreibungen des aktiven Projekts,
+  // nicht mehr auf S.ausschreibungen global.
+  var total=scopedAus().length;
+  // Treffer-Zaehler in der Toolbar aktualisieren
+  var cnt=document.getElementById('ausListCount');
+  if(cnt) cnt.textContent = list.length + ' von ' + total;
+  // Inhalt der Liste
+  if(!list.length){
+    cont.innerHTML = '<div class="es" style="padding:32px 16px"><span class="ei">🔍</span><div class="et">Keine Ausschreibung gefunden</div><p>Passe die Filter an oder setze sie zurück.</p><button class="btn btn-g btn-sm" onclick="resetAusFilter()" style="margin-top:8px">Filter zurücksetzen</button></div>';
+    return;
+  }
+  cont.innerHTML = list.map(_renderAusCard).join('');
+}
+
 VIEWS.paus=function(){
-  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="font-size:20px;font-weight:700">Ausschreibungen</h2><button class="btn btn-p" onclick="oM('mNewA')">+ Neue Ausschreibung</button></div>`;
-  h+=`<div style="margin-bottom:14px"><input type="text" id="ausSearch" placeholder="Ausschreibung suchen…" oninput="filterAusList()" style="width:100%;padding:10px 14px 10px 38px;border:1.5px solid var(--brd2);border-radius:10px;font-size:13px;font-family:inherit;background:var(--sur) url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%239ca3af%22><circle cx=%2210%22 cy=%2210%22 r=%227%22 stroke=%22%239ca3af%22 stroke-width=%222%22 fill=%22none%22/><line x1=%2215%22 y1=%2215%22 x2=%2221%22 y2=%2221%22 stroke=%22%239ca3af%22 stroke-width=%222%22/></svg>') no-repeat 10px center;background-size:18px;outline:none" onfocus="this.style.borderColor='#1d4ed8'" onblur="this.style.borderColor='var(--brd2)'"/></div>`;
-  if(!S.ausschreibungen.length){h+=`<div class="es"><span class="ei">📋</span><div class="et">Noch keine Ausschreibungen</div><p>Erstelle deine erste Ausschreibung.</p></div>`;return h;}
-  h+=`<div id="ausListContainer">`;
-  h+=S.ausschreibungen.map(a=>{
-    const nE=S.einreichungen.filter(e=>e.ausId===a.id).length;const nV=S.verteilungen.filter(v=>v.ausId===a.id).length;
-    const nUp=(a.bkp||[]).reduce((s,b)=>s+(b.unterpositionen||[]).length,0);
-    var bkpInfo='';if(a.lose&&a.lose.length){var allP=a.lose.reduce(function(s,l){return s.concat(l.positionen||[]);},[]);var ch=allP.filter(function(p){return p.checked;});var er=ch.filter(function(p){return p.status==='erledigt';});if(ch.length)bkpInfo=' · BKP '+er.length+'/'+ch.length;}
-    return `<div class="ac" onclick="selectAusschreibung('${a.id}')" style="cursor:pointer">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-        <strong style="font-size:15px">${E(a.name)}</strong>
-        <span class="tag ${a.typ==='crbx'?'t-pu':'t-ac'}">${a.typ==='crbx'?'CRBX':'Funktional'}</span>
-        <span class="tag t-gy">${(a.modelle||[a.modell]).join(' + ')}</span>
-        <span class="ml-a tag ${a.status==='vergeben'?'t-gr':a.status==='aktiv'||a.status==='crbx_geprueft'?'t-bl':'t-am'}">${a.status==='vergeben'?'Vergeben':a.status==='crbx_geprueft'?'Freigegeben':a.status==='aktiv'?'Aktiv':'Entwurf'}</span>
-        ${a.status!=='vergeben'?'<button class="btn btn-d btn-sm" onclick="event.stopPropagation();deleteAusschreibung(\''+a.id+'\')" style="margin-left:8px;opacity:.3;padding:2px 7px;font-size:10px" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.3" title="Löschen">✕</button>':''}
-      </div>
-      <div style="font-size:12px;color:var(--mut)">${E(a.objekt||'')} · Frist: ${a.frist||'—'} · ${nUp} Positionen · ${nV} verteilt · ${nE} Offerten${bkpInfo}</div>
-    </div>`;
-  }).join('');
-  h+=`</div>`;
+  var vlCount=getVisibleVorlagen().length;
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:8px;flex-wrap:wrap"><h2 style="font-size:20px;font-weight:700">Ausschreibungen</h2><div style="display:flex;gap:8px"><button class="btn btn-g" onclick="openVorlagenModal()" title="Vorlagen-Bibliothek">📋 Vorlagen${vlCount?' <span style="background:var(--acc);color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:999px;margin-left:2px">'+vlCount+'</span>':''}</button><button class="btn btn-p" onclick="oM('mNewA')">+ Neue Ausschreibung</button></div></div>`;
+  // Nur Ausschreibungen des aktiven Projekts anzeigen.
+  var scoped=scopedAus();
+  if(!scoped.length){
+    var pid=currentObjektId();
+    var msg = pid
+      ? '<div class="es"><span class="ei">📋</span><div class="et">Noch keine Ausschreibungen in diesem Projekt</div><p>Erstelle die erste Ausschreibung fuer das aktuelle Projekt.</p></div>'
+      : '<div class="es"><span class="ei">📋</span><div class="et">Noch keine Ausschreibungen</div><p>Erstelle deine erste Ausschreibung.</p></div>';
+    h+=msg;
+    return h;
+  }
+  var f=_getAusFilter();
+  // Such-Input
+  h+='<div style="margin-bottom:10px"><input type="text" id="ausSearch" placeholder="Ausschreibung suchen…" value="'+E(f.q||'').replace(/"/g,'&quot;')+'" oninput="setAusFilter(\'q\',this.value)" style="width:100%;padding:10px 14px 10px 38px;border:1.5px solid var(--brd2);border-radius:10px;font-size:13px;font-family:inherit;background:var(--sur) url(\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%239ca3af%22><circle cx=%2210%22 cy=%2210%22 r=%227%22 stroke=%22%239ca3af%22 stroke-width=%222%22 fill=%22none%22/><line x1=%2215%22 y1=%2215%22 x2=%2221%22 y2=%2221%22 stroke=%22%239ca3af%22 stroke-width=%222%22/></svg>\') no-repeat 10px center;background-size:18px;outline:none" onfocus="this.style.borderColor=\'#1d4ed8\'" onblur="this.style.borderColor=\'var(--brd2)\'"/></div>';
+  // Filter-/Sort-Toolbar
+  h+='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding:10px 12px;background:var(--bg2);border:1.5px solid var(--brd);border-radius:10px">';
+  h+= '<span style="font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.05em">Filter</span>';
+  // Status
+  h+= '<select class="aus-filter-sel" onchange="setAusFilter(\'status\',this.value)" title="Nach Status filtern">'
+    +   '<option value=""'+(f.status===''?' selected':'')+'>Alle Status</option>'
+    +   '<option value="entwurf"'+(f.status==='entwurf'?' selected':'')+'>📝 Entwurf</option>'
+    +   '<option value="aktiv"'+(f.status==='aktiv'?' selected':'')+'>▶ Aktiv</option>'
+    +   '<option value="crbx_geprueft"'+(f.status==='crbx_geprueft'?' selected':'')+'>✓ Freigegeben</option>'
+    +   '<option value="vergeben"'+(f.status==='vergeben'?' selected':'')+'>🏆 Vergeben</option>'
+    + '</select>';
+  // Typ
+  h+= '<select class="aus-filter-sel" onchange="setAusFilter(\'typ\',this.value)" title="Nach Typ filtern">'
+    +   '<option value=""'+(f.typ===''?' selected':'')+'>Alle Typen</option>'
+    +   '<option value="funktional"'+(f.typ==='funktional'?' selected':'')+'>Funktional</option>'
+    +   '<option value="crbx"'+(f.typ==='crbx'?' selected':'')+'>CRBX / E1S</option>'
+    + '</select>';
+  // Kein Projekt-Filter mehr — das aktive Projekt bestimmt die Liste
+  // automatisch. Wechseln des Projekts loest ein Re-Render aus.
+  // Sort
+  h+= '<span style="width:1px;height:22px;background:var(--brd);margin:0 2px"></span>';
+  h+= '<span style="font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.05em">Sortieren</span>';
+  h+= '<select class="aus-filter-sel" onchange="setAusFilter(\'sort\',this.value)" title="Sortierung waehlen">'
+    +   '<option value="name-asc"'+(f.sort==='name-asc'?' selected':'')+'>Name A → Z</option>'
+    +   '<option value="name-desc"'+(f.sort==='name-desc'?' selected':'')+'>Name Z → A</option>'
+    +   '<option value="frist-asc"'+(f.sort==='frist-asc'?' selected':'')+'>Frist ↑ (naechste)</option>'
+    +   '<option value="frist-desc"'+(f.sort==='frist-desc'?' selected':'')+'>Frist ↓ (spaeteste)</option>'
+    +   '<option value="status"'+(f.sort==='status'?' selected':'')+'>Status (Entwurf → Vergeben)</option>'
+    +   '<option value="offerten"'+(f.sort==='offerten'?' selected':'')+'>Meiste Offerten zuerst</option>'
+    + '</select>';
+  // Treffer-Zaehler + Reset
+  h+= '<span style="flex:1"></span>';
+  h+= '<span style="font-size:11px;color:var(--mut);font-weight:600"><span id="ausListCount">'+scoped.length+' von '+scoped.length+'</span> Ausschreibungen</span>';
+  if(f.q||f.status||f.typ||f.sort!=='name-asc'){
+    h+= '<button class="btn btn-g btn-sm" onclick="resetAusFilter()" style="font-size:11px">✕ Zuruecksetzen</button>';
+  }
+  h+='</div>';
+  // Listen-Container (Inhalt wird via renderAusList() gesetzt)
+  h+='<div id="ausListContainer"></div>';
+  // Nach dem Rendern Event-Delegation haengen + Liste initial fuellen.
+  setTimeout(function(){
+    var cont=document.getElementById('ausListContainer');
+    if(cont && !cont._delegated){
+      cont._delegated=true;
+      cont.addEventListener('click',function(ev){
+        if(ev.target.closest('[data-nosel]'))return;
+        var card=ev.target.closest('.ac[data-aus-id]');
+        if(!card)return;
+        var id=card.getAttribute('data-aus-id');
+        if(id)selectAusschreibung(id);
+      });
+    }
+    renderAusList();
+  },0);
   return h;
 };
-function filterAusList(){
-  var q=(document.getElementById('ausSearch')||{}).value||'';
-  q=q.trim().toLowerCase();
-  var items=document.querySelectorAll('#ausListContainer .ac');
-  items.forEach(function(el){
-    el.style.display=(!q||el.textContent.toLowerCase().indexOf(q)>=0)?'':'none';
-  });
-}
+// Alias fuer bestehende Aufrufer — delegiert an das neue Filter-System.
+function filterAusList(){ renderAusList(); }
 
 function deleteAusschreibung(ausId){
   var a=S.ausschreibungen.find(function(x){return x.id===ausId;});
@@ -900,6 +1322,273 @@ function deleteAusschreibung(ausId){
   sv();lg('🗑','Ausschreibung gelöscht',a.name);
   toast('🗑 «'+a.name+'» gelöscht');
   buildTabs();nav('paus');
+}
+
+// ═══════════════════════════════════════════════
+// VORLAGEN-BIBLIOTHEK (#28)
+// ═══════════════════════════════════════════════
+// Zwei Ebenen: 'personal' (scoped auf userId) + 'org' (scoped auf orgId).
+// Vorlagen enthalten einen Snapshot von typ, modelle, bkp, lose. Projekt/Objekt,
+// Frist, Beteiligte und Offerten werden bewusst NICHT in die Vorlage übernommen,
+// damit sie projektunabhängig wiederverwendbar sind.
+const SK_VORLAGEN='gema_ausschreibung_vorlagen_v1';
+var _vlFilter='all'; // 'all'|'personal'|'org'
+
+function getCurrentUserInfo(){
+  var info={userId:'anonymous',orgId:'org_default',userName:'Unbekannt'};
+  try{
+    if(typeof GemaAuth!=='undefined'){
+      var u=GemaAuth.getCurrentUser();
+      if(u){
+        info.userId=u.id||info.userId;
+        info.orgId=u.orgId||info.orgId;
+        info.userName=u.name||u.username||info.userName;
+      }
+    }
+  }catch(e){}
+  return info;
+}
+
+function ldVorlagen(){
+  try{
+    var raw=localStorage.getItem(SK_VORLAGEN);
+    if(raw)return JSON.parse(raw)||[];
+  }catch(e){}
+  try{
+    if(typeof _GemaDB!=='undefined'&&_GemaDB.c&&_GemaDB.c[SK_VORLAGEN]){
+      return JSON.parse(_GemaDB.c[SK_VORLAGEN])||[];
+    }
+  }catch(e){}
+  return [];
+}
+
+function svVorlagen(list){
+  var json=JSON.stringify(list||[]);
+  try{localStorage.setItem(SK_VORLAGEN,json);}catch(e){}
+  try{if(typeof _GemaDB!=='undefined')_GemaDB.put(SK_VORLAGEN,json).catch(function(){});}catch(e){}
+}
+
+// Gibt Vorlagen zurück, die für den aktuellen User sichtbar sind:
+// - Persönliche Vorlagen des Users
+// - Büro-Vorlagen der eigenen Organisation
+function getVisibleVorlagen(){
+  var info=getCurrentUserInfo();
+  var all=ldVorlagen();
+  return all.filter(function(v){
+    if(v.scope==='personal')return v.ownerUserId===info.userId;
+    if(v.scope==='org')return v.orgId===info.orgId;
+    return false;
+  });
+}
+
+// ── Als Vorlage speichern (aus bestehender Ausschreibung) ──
+function openSaveVorlageModal(ausId){
+  var a=S.ausschreibungen.find(function(x){return x.id===ausId;});
+  if(!a){toast('Ausschreibung nicht gefunden','error');return;}
+  document.getElementById('svAusId').value=ausId;
+  document.getElementById('svName').value=a.name?(a.name+' — Vorlage'):'';
+  document.getElementById('svDesc').value='';
+  var radios=document.querySelectorAll('input[name=svScope]');
+  radios.forEach(function(r){r.checked=(r.value==='personal');});
+  oM('mSaveVorlage');
+  setTimeout(function(){var el=document.getElementById('svName');if(el){el.focus();el.select();}},100);
+}
+
+function saveAsVorlageSubmit(){
+  var ausId=document.getElementById('svAusId').value;
+  var a=S.ausschreibungen.find(function(x){return x.id===ausId;});
+  if(!a){toast('Ausschreibung nicht gefunden','error');return;}
+  var name=(document.getElementById('svName').value||'').trim();
+  if(!name){toast('Bitte Vorlagenname angeben','error');return;}
+  var desc=(document.getElementById('svDesc').value||'').trim();
+  var scope='personal';
+  var r=document.querySelector('input[name=svScope]:checked');
+  if(r)scope=r.value;
+  var info=getCurrentUserInfo();
+  // Snapshot: nur übertragbare Felder, ohne projekt-/objektspezifische Daten
+  var vorlage={
+    id:'vl-'+Date.now()+'-'+Math.random().toString(36).slice(2,6),
+    name:name,
+    beschreibung:desc,
+    scope:scope,
+    ownerUserId:info.userId,
+    ownerUserName:info.userName,
+    orgId:info.orgId,
+    createdAt:new Date().toISOString(),
+    // Snapshot der wiederverwendbaren Struktur
+    snapshot:{
+      typ:a.typ||'funktional',
+      modelle:(a.modelle||[a.modell||'pauschal']).slice(),
+      bkp:a.bkp?JSON.parse(JSON.stringify(a.bkp)):[],
+      lose:a.lose?JSON.parse(JSON.stringify(a.lose)):[],
+      abzuege:a.abzuege?JSON.parse(JSON.stringify(a.abzuege)):null,
+      vorbedingungen:a.vorbedingungen?JSON.parse(JSON.stringify(a.vorbedingungen)):null
+    }
+  };
+  var list=ldVorlagen();
+  list.push(vorlage);
+  svVorlagen(list);
+  cM('mSaveVorlage');
+  toast('✓ Vorlage «'+name+'» gespeichert ('+(scope==='org'?'🏢 Büro':'👤 Persönlich')+')');
+  try{lg('📋','Vorlage gespeichert',name+' ('+scope+')');}catch(e){}
+}
+
+// ── Vorlagen-Bibliothek öffnen ──
+function openVorlagenModal(){
+  _vlFilter='all';
+  renderVorlagenList();
+  oM('mVorlagen');
+}
+
+function vlFilter(f){
+  _vlFilter=f;
+  ['vlFilterAll','vlFilterPers','vlFilterOrg'].forEach(function(id){
+    var el=document.getElementById(id);if(!el)return;
+    el.style.background='';el.style.borderColor='';el.style.color='';
+  });
+  var activeId=f==='all'?'vlFilterAll':f==='personal'?'vlFilterPers':'vlFilterOrg';
+  var ae=document.getElementById(activeId);
+  if(ae){ae.style.background='var(--acc-bg)';ae.style.borderColor='var(--acc-bd)';ae.style.color='var(--acc)';}
+  renderVorlagenList();
+}
+
+function renderVorlagenList(){
+  var list=getVisibleVorlagen();
+  if(_vlFilter!=='all')list=list.filter(function(v){return v.scope===_vlFilter;});
+  list.sort(function(a,b){return (b.createdAt||'').localeCompare(a.createdAt||'');});
+  var container=document.getElementById('vlList');
+  var empty=document.getElementById('vlEmpty');
+  if(!list.length){
+    container.innerHTML='';container.style.display='none';
+    empty.style.display='';
+    return;
+  }
+  empty.style.display='none';container.style.display='';
+  var info=getCurrentUserInfo();
+  container.innerHTML=list.map(function(v){
+    var scopeLabel=v.scope==='org'?'<span class="tag t-bl" style="font-size:10px">🏢 Büro-Vorlage</span>':'<span class="tag t-pu" style="font-size:10px">👤 Persönlich</span>';
+    var typLabel=v.snapshot&&v.snapshot.typ==='crbx'?'<span class="tag t-gy" style="font-size:10px">CRBX</span>':'<span class="tag t-gy" style="font-size:10px">Funktional</span>';
+    var nBkp=v.snapshot&&v.snapshot.bkp?v.snapshot.bkp.length:0;
+    var nLose=v.snapshot&&v.snapshot.lose?v.snapshot.lose.length:0;
+    var nPos=0;
+    if(v.snapshot&&v.snapshot.lose){v.snapshot.lose.forEach(function(l){nPos+=(l.positionen||[]).length;});}
+    (v.snapshot&&v.snapshot.bkp||[]).forEach(function(b){nPos+=(b.unterpositionen||[]).length;});
+    var canDelete=(v.scope==='personal'&&v.ownerUserId===info.userId)||(v.scope==='org'&&v.orgId===info.orgId);
+    var when='';
+    try{when=new Date(v.createdAt).toLocaleDateString('de-CH');}catch(e){}
+    return '<div style="padding:12px 14px;border-bottom:1px solid var(--brd);display:flex;align-items:flex-start;gap:10px">'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">'+
+          '<strong style="font-size:14px">'+E(v.name)+'</strong>'+
+          scopeLabel+typLabel+
+        '</div>'+
+        (v.beschreibung?'<div style="font-size:12px;color:var(--txt2);margin-bottom:4px">'+E(v.beschreibung)+'</div>':'')+
+        '<div style="font-size:11px;color:var(--mut)">'+
+          nBkp+' BKP-Gruppen · '+nLose+' Los'+(nLose!==1?'e':'')+' · '+nPos+' Position'+(nPos!==1?'en':'')+
+          (v.ownerUserName?' · von '+E(v.ownerUserName):'')+
+          (when?' · '+when:'')+
+        '</div>'+
+      '</div>'+
+      '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">'+
+        '<button class="btn btn-p btn-sm" onclick="useVorlageFromLibrary(\''+v.id+'\')" title="Neue Ausschreibung aus Vorlage">+ Verwenden</button>'+
+        (canDelete?'<button class="btn btn-d btn-sm" onclick="deleteVorlage(\''+v.id+'\')" title="Vorlage löschen">🗑</button>':'')+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function deleteVorlage(vid){
+  var list=ldVorlagen();
+  var v=list.find(function(x){return x.id===vid;});
+  if(!v)return;
+  if(!confirm('Vorlage «'+v.name+'» wirklich löschen?'))return;
+  var info=getCurrentUserInfo();
+  // Berechtigung: personal nur eigene, org nur innerhalb eigener Organisation
+  if(v.scope==='personal'&&v.ownerUserId!==info.userId){toast('Keine Berechtigung','error');return;}
+  if(v.scope==='org'&&v.orgId!==info.orgId){toast('Keine Berechtigung','error');return;}
+  list=list.filter(function(x){return x.id!==vid;});
+  svVorlagen(list);
+  renderVorlagenList();
+  toast('🗑 Vorlage «'+v.name+'» gelöscht');
+  try{lg('🗑','Vorlage gelöscht',v.name);}catch(e){}
+}
+
+// Öffnet das "Neue Ausschreibung"-Modal mit bereits vorausgewählter Vorlage.
+function useVorlageFromLibrary(vid){
+  cM('mVorlagen');
+  oM('mNewA');
+  // Warten bis mNewA gerendert ist, dann Vorlage im Dropdown selektieren
+  setTimeout(function(){
+    var sel=document.getElementById('naVorlageId');
+    if(sel){sel.value=vid;naVorlageChanged();}
+  },50);
+}
+
+// Befüllt das Vorlagen-Dropdown im "Neue Ausschreibung"-Modal
+function naPopulateVorlagen(){
+  var sel=document.getElementById('naVorlageId');
+  if(!sel)return;
+  var list=getVisibleVorlagen();
+  list.sort(function(a,b){
+    // Büro-Vorlagen zuerst (Team-Defaults), dann persönliche
+    if(a.scope!==b.scope)return a.scope==='org'?-1:1;
+    return (a.name||'').localeCompare(b.name||'','de');
+  });
+  var opts=['<option value="">— Leere Ausschreibung (keine Vorlage) —</option>'];
+  var orgItems=list.filter(function(v){return v.scope==='org';});
+  var persItems=list.filter(function(v){return v.scope==='personal';});
+  if(orgItems.length){
+    opts.push('<optgroup label="🏢 Büro-Vorlagen">');
+    orgItems.forEach(function(v){opts.push('<option value="'+v.id+'">'+E(v.name)+'</option>');});
+    opts.push('</optgroup>');
+  }
+  if(persItems.length){
+    opts.push('<optgroup label="👤 Persönliche Vorlagen">');
+    persItems.forEach(function(v){opts.push('<option value="'+v.id+'">'+E(v.name)+'</option>');});
+    opts.push('</optgroup>');
+  }
+  sel.innerHTML=opts.join('');
+}
+
+function naVorlageChanged(){
+  var sel=document.getElementById('naVorlageId');
+  var hint=document.getElementById('naVorlageHint');
+  if(!sel||!hint)return;
+  if(sel.value){
+    // Vorlage gewählt → typ/modelle aus Vorlage vorausfüllen
+    var v=ldVorlagen().find(function(x){return x.id===sel.value;});
+    if(v&&v.snapshot){
+      hint.style.display='';
+      hint.textContent='✓ Vorlage «'+v.name+'» wird angewendet: BKP-Baum, Lose und Positionen werden übernommen.';
+      // Typ-Card visuell anpassen
+      if(v.snapshot.typ)naPickTyp(v.snapshot.typ);
+      // Modell-Checkboxen setzen
+      var modelle=v.snapshot.modelle||[];
+      document.querySelectorAll('#naModellWrap input[type=checkbox]').forEach(function(cb){
+        cb.checked=modelle.indexOf(cb.value)>=0;
+      });
+    }
+  } else {
+    hint.style.display='none';
+  }
+}
+
+// Wendet eine Vorlage auf eine frisch erstellte Ausschreibung an.
+// Überschreibt bkp, lose, abzuege, vorbedingungen mit dem Snapshot-Inhalt.
+function applyVorlageSnapshot(ausObj,vorlageId){
+  var v=ldVorlagen().find(function(x){return x.id===vorlageId;});
+  if(!v||!v.snapshot)return false;
+  var snap=v.snapshot;
+  if(snap.bkp)ausObj.bkp=JSON.parse(JSON.stringify(snap.bkp));
+  if(snap.lose&&snap.lose.length){
+    // Neue Los-IDs vergeben, damit keine Kollisionen entstehen
+    ausObj.lose=JSON.parse(JSON.stringify(snap.lose)).map(function(los,i){
+      return Object.assign({},los,{id:'los_'+Date.now()+'_'+i});
+    });
+  }
+  if(snap.abzuege)ausObj.abzuege=JSON.parse(JSON.stringify(snap.abzuege));
+  if(snap.vorbedingungen)ausObj.vorbedingungen=JSON.parse(JSON.stringify(snap.vorbedingungen));
+  return true;
 }
 
 // ═══════════════════════════════════════════════
@@ -2122,15 +2811,34 @@ VIEWS.pein=function(){
   return h;
 };
 
+// Wiederverwendbarer Info-Icon-Helper für den Offertvergleich (#29c).
+// Rendert einen ℹ-Button mit CSS-Tooltip. Der Text darf keine doppelten Quotes
+// enthalten — wir ersetzen sie durch Guillemets und verwenden HTML-Entities.
+function infoIcon(tip){
+  var safe=String(tip||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  return '<button class="gcm-info" type="button" aria-label="Erklärung" data-tip="'+safe+'" onclick="event.stopPropagation();this.blur();">ℹ</button>';
+}
+
 VIEWS.pvgl=function(){
   const a=curA();if(!a)return '<div class="wp">Ausschreibung wählen.</div>';
   const eins=S.einreichungen.filter(e=>e.ausId===a.id);
   let h=`<h2 style="font-size:20px;font-weight:700;margin-bottom:16px">📊 Offertvergleich — ${E(a.name)}</h2>`;
   if(!eins.length){h+=`<div class="es"><p>Keine Offerten.</p></div>`;return h;}
+  // Erklärungs-Legende für Einsteiger (#29c)
+  h+=`<div class="gcm-legend">
+    <strong>So liest du den Vergleich:</strong>
+    <span class="gcm-legend-chip ch">Grün</span> = günstigste Offerte pro Position,
+    <span class="gcm-legend-chip z">Rot</span> = fehlende Position (Preis 0).
+    Die Info-Icons <span class="gcm-info" data-tip="Kleine Erklärungen zu jeder Kennzahl — fahre mit der Maus drüber oder tippe auf das Icon.">ℹ</span>
+    neben jeder Kennzahl zeigen beim Überfahren eine kurze Erklärung. <strong>Kartellrecht:</strong> Den nicht berücksichtigten Unternehmern werden keine Preise der Konkurrenz mitgeteilt (KG Art. 5).
+  </div>`;
 
   if(a.modell==='global'){
     // Global: just totals
-    h+=`<table class="dt"><thead><tr><th>Firma</th><th class="tr">Brutto</th>${(a.abzuege||[]).filter(z=>z.aktiv).map(z=>`<th class="tr">${E(z.name)}</th>`).join('')}<th class="tr">MwSt 8.1%</th><th class="tr" style="font-weight:800">Netto inkl.</th></tr></thead><tbody>`;
+    var brTipG='Brutto = Angebotspreis ohne Abzüge, ohne MwSt. Vergleichsbasis vor Verhandlungen.';
+    var mwTipG='Mehrwertsteuer 8.1% gemäss Bundesratsentscheid 2024. Wird auf den Zwischenbetrag nach allen Abzügen angewendet.';
+    var ntTipG='Netto inkl. MwSt = Brutto abzüglich aller aktiven Abzüge (kaskadiert) + MwSt. Die günstigste Offerte wird grün hervorgehoben.';
+    h+=`<table class="dt"><thead><tr><th>Firma</th><th class="tr">Brutto${infoIcon(brTipG)}</th>${(a.abzuege||[]).filter(z=>z.aktiv).map(z=>`<th class="tr">${E(z.name)}${infoIcon('Abzug «'+(z.name||'')+'» wird kaskadiert vom jeweiligen Zwischentotal berechnet.')}</th>`).join('')}<th class="tr">MwSt 8.1%${infoIcon(mwTipG)}</th><th class="tr" style="font-weight:800">Netto inkl.${infoIcon(ntTipG)}</th></tr></thead><tbody>`;
     const nettos=eins.map(e=>calcNetto(a,e));const minN=Math.min(...nettos.filter(n=>n>0));
     eins.forEach((e,i)=>{const brutto=e.globalPreis||0;const detail=calcAbzugDetail(a,e,brutto);
       h+=`<tr><td><strong>${E(e.firma)}</strong></td><td class="tr">${fC(brutto)}</td>${detail.lines.map(l=>`<td class="tr">${l.val?'-'+fC(l.val)+(l.pct?' ('+l.pct+'%)':''):'–'}</td>`).join('')}<td class="tr">${fC(detail.mwst)}</td><td class="tr" style="font-weight:800;${nettos[i]===minN&&eins.length>1?'color:var(--grn)':''}">${fC(nettos[i])}</td></tr>`;
@@ -2152,9 +2860,11 @@ VIEWS.pvgl=function(){
     });
     // Grand totals
     const grandT=eins.map(e=>e.total||0);const nettos=eins.map(e=>calcNetto(a,e));const minN=Math.min(...nettos.filter(n=>n>0));
-    h+=`<tr style="font-weight:800;border-top:3px solid var(--txt);background:var(--bg2)"><td class="tr">Brutto</td>${grandT.map(t=>`<td class="tr">${fC(t)}</td>`).join('')}</tr>`;
-    (a.abzuege||[]).filter(z=>z.aktiv).forEach(z=>{h+=`<tr><td class="tr" style="padding-left:24px">${E(z.name)}</td>${eins.map(e=>{const d=calcAbzugDetail(a,e,e.total);const l=d.lines.find(x=>x.id===z.id);return `<td class="tr">${l?.val?'-'+fC(l.val):'–'}</td>`;}).join('')}</tr>`;});
-    h+=`<tr style="font-weight:800;border-top:2px solid var(--txt)"><td class="tr">Netto inkl. MwSt</td>${nettos.map((n,i)=>`<td class="tr" style="${n===minN&&eins.length>1?'color:var(--grn)':''}">${fC(n)}</td>`).join('')}</tr>`;
+    var brTip='Brutto = Summe aller Positionspreise dieser Offerte, ohne Abzüge, ohne MwSt.';
+    var ntTip='Netto inkl. MwSt = Brutto − alle aktiven Abzüge (kaskadiert) + 8.1% MwSt. Die günstigste Offerte ist grün markiert.';
+    h+=`<tr style="font-weight:800;border-top:3px solid var(--txt);background:var(--bg2)"><td class="tr">Brutto${infoIcon(brTip)}</td>${grandT.map(t=>`<td class="tr">${fC(t)}</td>`).join('')}</tr>`;
+    (a.abzuege||[]).filter(z=>z.aktiv).forEach(z=>{h+=`<tr><td class="tr" style="padding-left:24px">${E(z.name)}${infoIcon('Abzug «'+(z.name||'')+'» wird kaskadiert vom jeweiligen Zwischentotal berechnet.')}</td>${eins.map(e=>{const d=calcAbzugDetail(a,e,e.total);const l=d.lines.find(x=>x.id===z.id);return `<td class="tr">${l?.val?'-'+fC(l.val):'–'}</td>`;}).join('')}</tr>`;});
+    h+=`<tr style="font-weight:800;border-top:2px solid var(--txt)"><td class="tr">Netto inkl. MwSt${infoIcon(ntTip)}</td>${nettos.map((n,i)=>`<td class="tr" style="${n===minN&&eins.length>1?'color:var(--grn)':''}">${fC(n)}</td>`).join('')}</tr>`;
     h+=`</tbody></table>`;
   } else {
     // CRBX — position-level comparison (reuse v3 logic)
@@ -2573,12 +3283,19 @@ function apSuggest(q){
   var rolle=document.getElementById('apR').value;
   q=q.toLowerCase();
   var html='';var found=0;
+  // Tracking der Firmen-Namen (case-insensitive), die wir schon
+  // angezeigt haben. Verhindert doppelte Eintraege, wenn z.B. BWT
+  // sowohl als Katalog-Lieferant als auch als Org existiert.
+  var shownFirmen=new Set();
+  var shownEmails=new Set();
 
   // 1. Zentraler Lieferantenkatalog (für Lieferanten-Rolle)
   if(rolle==='lieferant'&&typeof GemaProdukte!=='undefined'){
     var katalogMatches=GemaProdukte.searchLieferanten(q).slice(0,5);
     katalogMatches.forEach(function(l){
       found++;
+      if(l.firma) shownFirmen.add(l.firma.toLowerCase().trim());
+      if(l.email) shownEmails.add(l.email.toLowerCase());
       html+='<div onclick="apSelectKatalogLief(\''+l.id+'\')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--brd);font-size:12px;display:flex;align-items:center;gap:8px;transition:.1s" onmouseover="this.style.background=\'var(--bg2)\'" onmouseout="this.style.background=\'\'">'
         +'<div style="flex:1"><strong>'+E(l.firma)+'</strong><div style="font-size:11px;color:var(--mut)">'+E(l.kontaktPerson||'')+' · '+E(l.email||'')+'</div></div>'
         +'<span class="tag t-am" style="font-size:9px">Katalog</span>'
@@ -2586,18 +3303,54 @@ function apSuggest(q){
     });
   }
 
-  // 2. Bestehende Users mit Login
+  // 2. Bestehende Organisationen (alle Rollen) — so erkennt man schon
+  // existierende Firmen, auch wenn sie noch keinen User oder Katalog-
+  // Eintrag haben. Wir filtern nach passender Kategorie je nach Rolle.
+  // Orgs haben jetzt ein Array 'kategorien' (Mehrfachauswahl) — ein
+  // Installateurs-Orgs mit ['sanitaerinstallateur','heizungsinstallateur']
+  // taucht bei der Installateur-Suche auf. Fuer Lieferanten akzeptieren
+  // wir ausschliesslich die exakte 'lieferant'-Kategorie.
+  // org_default (Jaeggi Vollmer) wird ignoriert, um keine Fremd-
+  // eintraege in die Planer-Org zu bekommen.
+  var KAT_BY_ROLLE = {
+    installateur: ['sanitaerinstallateur','heizungsinstallateur','lueftungsinstallateur','elektroinstallateur','klima_kaeltetechnik'],
+    lieferant:    ['lieferant'],
+    architekt:    ['architekt']
+  };
+  var wantKats = KAT_BY_ROLLE[rolle] || null;
+  var orgs=[]; try{ orgs = (typeof GemaAuth!=='undefined' && GemaAuth.getOrgs && GemaAuth.getOrgs()) || []; }catch(e){}
+  var orgMatches = orgs.filter(function(o){
+    if(o.id==='org_default') return false;
+    if(wantKats){
+      var orgCats = (o.kategorien && o.kategorien.length) ? o.kategorien : (o.kategorie ? [o.kategorie] : []);
+      var hit = orgCats.some(function(k){return wantKats.indexOf(k)>=0;});
+      if(!hit) return false;
+    }
+    var nameMatch = (o.name||'').toLowerCase().indexOf(q)>=0;
+    var ortMatch  = (o.adresse && o.adresse.ort||'').toLowerCase().indexOf(q)>=0;
+    return nameMatch || ortMatch;
+  }).filter(function(o){
+    return !shownFirmen.has((o.name||'').toLowerCase().trim());
+  }).slice(0,5);
+  orgMatches.forEach(function(o){
+    found++;
+    shownFirmen.add((o.name||'').toLowerCase().trim());
+    if(o.kontakt && o.kontakt.email) shownEmails.add(o.kontakt.email.toLowerCase());
+    var ort = (o.adresse && o.adresse.ort) ? o.adresse.ort : '';
+    var email = (o.kontakt && o.kontakt.email) || '';
+    html+='<div onclick="apSelectOrg(\''+o.id+'\')" style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--brd);font-size:12px;display:flex;align-items:center;gap:8px;transition:.1s" onmouseover="this.style.background=\'var(--bg2)\'" onmouseout="this.style.background=\'\'">'
+      +'<div style="flex:1"><strong>'+E(o.name)+'</strong><div style="font-size:11px;color:var(--mut)">'+E(ort)+(email?' · '+E(email):'')+'</div></div>'
+      +'<span class="tag t-bl" style="font-size:9px">Firma</span>'
+      +'</div>';
+  });
+
+  // 3. Bestehende Users mit Login
   var users=[];try{users=GemaAuth.getUsers()||[];}catch(e){}
-  var roleMap={installateur:'role_unternehmer',lieferant:'role_lieferant',architekt:'role_architekt'};
-  var targetRole=roleMap[rolle];
-  var shownEmails=new Set();
-  if(rolle==='lieferant'&&typeof GemaProdukte!=='undefined'){
-    GemaProdukte.searchLieferanten(q).forEach(function(l){if(l.email)shownEmails.add(l.email.toLowerCase());});
-  }
   var matches=users.filter(function(u){
     if(!u.active)return false;
     if(u.profile?.email&&shownEmails.has(u.profile.email.toLowerCase()))return false;
     if(u.username&&shownEmails.has(u.username.toLowerCase()))return false;
+    if(u.profile?.firma&&shownFirmen.has(u.profile.firma.toLowerCase().trim()))return false;
     var nameMatch=(u.name||'').toLowerCase().indexOf(q)>=0;
     var firmaMatch=(u.profile?.firma||'').toLowerCase().indexOf(q)>=0;
     var emailMatch=(u.username||'').toLowerCase().indexOf(q)>=0;
@@ -2615,6 +3368,37 @@ function apSuggest(q){
   if(!found){sugEl.style.display='none';return;}
   sugEl.style.display='block';
   sugEl.innerHTML=html;
+}
+
+// Übernimmt die Daten einer vorgeschlagenen Organisation in das
+// Beteiligte-Formular. Die resultierende Beteiligten-Karte wird beim
+// spaeteren inviteLieferant/inviteBeteiligter ueber die Org-ID mit
+// der existierenden Firma verknuepft, statt eine neue anzulegen.
+function apSelectOrg(orgId){
+  if(typeof GemaAuth==='undefined') return;
+  var orgs = (GemaAuth.getOrgs && GemaAuth.getOrgs()) || [];
+  var o = orgs.find(function(x){return x.id===orgId;});
+  if(!o) return;
+  document.getElementById('apF').value=o.name||'';
+  // Kontaktperson aus dem ersten Admin-User (falls vorhanden) vorbelegen
+  var person='', email=(o.kontakt&&o.kontakt.email)||'', tel=(o.kontakt&&o.kontakt.telefon)||'';
+  if(o.admins && o.admins.length){
+    var users = (GemaAuth.getUsers && GemaAuth.getUsers()) || [];
+    var adminUser = users.find(function(u){return u.id===o.admins[0];});
+    if(adminUser){
+      person = adminUser.name || adminUser.profile?.person || '';
+      if(!email) email = adminUser.profile?.email || adminUser.username || '';
+      if(!tel)   tel   = adminUser.profile?.telefon || '';
+    }
+  }
+  document.getElementById('apP').value=person;
+  document.getElementById('apE').value=email;
+  document.getElementById('apT').value=tel;
+  document.getElementById('apSuggestions').style.display='none';
+  // orgId in einem Data-Attribut merken, damit addPerson()/inviteLieferant()
+  // die existierende Org nutzen koennen.
+  document.getElementById('apF').dataset.orgId=orgId;
+  document.getElementById('apF').dataset.katalogId='';
 }
 
 function apSelectKatalogLief(liefId){
@@ -3093,9 +3877,20 @@ function createAusschreibung(){
     {code:'259',name:'Übriges',unterpositionen:[],materialSpec:[]}
   ]:[];
   var objektId=objSel.value||'';
-  S.ausschreibungen.push({id,name,typ,modelle,modell:modelle[0],objekt,objektId,region,frist,status:'entwurf',bkp:stdBKP,abzuege:JSON.parse(JSON.stringify(DEF_ABZUEGE)),crbx:{lv:null},beilagen,plaene,unterlagen,vorbedingungen:{modus:'gema',kapitel:{},pdfName:''},materialSpec:{},vergabe:null,lose:[],crbxVergleich:null});
-  S.activeAusId=id;save();lg('📋','Ausschreibung erstellt',name+' ('+typ+', '+modelle.join('+')+')');
-  cM('mNewA');toast('Ausschreibung erstellt');buildTabs();nav('pbkp');
+  var vorlageId=(document.getElementById('naVorlageId')||{}).value||'';
+  var neuAus={id,name,typ,modelle,modell:modelle[0],objekt,objektId,region,frist,status:'entwurf',bkp:stdBKP,abzuege:JSON.parse(JSON.stringify(DEF_ABZUEGE)),crbx:{lv:null},beilagen,plaene,unterlagen,vorbedingungen:{modus:'gema',kapitel:{},pdfName:''},materialSpec:{},vergabe:null,lose:[],crbxVergleich:null};
+  var appliedVorlage=false;
+  if(vorlageId){appliedVorlage=applyVorlageSnapshot(neuAus,vorlageId);}
+  S.ausschreibungen.push(neuAus);
+  S.activeAusId=id;save();
+  var logDetail=name+' ('+typ+', '+modelle.join('+')+')';
+  if(appliedVorlage){
+    var v=ldVorlagen().find(function(x){return x.id===vorlageId;});
+    if(v)logDetail+=' · aus Vorlage «'+v.name+'»';
+  }
+  lg('📋','Ausschreibung erstellt',logDetail);
+  cM('mNewA');toast(appliedVorlage?'✓ Ausschreibung aus Vorlage erstellt':'Ausschreibung erstellt');
+  buildTabs();nav('pbkp');
 }
 
 // ── GEMA Internal Dialogs ──
@@ -3555,6 +4350,11 @@ function addPerson(){var r=document.getElementById('apR').value,f=document.getEl
   var person=document.getElementById('apP').value.trim();
   var tel=document.getElementById('apT').value.trim();
   var katalogId=document.getElementById('apF').dataset.katalogId||'';
+  // Org-ID aus Autocomplete-Auswahl (falls der User eine bestehende
+  // Firma aus den Vorschlaegen gewaehlt hat). Wird an den spaeteren
+  // inviteLieferant/inviteBeteiligter-Aufruf mitgegeben, damit keine
+  // neue Org angelegt wird.
+  var orgId=document.getElementById('apF').dataset.orgId||'';
 
   // Lieferant: Zentralen Katalog nutzen/erstellen
   if(r==='lieferant'&&typeof GemaProdukte!=='undefined'){
@@ -3572,16 +4372,17 @@ function addPerson(){var r=document.getElementById('apR').value,f=document.getEl
     if(zentralLief)katalogId=zentralLief.id;
   }
 
-  var obj={id:r.substring(0,4)+'-'+Date.now(),rolle:r,userId:null,firma:f,person:person,email:email,tel:tel,gewerke:'',profil:{},_loginStatus:'none',katalogLieferantId:katalogId||null};
+  var obj={id:r.substring(0,4)+'-'+Date.now(),rolle:r,userId:null,firma:f,person:person,email:email,tel:tel,gewerke:'',profil:{},_loginStatus:'none',katalogLieferantId:katalogId||null,orgId:orgId||null};
   // Auto-Verknüpfung: prüfe ob ein User mit dieser Email existiert
   var existingUser=findUserByEmail(email);
   if(existingUser){
     obj.userId=existingUser.id;
     obj._loginStatus=existingUser.einladung&&existingUser.einladung.passwortGesetzt?'active':'pending';
+    if(!obj.orgId && existingUser.orgId) obj.orgId=existingUser.orgId;
     toast(f+' ✓ (mit bestehendem Account verknüpft)');
   }
   if(r==='lieferant')obj.abo={aktiv:false,typ:'gratis',gewerke:[]};if(r==='installateur')obj.abo={typ:'gratis',aktiv:true};
-  S.beteiligte.push(obj);save();lg('👥','+',f);cM('mPerson');['apF','apP','apE','apT'].forEach(function(x){document.getElementById(x).value='';});document.getElementById('apF').dataset.katalogId='';if(!existingUser)toast(f+' ✓');buildTabs();nav(S.currentRole==='planer'?'pbet':defP());}
+  S.beteiligte.push(obj);save();lg('👥','+',f);cM('mPerson');['apF','apP','apE','apT'].forEach(function(x){document.getElementById(x).value='';});document.getElementById('apF').dataset.katalogId='';document.getElementById('apF').dataset.orgId='';if(!existingUser)toast(f+' ✓');buildTabs();nav(S.currentRole==='planer'?'pbet':defP());}
 
 function inviteLieferant(beteiligterIdx){
   var b=S.beteiligte[beteiligterIdx];if(!b)return;
@@ -3596,9 +4397,14 @@ function inviteLieferant(beteiligterIdx){
   }
   var result=GemaAuth.inviteLieferant({
     firma:b.firma,person:b.person,email:b.email,tel:b.tel,
+    orgId:b.orgId||null, // aus Autocomplete-Auswahl, falls gesetzt
     eingeladenVon:S.currentRole
   });
   b.userId=result.user.id;
+  // orgId aus dem Ergebnis zurueckschreiben, damit die Beteiligten-
+  // Karte mit der neu angelegten (oder zugeordneten) Firma verbunden
+  // bleibt und das Profil bei Login korrekt aufloest.
+  if(result.user && result.user.orgId) b.orgId=result.user.orgId;
   b._loginStatus='pending'; // Einladung gesendet, Passwort noch nicht gesetzt
   b._einladungGesendet=true;b._loginUrl=result.loginUrl;
   save();
@@ -3892,7 +4698,7 @@ function fmtWG(c){if(!c)return'';c=c.replace(/\s/g,'');if(c.length<=3)return c;i
 // Clean unit: "StA+"→"St", "LE"→"LE", "m A+"→"m", "m²A+"→"m²"
 function cleanUnit(u){if(!u)return'';if(u.length<=2)return u.trim();return u.replace(/\s*[A-Z][\+\-]\s*$/,'').trim()||u.trim();}
 function E(s){if(!s)return'';const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
-function oM(id){document.getElementById(id).classList.add('open');if(id==='mAbzug')renderAbzModal();if(id==='mNewA')naPopulateObjekte();if(id==='mProfil')loadProfil();}
+function oM(id){document.getElementById(id).classList.add('open');if(id==='mAbzug')renderAbzModal();if(id==='mNewA'){naPopulateObjekte();naPopulateVorlagen();}if(id==='mProfil')loadProfil();}
 function cM(id){document.getElementById(id).classList.remove('open');}
 function toast(m,t='success'){const c=document.getElementById('toasts'),d=document.createElement('div');d.style.cssText=`padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;color:#fff;background:${t==='error'?'var(--red)':t==='info'?'var(--blue)':'var(--grn)'};box-shadow:var(--sh);animation:fu .2s ease;max-width:360px`;d.textContent=m;c.appendChild(d);setTimeout(()=>{d.style.opacity='0';d.style.transition='opacity .3s';setTimeout(()=>d.remove(),300);},3500);}
 
@@ -3934,6 +4740,69 @@ function initDropZones(){
 </script>
 <script>document.addEventListener("DOMContentLoaded",function(){if(typeof GemaFeedback!=="undefined")GemaFeedback.init("ausschrunterlagen","Ausschreibungsunterlagen");});</script>
 <script>if(typeof GemaAutoSave!=="undefined")GemaAutoSave.init("ausschreibungsunterlagen");</script>
+<script src="gema_coachmarks.js"></script>
+<script>
+// ── Onboarding-Coachmarks (#29) ──
+// Wird beim ersten Besuch dieser Seite gezeigt und führt durch den
+// typischen Ausschreibungs-Workflow (Tab-Navigation → neue Ausschreibung
+// → BKP-Checkliste → Offerten → Vergleich → Vergabe).
+(function(){
+  function startCoach(){
+    if(typeof GemaCoachmarks==='undefined')return;
+    if(GemaCoachmarks.isDone('pm_ausschreibungsunterlagen'))return;
+    // Warten bis buildTabs() gerendert hat
+    var tries=0;
+    var timer=setInterval(function(){
+      tries++;
+      var tabBar=document.getElementById('tabBar');
+      if((tabBar&&tabBar.children.length)||tries>20){
+        clearInterval(timer);
+        var steps=[
+          {
+            selector:'#tabBar',
+            title:'Dein Ausschreibungs-Workflow',
+            text:'Oben siehst du alle Schritte: Übersicht, Ausschreibungen, BKP-Checkliste, Detail, Verteilen, Offerten, Vergleich, Vergabeantrag. Du durchläufst sie von links nach rechts.',
+            placement:'bottom',icon:'📋'
+          },
+          {
+            selector:'.tab-btn[data-tab="paus"]',
+            title:'Ausschreibungen verwalten',
+            text:'Hier erstellst du neue Ausschreibungen — entweder aus einer Vorlage (persönlich oder büroweit) oder leer. Du kannst Ausschreibungen auch als Vorlage speichern.',
+            placement:'bottom',icon:'📝'
+          },
+          {
+            selector:'.tab-btn[data-tab="pbkp"]',
+            title:'BKP-Checkliste & Lose',
+            text:'BKP-Baum nach SIA 451: Positionen aktivieren, gruppieren, Materialspezifikationen festlegen. Alternativ CRBX-Import für Grossprojekte.',
+            placement:'bottom',icon:'☑'
+          },
+          {
+            selector:'.tab-btn[data-tab="pvrt"]',
+            title:'Offertanfragen verteilen',
+            text:'Unternehmer aus deinem Adressbuch auswählen, Anfrage zusammenstellen und versenden. Status verfolgen in «Offerten».',
+            placement:'bottom',icon:'📤'
+          },
+          {
+            selector:'.tab-btn[data-tab="pvgl"]',
+            title:'Offertvergleich mit Erklärungen',
+            text:'Sobald Offerten eingegangen sind, zeigt der Vergleich den günstigsten Preis pro Position grün, fehlende Positionen rot. Info-Icons ℹ erklären jede Kennzahl im Detail.',
+            placement:'bottom',icon:'📊'
+          },
+          {
+            selector:'.tab-btn[data-tab="pvga"]',
+            title:'Vergabeantrag & Zuschlag',
+            text:'Empfehlung, BKP-Vergleich und Checkliste zusammenstellen, einreichen an Bauherr/Architekt. Nach Genehmigung: Zuschlag erteilen — kartellrechts-konform (keine Preise an Absagen).',
+            placement:'left',icon:'🏆'
+          }
+        ];
+        GemaCoachmarks.init('pm_ausschreibungsunterlagen',steps,{delay:300});
+      }
+    },150);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startCoach);
+  else setTimeout(startCoach,600);
+})();
+</script>
 <script src="gema_scroll.js"></script>
 <script src="gema_mobile_menu.js"></script>
 </body></html>

@@ -110,6 +110,10 @@ input::placeholder,textarea::placeholder{color:#cbd5e1!important}
 /* OBJEKT CARDS */
 .obj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .obj-card{background:var(--sur);border:1.5px solid var(--brd);border-radius:var(--r);padding:16px;cursor:pointer;transition:.15s;position:relative}
+.obj-card.is-child{border-left:3px solid var(--acc-bd);background:linear-gradient(90deg,var(--acc-bg) 0,var(--sur) 40px)}
+.obj-card .obj-parent-crumb{font-size:11px;color:var(--acc);font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:4px}
+.obj-card .obj-parent-crumb::before{content:'↳';font-size:13px;opacity:.7}
+.obj-card .obj-child-count{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;background:var(--acc-bg);color:var(--acc);border:1px solid var(--acc-bd);margin-left:6px}
 .obj-card:hover{border-color:var(--acc-bd);box-shadow:var(--sh)}
 .obj-card.active{border-color:var(--acc);box-shadow:0 0 0 3px rgba(8,145,178,.12)}
 .obj-name{font-size:14px;font-weight:800;color:var(--txt);margin-bottom:4px}
@@ -296,6 +300,19 @@ input::placeholder,textarea::placeholder{color:#cbd5e1!important}
     <div class="modal-bd">
       <input type="hidden" id="objEditId"/>
       <div class="fg"><label>Projektname / Objektbezeichnung *</label><input id="objName" placeholder="z.B. Neubau MFH Musterstrasse 12"/></div>
+      <div class="frow">
+        <div class="fg"><label>Eigene Projektnummer</label><input id="objProjektnummer" placeholder="z.B. 2026-014"/></div>
+        <div class="fg"><label>Revision</label><input id="objRevision" placeholder="z.B. 1.0"/></div>
+      </div>
+      <div class="fg"><label>Aktive SIA-Phase (optional)</label>
+        <select id="objAktivePhase">
+          <option value="">— Keine Phase —</option>
+          <option value="vorprojekt">SIA 32 · Vorprojekt</option>
+          <option value="bauprojekt">SIA 33 · Bauprojekt</option>
+          <option value="ausschreibung">SIA 41 · Ausschreibung</option>
+          <option value="ausfuehrung">SIA 51-53 · Ausführung</option>
+        </select>
+      </div>
       <div class="fg"><label>Adresse <span class="adr-tag" id="objAdrTag" style="display:none">✓ Verifiziert</span></label>
         <div class="adr-wrap">
           <input id="objAdrSearch" class="adr-input" placeholder="Adresse eingeben — z.B. Bläsiring 153 Basel" autocomplete="off" oninput="adrSearch(this,'objAdrDrop','obj')" onkeydown="adrKey(event,'objAdrDrop','obj')"/>
@@ -308,6 +325,9 @@ input::placeholder,textarea::placeholder{color:#cbd5e1!important}
         <div class="fg"><label>Bauvorhaben</label>
           <select id="objBauvorhaben"><option value="Neubau">Neubau</option><option value="Umbau">Umbau</option><option value="Sanierung">Sanierung</option><option value="Erweiterung">Erweiterung</option><option value="Abbruch">Abbruch</option><option value="Andere">Andere</option></select>
         </div>
+      </div>
+      <div class="fg"><label>Übergeordnetes Objekt <span style="font-weight:500;color:var(--mut);text-transform:none;letter-spacing:0">(optional — für Bauetappen / Sub-Projekte)</span></label>
+        <select id="objParentId"><option value="">— Kein Oberprojekt (eigenständiges Objekt) —</option></select>
       </div>
       <div class="fg"><label>Status</label>
         <select id="objStatus"><option value="aktiv">✓ Aktiv</option><option value="abgeschlossen">Abgeschlossen</option><option value="archiviert">Archiviert</option></select>
@@ -451,6 +471,58 @@ window.openModal=openModal;window.closeModal=closeModal;
 let _tt;
 function toast(msg){const el=$('gToast');el.textContent=msg;el.classList.add('show');clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),2800);}
 
+// ── HIERARCHIE-HELPER (Parent-Child) ──
+// Sammelt rekursiv alle Nachkommen eines Objekts (um Zyklen im Parent-Select zu verhindern)
+function getDescendantIds(parentId,pool){
+  const out={};
+  const stack=[parentId];
+  while(stack.length){
+    const cur=stack.pop();
+    pool.forEach(o=>{if(o.parentObjektId===cur&&!out[o.id]){out[o.id]=true;stack.push(o.id);}});
+  }
+  return out;
+}
+// Sortiert Objekte in Baum-Reihenfolge (Parents vor Kindern) und annotiert jedes Objekt
+// mit `_depth`. Objekte, deren Parent nicht in der sichtbaren Liste ist, werden als Root behandelt.
+function buildObjektTree(list){
+  const byId={};list.forEach(o=>{byId[o.id]=o;});
+  const childMap={};
+  const roots=[];
+  list.forEach(o=>{
+    const pid=o.parentObjektId;
+    if(pid&&byId[pid]){
+      (childMap[pid]=childMap[pid]||[]).push(o);
+    } else {
+      roots.push(o);
+    }
+  });
+  const result=[];
+  function walk(o,depth){
+    o._depth=depth;
+    result.push(o);
+    (childMap[o.id]||[]).sort((a,b)=>(a.name||'').localeCompare(b.name||'','de')).forEach(c=>walk(c,depth+1));
+  }
+  roots.sort((a,b)=>(a.name||'').localeCompare(b.name||'','de')).forEach(r=>walk(r,0));
+  // Fallback: Objekte, die weder Root noch Kind waren (z.B. durch Filter verschwundener Parent), anhängen
+  list.forEach(o=>{if(result.indexOf(o)<0){o._depth=0;result.push(o);}});
+  return result;
+}
+function getChildCount(objektId){
+  return _mem.objekte.filter(o=>o.parentObjektId===objektId).length;
+}
+function getObjektBreadcrumb(objektId){
+  const names=[];
+  let cur=_mem.objekte.find(o=>o.id===objektId);
+  let guard=0;
+  while(cur&&cur.parentObjektId&&guard<10){
+    const p=_mem.objekte.find(o=>o.id===cur.parentObjektId);
+    if(!p)break;
+    names.unshift(p.name||'–');
+    cur=p;guard++;
+  }
+  return names;
+}
+
 // ── RENDER OBJEKTE ──
 var _objFilter='aktiv'; // default: show only active
 function setObjFilter(val,btn){
@@ -487,7 +559,9 @@ function renderObjekte(){
 
   // Sort
   const cmp=(a,b,k)=>(a[k]||'').localeCompare(b[k]||'','de');
-  if(sortBy==='name') list=[...list].sort((a,b)=>cmp(a,b,'name'));
+  // Bei Sortierung nach Name verwenden wir Baum-Reihenfolge (Parent → Kinder eingerückt).
+  // Andere Sortierungen blenden die Hierarchie aus.
+  if(sortBy==='name') list=buildObjektTree([...list]);
   else if(sortBy==='ort') list=[...list].sort((a,b)=>cmp(a,b,'ort')||cmp(a,b,'name'));
   else if(sortBy==='status') list=[...list].sort((a,b)=>{
     const order={aktiv:0,abgeschlossen:1,archiviert:2};
@@ -513,9 +587,15 @@ function renderObjekte(){
     const betCount=_mem.beteiligte.filter(b=>b.objektId===o.id).length;
     const isActive=o.id===_mem.activeObjektId;
     const loc=[o.plz,o.ort].filter(Boolean).join(' ');
-    return `<div class="obj-card${isActive?' active':''}" onclick="selectObjekt('${esc(o.id)}')">
+    const depth=(typeof o._depth==='number')?o._depth:0;
+    const isChild=depth>0;
+    const kindCount=getChildCount(o.id);
+    const crumbs=isChild?getObjektBreadcrumb(o.id):[];
+    const indentStyle=depth>0?'margin-left:'+Math.min(depth,3)*18+'px;':'';
+    return `<div class="obj-card${isActive?' active':''}${isChild?' is-child':''}" style="${indentStyle}" onclick="selectObjekt('${esc(o.id)}')">
       <span class="obj-status ${o.status||'aktiv'}">${({aktiv:'✓ Aktiv',abgeschlossen:'Abgeschlossen',archiviert:'Archiviert'})[o.status||'aktiv']}</span>
-      <div class="obj-name">${esc(o.name)}</div>
+      ${crumbs.length?'<div class="obj-parent-crumb">'+crumbs.map(esc).join(' › ')+'</div>':''}
+      <div class="obj-name">${esc(o.name)}${kindCount>0?'<span class="obj-child-count" title="Sub-Objekte">⎘ '+kindCount+'</span>':''}</div>
       <div class="obj-loc">${o.strasse?esc(o.strasse)+', ':''}${esc(loc)}</div>
       <div class="obj-meta">
         <span>🏗 ${esc(o.bauvorhaben||'–')}</span>
@@ -544,11 +624,36 @@ function setActive(id){
 window.setActive=setActive;
 
 // ── OBJEKT CRUD ──
+// Befüllt das Parent-Dropdown im Objekt-Modal. Beim Bearbeiten werden das
+// Objekt selbst und alle seine Nachkommen ausgeschlossen, um Zyklen zu verhindern.
+function populateParentSelect(currentEditId){
+  const sel=$('objParentId');if(!sel)return;
+  const visible=_isAdminUser
+    ? _mem.objekte
+    : _mem.objekte.filter(o=>(o.orgId||'org_default')===(_currentOrgId||'org_default'));
+  const excluded={};
+  if(currentEditId){
+    excluded[currentEditId]=true;
+    Object.assign(excluded,getDescendantIds(currentEditId,visible));
+  }
+  // Baum-Reihenfolge für die Auswahl, damit Eltern über Kindern stehen
+  const tree=buildObjektTree([...visible]);
+  const opts=['<option value="">— Kein Oberprojekt (eigenständiges Objekt) —</option>'];
+  tree.forEach(o=>{
+    if(excluded[o.id])return;
+    const depth=o._depth||0;
+    const indent='&nbsp;'.repeat(depth*3)+(depth>0?'↳ ':'');
+    opts.push('<option value="'+esc(o.id)+'">'+indent+esc(o.name||'–')+'</option>');
+  });
+  sel.innerHTML=opts.join('');
+}
+
 function openObjektModal(editId){
   const isEdit=!!editId;
   $('objModalTitle').textContent=isEdit?'Objekt bearbeiten':'Neues Objekt';
   $('objDelBtn').style.display=isEdit?'':'none';
   $('objEditId').value=editId||'';
+  populateParentSelect(editId);
   const detail=$('objAdrDetail');
   if(isEdit){
     const o=_mem.objekte.find(x=>x.id===editId);
@@ -557,6 +662,10 @@ function openObjektModal(editId){
     $('objPlz').value=o.plz||'';$('objOrt').value=o.ort||'';
     $('objGemeinde').value=o.gemeinde||'';$('objKanton').value=o.kanton||'';
     $('objBauvorhaben').value=o.bauvorhaben||'Neubau';
+    $('objProjektnummer').value=o.projektnummer||'';
+    $('objRevision').value=o.revision||'';
+    $('objAktivePhase').value=o.aktivePhase||'';
+    if($('objParentId'))$('objParentId').value=o.parentObjektId||'';
     $('objStatus').value=o.status||'aktiv';$('objNotizen').value=o.notizen||'';
     $('objAdrSearch').value=o.strasse?((o.strasse||'')+', '+(o.plz||'')+' '+(o.ort||'')):'';
     const tag=$('objAdrTag');if(tag)tag.style.display=o.strasse?'inline-flex':'none';
@@ -567,8 +676,17 @@ function openObjektModal(editId){
         (o.kanton?`<span class="adr-chip adr-chip-kt">${esc(o.kanton)}</span>`:'');
     } else if(detail){detail.style.display='none';detail.innerHTML='';}
   } else {
-    ['objName','objStrasse','objPlz','objOrt','objGemeinde','objKanton','objNotizen'].forEach(id=>{if($(id))$(id).value='';});
-    $('objBauvorhaben').value='Neubau';$('objStatus').value='aktiv';
+    ['objName','objStrasse','objPlz','objOrt','objGemeinde','objKanton','objNotizen','objProjektnummer','objRevision'].forEach(id=>{if($(id))$(id).value='';});
+    $('objBauvorhaben').value='Neubau';$('objStatus').value='aktiv';$('objAktivePhase').value='';
+    if($('objParentId'))$('objParentId').value='';
+    // Wenn ein aktives Objekt existiert, dieses als Vorgabe für den Parent anbieten
+    // (typischer Workflow: User legt ein Sub-Objekt zum aktuell aktiven Projekt an).
+    try{
+      if(_mem.activeObjektId&&$('objParentId')){
+        const hasOpt=Array.from($('objParentId').options).some(op=>op.value===_mem.activeObjektId);
+        if(hasOpt)$('objParentId').value=_mem.activeObjektId;
+      }
+    }catch(e){}
     $('objAdrSearch').value='';
     const tag=$('objAdrTag');if(tag)tag.style.display='none';
     if(detail){detail.style.display='none';detail.innerHTML='';}
@@ -581,8 +699,11 @@ function saveObjekt(){
   const name=$('objName').value.trim();
   if(!name){toast('⚠ Projektname erforderlich');return;}
   const editId=$('objEditId').value;
+  const parentId=($('objParentId')?$('objParentId').value:'')||'';
   const data={name,strasse:$('objStrasse').value.trim(),plz:$('objPlz').value.trim(),ort:$('objOrt').value.trim(),
-    gemeinde:$('objGemeinde').value.trim(),kanton:$('objKanton').value.trim(),bauvorhaben:$('objBauvorhaben').value,status:$('objStatus').value,notizen:$('objNotizen').value.trim()};
+    gemeinde:$('objGemeinde').value.trim(),kanton:$('objKanton').value.trim(),bauvorhaben:$('objBauvorhaben').value,status:$('objStatus').value,notizen:$('objNotizen').value.trim(),
+    projektnummer:$('objProjektnummer').value.trim(),revision:$('objRevision').value.trim(),
+    aktivePhase:$('objAktivePhase').value,parentObjektId:parentId};
   if(editId){
     const idx=_mem.objekte.findIndex(x=>x.id===editId);
     if(idx>=0)Object.assign(_mem.objekte[idx],data);
@@ -604,7 +725,12 @@ window.saveObjekt=saveObjekt;
 
 function deleteObjekt(){
   const id=$('objEditId').value;if(!id)return;
-  if(!confirm('Objekt und alle zugehörigen Beteiligten löschen?'))return;
+  const kinder=_mem.objekte.filter(o=>o.parentObjektId===id);
+  let msg='Objekt und alle zugehörigen Beteiligten löschen?';
+  if(kinder.length)msg+='\n\n'+kinder.length+' Sub-Objekt'+(kinder.length!==1?'e':'')+' werden zu eigenständigen Objekten (Parent-Verknüpfung wird entfernt, die Sub-Objekte selbst bleiben erhalten).';
+  if(!confirm(msg))return;
+  // Kinder entkoppeln, damit sie nicht zu Waisen werden
+  _mem.objekte.forEach(o=>{if(o.parentObjektId===id)o.parentObjektId='';});
   _mem.objekte=_mem.objekte.filter(x=>x.id!==id);
   _mem.beteiligte=_mem.beteiligte.filter(b=>b.objektId!==id);
   if(_mem.activeObjektId===id)_mem.activeObjektId=_mem.objekte[0]?.id||null;
@@ -1027,6 +1153,40 @@ updateBadges();
 </script>
 <script>document.addEventListener('DOMContentLoaded',function(){GemaFeedback.init('objekte','Objekte & Beteiligte');});</script>
 <script>if(typeof GemaAutoSave!=='undefined') GemaAutoSave.init('objekte');</script>
+<script src="gema_coachmarks.js"></script>
+<script>
+// ── Onboarding-Coachmarks (#29) ──
+document.addEventListener('DOMContentLoaded',function(){
+  if(typeof GemaCoachmarks==='undefined')return;
+  var steps=[
+    {
+      selector:'.tab-btn',
+      title:'Zwei Tabs: Objekte & Beteiligte',
+      text:'Im Tab «Objekte» verwaltest du Bauvorhaben. Im Tab «Beteiligte» erfasst du Bauherrschaft, Architekten, Unternehmer etc. pro Objekt.',
+      placement:'bottom',icon:'🗂'
+    },
+    {
+      selector:'.btn-primary',
+      title:'Dein erstes Bauvorhaben anlegen',
+      text:'Klick auf «+ Neues Objekt», um ein Projekt zu erfassen. Adresse, Bauvorhaben-Typ, SIA-Phase und optional ein übergeordnetes Objekt (für Bauetappen).',
+      placement:'bottom',icon:'🏗'
+    },
+    {
+      selector:'#objSearch',
+      title:'Schnelle Suche & Filter',
+      text:'Bei vielen Projekten findest du hier blitzschnell Objekte per Name oder Ort. Daneben filterst du nach Status (Aktiv / Abgeschlossen / Archiviert) und Bauvorhaben-Typ.',
+      placement:'bottom',icon:'🔍'
+    },
+    {
+      selector:'.gema-feedback-btn',
+      title:'Feedback direkt an uns',
+      text:'Siehst du einen Fehler oder hast du einen Verbesserungsvorschlag? Klick hier, mach einen Screenshot und markiere die Stelle — wir sehen alles.',
+      placement:'left',icon:'💬'
+    }
+  ];
+  GemaCoachmarks.init('pm_objekte',steps,{delay:900});
+});
+</script>
 <script src="gema_scroll.js"></script>
 <script src="gema_mobile_menu.js"></script>
 </body>

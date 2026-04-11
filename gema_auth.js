@@ -99,7 +99,7 @@
 
   // ── Default Org + User ─────────────────────────────────────────────
   var DEFAULT_ORGS = [{
-    id:'org_default', name:'Jäggi Vollmer GmbH', logo:null, kategorie:'sanitaerplaner',
+    id:'org_default', name:'Jäggi Vollmer GmbH', logo:null, kategorie:'sanitaerplaner', kategorien:['sanitaerplaner','heizungsplaner','lueftungsplaner'],
     rechtsform:'GmbH',
     adresse:{strasse:'Rheinfelderstrasse 10',plz:'4058',ort:'Basel',kanton:'BS',land:'CH'},
     kontakt:{email:'info@jaeggivollmer.ch',telefon:'061 692 03 11',website:''},
@@ -112,23 +112,114 @@
     admins:['user_admin','user_planer_1'],
     active:true,
     createdAt:'2025-01-01T08:00:00Z'
+  },
+  // ── Installateur-Firmen (eigenstaendige Unternehmen) ──
+  {
+    id:'org_meier_sanitaer', name:'Meier Sanitär AG', logo:null, kategorie:'sanitaerinstallateur', kategorien:['sanitaerinstallateur'],
+    rechtsform:'AG',
+    adresse:{strasse:'Industriestrasse 12',plz:'4133',ort:'Pratteln',kanton:'BL',land:'CH'},
+    kontakt:{email:'info@meiersanitaer.ch',telefon:'061 333 44 55',website:''},
+    settings:{waehrung:'CHF',land:'CH',sichtbarkeit:'organisation',abteilungenAktiv:false},
+    abteilungen:[],
+    lizenzen:{typ:'single',maxUser:3,aktiveUser:1,aboStart:'2025-03-15',aboEnde:'2026-12-31',gewerke:['sanitaer']},
+    admins:['user_unternehmer_1'],
+    active:true,
+    createdAt:'2025-03-15T08:00:00Z'
+  },
+  {
+    id:'org_steiner_sanitaer', name:'Steiner Sanitär GmbH', logo:null, kategorie:'sanitaerinstallateur', kategorien:['sanitaerinstallateur','heizungsinstallateur'],
+    rechtsform:'GmbH',
+    adresse:{strasse:'Dorfstrasse 45',plz:'8004',ort:'Zürich',kanton:'ZH',land:'CH'},
+    kontakt:{email:'info@steinersanitaer.ch',telefon:'044 222 33 44',website:''},
+    settings:{waehrung:'CHF',land:'CH',sichtbarkeit:'organisation',abteilungenAktiv:false},
+    abteilungen:[],
+    lizenzen:{typ:'single',maxUser:3,aktiveUser:1,aboStart:'2025-04-01',aboEnde:'2026-12-31',gewerke:['sanitaer']},
+    admins:['user_unternehmer_2'],
+    active:true,
+    createdAt:'2025-04-01T08:00:00Z'
+  },
+  // ── Architektur-Büro ──
+  {
+    id:'org_arch_muster', name:'Architektur Muster AG', logo:null, kategorie:'architekt', kategorien:['architekt'],
+    rechtsform:'AG',
+    adresse:{strasse:'Freie Strasse 88',plz:'4051',ort:'Basel',kanton:'BS',land:'CH'},
+    kontakt:{email:'info@archmuster.ch',telefon:'061 555 66 77',website:''},
+    settings:{waehrung:'CHF',land:'CH',sichtbarkeit:'organisation',abteilungenAktiv:false},
+    abteilungen:[],
+    lizenzen:{typ:'pool',maxUser:5,aktiveUser:1,aboStart:'2025-02-01',aboEnde:'2026-12-31',gewerke:['architektur']},
+    admins:['user_architekt_1'],
+    active:true,
+    createdAt:'2025-02-01T08:00:00Z'
+  },
+  // ── Lieferanten-Firmen (eigenstaendige Hersteller) ──
+  {
+    id:'org_bwt', name:'BWT', logo:null, kategorie:'lieferant', kategorien:['lieferant'],
+    rechtsform:'AG',
+    adresse:{strasse:'Hauptstrasse 192',plz:'4147',ort:'Aesch',kanton:'BL',land:'CH'},
+    kontakt:{email:'info@bwt.ch',telefon:'061 755 88 99',website:'www.bwt.ch'},
+    settings:{waehrung:'CHF',land:'CH',sichtbarkeit:'organisation',abteilungenAktiv:false},
+    abteilungen:[],
+    lizenzen:{typ:'pool',maxUser:5,aktiveUser:1,aboStart:'2025-01-15',aboEnde:'2026-12-31',gewerke:['lieferant']},
+    admins:['user_lief_bwt'],
+    active:true,
+    createdAt:'2025-01-15T10:00:00Z'
+  },
+  {
+    id:'org_gruenbeck', name:'Grünbeck', logo:null, kategorie:'lieferant', kategorien:['lieferant'],
+    rechtsform:'GmbH',
+    adresse:{strasse:'Industriestrasse 35',plz:'8604',ort:'Volketswil',kanton:'ZH',land:'CH'},
+    kontakt:{email:'info@gruenbeck.ch',telefon:'044 820 33 44',website:'www.gruenbeck.ch'},
+    settings:{waehrung:'CHF',land:'CH',sichtbarkeit:'organisation',abteilungenAktiv:false},
+    abteilungen:[],
+    lizenzen:{typ:'pool',maxUser:3,aktiveUser:1,aboStart:'2025-06-01',aboEnde:'2026-12-31',gewerke:['lieferant']},
+    admins:['user_lief_gruenbeck'],
+    active:true,
+    createdAt:'2025-06-01T08:00:00Z'
+  },
+  {
+    id:'org_judo', name:'Judo', logo:null, kategorie:'lieferant', kategorien:['lieferant'],
+    rechtsform:'GmbH',
+    adresse:{strasse:'Bernstrasse 22',plz:'3011',ort:'Bern',kanton:'BE',land:'CH'},
+    kontakt:{email:'info@judo.ch',telefon:'031 920 11 22',website:'www.judo.ch'},
+    settings:{waehrung:'CHF',land:'CH',sichtbarkeit:'organisation',abteilungenAktiv:false},
+    abteilungen:[],
+    lizenzen:{typ:'pool',maxUser:3,aktiveUser:1,aboStart:'2026-03-01',aboEnde:'2026-06-30',gewerke:['lieferant']},
+    admins:['user_lief_judo'],
+    active:true,
+    createdAt:'2026-03-01T09:00:00Z'
   }];
 
+  // Unternehmens-Kategorien. Jede Kategorie gehoert einer Gruppe an:
+  //   - 'gebaeudetechnik' = Planer / Installateure aller Gewerke. Beliebig
+  //     untereinander kombinierbar (ein Installateur kann auch Planer sein).
+  //   - 'lieferant'       = Lieferanten / Hersteller. Exklusiv gegenueber
+  //     'gebaeudetechnik' (wer liefert, plant/fuehrt nicht aus).
+  //   - 'bau'             = Architekt, GU, Bauherr. Kombinierbar mit allen.
+  //   - 'andere'          = Behoerde, Immobilien, Sonstiges. Kombinierbar.
   var DEFAULT_ORG_CATS = [
-    {id:'sanitaerplaner',     name:'Sanitärplaner',          icon:'💧'},
-    {id:'sanitaerinstallateur',name:'Sanitärinstallateur',   icon:'🔧'},
-    {id:'heizungsplaner',     name:'Heizungsplaner',         icon:'🔥'},
-    {id:'heizungsinstallateur',name:'Heizungsinstallateur',  icon:'♨️'},
-    {id:'lueftungsplaner',    name:'Lüftungsplaner',         icon:'🌀'},
-    {id:'elektroplaner',      name:'Elektroplaner',          icon:'⚡'},
-    {id:'architekt',          name:'Architekt / Generalplaner', icon:'🏛'},
-    {id:'bauherr',            name:'Bauherr / Investor',     icon:'🏗'},
-    {id:'generalunternehmer', name:'Generalunternehmer',     icon:'👷'},
-    {id:'lieferant',          name:'Lieferant / Hersteller', icon:'🏭'},
-    {id:'brandschutz',        name:'Brandschutz / Sprinkler',icon:'🔥'},
-    {id:'immobilien',         name:'Immobilienverwaltung',   icon:'🏢'},
-    {id:'behoerde',           name:'Behörde / Fachstelle',   icon:'🏛'},
-    {id:'sonstiges',          name:'Sonstiges',              icon:'📦'},
+    // ── Planung & Ausführung (Gebäudetechnik) ──
+    {id:'sanitaerplaner',       name:'Sanitärplaner',          icon:'💧', gruppe:'gebaeudetechnik'},
+    {id:'sanitaerinstallateur', name:'Sanitärinstallateur',    icon:'🔧', gruppe:'gebaeudetechnik'},
+    {id:'heizungsplaner',       name:'Heizungsplaner',         icon:'🔥', gruppe:'gebaeudetechnik'},
+    {id:'heizungsinstallateur', name:'Heizungsinstallateur',   icon:'♨️', gruppe:'gebaeudetechnik'},
+    {id:'lueftungsplaner',      name:'Lüftungsplaner',         icon:'🌀', gruppe:'gebaeudetechnik'},
+    {id:'lueftungsinstallateur',name:'Lüftungsinstallateur',   icon:'💨', gruppe:'gebaeudetechnik'},
+    {id:'klima_kaeltetechnik',  name:'Klima-/Kältetechnik',    icon:'❄️', gruppe:'gebaeudetechnik'},
+    {id:'elektroplaner',        name:'Elektroplaner',          icon:'⚡', gruppe:'gebaeudetechnik'},
+    {id:'elektroinstallateur',  name:'Elektroinstallateur',    icon:'🔌', gruppe:'gebaeudetechnik'},
+    {id:'msr_gebaeudeautomation',name:'MSR / Gebäudeautomation',icon:'🎛️', gruppe:'gebaeudetechnik'},
+    {id:'brandschutz',          name:'Brandschutz / Sprinkler',icon:'🚒', gruppe:'gebaeudetechnik'},
+    {id:'aufzugsbau',           name:'Aufzugsbau / Lifttechnik',icon:'🛗', gruppe:'gebaeudetechnik'},
+    // ── Bau / Projektbeteiligte ──
+    {id:'architekt',            name:'Architekt / Generalplaner',icon:'🏛', gruppe:'bau'},
+    {id:'bauherr',              name:'Bauherr / Investor',     icon:'🏗', gruppe:'bau'},
+    {id:'generalunternehmer',   name:'Generalunternehmer',     icon:'👷', gruppe:'bau'},
+    // ── Lieferant (exklusiv gegenueber Gebaeudetechnik) ──
+    {id:'lieferant',            name:'Lieferant / Hersteller', icon:'🏭', gruppe:'lieferant'},
+    // ── Andere ──
+    {id:'immobilien',           name:'Immobilienverwaltung',   icon:'🏢', gruppe:'andere'},
+    {id:'behoerde',             name:'Behörde / Fachstelle',   icon:'🏛', gruppe:'andere'},
+    {id:'sonstiges',            name:'Sonstiges',              icon:'📦', gruppe:'andere'}
   ];
 
   var DEFAULT_USERS = [
@@ -155,39 +246,39 @@
      profile:{email:'buehler@jaeggivollmer.ch',telefon:'061 692 03 15',firma:'Jäggi Vollmer GmbH',person:'Marco Bühler',sprache:'de',benachrichtigungen:true,dynamischeBKP:true}},
     // ── Unternehmer / Installateur ──
     {id:'user_unternehmer_1', username:'installateur', name:'Peter Meier',
-     password:_hash('inst2025'), roleIds:['role_unternehmer'], orgId:'org_default',
+     password:_hash('inst2025'), roleIds:['role_unternehmer'], orgId:'org_meier_sanitaer',
      active:true, createdAt:'2025-03-15T08:00:00Z',
      kontotyp:'vollzugang', abo:{typ:'basic'},
      profile:{email:'meier@meiersanitaer.ch',telefon:'061 333 44 55',firma:'Meier Sanitär AG',person:'Peter Meier',sprache:'de',benachrichtigungen:true},
      einladung:{token:'inv_meier',eingeladenVon:'user_planer_1',eingeladenAm:'2025-03-10T08:00:00Z',angenommenAm:'2025-03-15T08:00:00Z',passwortGesetzt:true}},
     {id:'user_unternehmer_2', username:'steiner@steinersanitaer.ch', name:'Thomas Steiner',
-     password:_hash('steiner2025'), roleIds:['role_unternehmer'], orgId:'org_default',
+     password:_hash('steiner2025'), roleIds:['role_unternehmer'], orgId:'org_steiner_sanitaer',
      active:true, createdAt:'2025-04-01T08:00:00Z',
      kontotyp:'vollzugang', abo:{typ:'basic'},
      profile:{email:'steiner@steinersanitaer.ch',telefon:'044 222 33 44',firma:'Steiner Sanitär GmbH',person:'Thomas Steiner',sprache:'de',benachrichtigungen:true},
      einladung:{token:'inv_steiner',eingeladenVon:'user_planer_1',eingeladenAm:'2025-03-25T08:00:00Z',angenommenAm:'2025-04-01T08:00:00Z',passwortGesetzt:true}},
     // ── Architekt ──
     {id:'user_architekt_1', username:'architekt', name:'Sarah Müller',
-     password:_hash('arch2025'), roleIds:['role_architekt'], orgId:'org_default',
+     password:_hash('arch2025'), roleIds:['role_architekt'], orgId:'org_arch_muster',
      active:true, createdAt:'2025-02-01T08:00:00Z',
      kontotyp:'vollzugang', abo:{typ:'basic'},
      profile:{email:'mueller@archmuster.ch',telefon:'061 555 66 77',firma:'Architektur Muster AG',person:'Sarah Müller',sprache:'de',benachrichtigungen:true},
      einladung:{token:'inv_arch',eingeladenVon:'user_planer_1',eingeladenAm:'2025-01-20T08:00:00Z',angenommenAm:'2025-02-01T08:00:00Z',passwortGesetzt:true}},
     // ── Lieferanten ──
     {id:'user_lief_bwt', username:'keller@bwt.ch', name:'Hans Keller',
-     password:_hash('bwt2025'), roleIds:['role_lieferant'], orgId:'org_default',
+     password:_hash('bwt2025'), roleIds:['role_lieferant'], orgId:'org_bwt',
      active:true, createdAt:'2025-01-15T10:00:00Z',
      profile:{email:'keller@bwt.ch',telefon:'061 755 88 99',firma:'BWT',person:'Hans Keller',sprache:'de'},
      kontotyp:'vollzugang', abo:{typ:'premium'},
      einladung:{token:'inv_bwt',eingeladenVon:'user_planer_1',eingeladenAm:'2025-01-10T08:00:00Z',angenommenAm:'2025-01-15T10:00:00Z',passwortGesetzt:true}},
     {id:'user_lief_gruenbeck', username:'weber@gruenbeck.ch', name:'Martin Weber',
-     password:_hash('gruen2025'), roleIds:['role_lieferant'], orgId:'org_default',
+     password:_hash('gruen2025'), roleIds:['role_lieferant'], orgId:'org_gruenbeck',
      active:true, createdAt:'2025-06-01T08:00:00Z',
      profile:{email:'weber@gruenbeck.ch',telefon:'044 820 33 44',firma:'Grünbeck',person:'Martin Weber',sprache:'de'},
      kontotyp:'vollzugang', abo:{typ:'basic'},
      einladung:{token:'inv_gruenbeck',eingeladenVon:'user_planer_1',eingeladenAm:'2025-05-20T08:00:00Z',angenommenAm:'2025-06-01T08:00:00Z',passwortGesetzt:true}},
     {id:'user_lief_judo', username:'meier@judo.ch', name:'Claudia Meier',
-     password:_hash('judo2025'), roleIds:['role_lieferant'], orgId:'org_default',
+     password:_hash('judo2025'), roleIds:['role_lieferant'], orgId:'org_judo',
      active:true, createdAt:'2026-03-01T09:00:00Z',
      profile:{email:'meier@judo.ch',telefon:'031 920 11 22',firma:'Judo',person:'Claudia Meier',sprache:'de'},
      kontotyp:'login_light', abo:{typ:'testphase',testphaseEnde:'2026-06-30'},
@@ -213,6 +304,86 @@
     if(!_getOrgCats()) try{localStorage.setItem(STORAGE_ORG_CATS,JSON.stringify(DEFAULT_ORG_CATS));}catch(e){}
     if(!_getUsers())   try{localStorage.setItem(STORAGE_USERS,JSON.stringify(DEFAULT_USERS));}catch(e){}
     if(!_getRoles())   try{localStorage.setItem(STORAGE_ROLES,JSON.stringify(DEFAULT_ROLES));}catch(e){}
+    // ── Migration: Demo-Orgs fuer Fremdfirmen ──
+    // Bestehende Demo-Installationen hatten alle Fremdfirmen-User
+    // (Installateure, Architekten, Lieferanten) in org_default (Jaeggi
+    // Vollmer). Richtig ist: jede Firma hat ihre eigene Organisation.
+    // Diese Migration legt die fehlenden Demo-Orgs an und verschiebt die
+    // betroffenen Demo-User dorthin — nur einmalig pro Browser.
+    try {
+      var MIGFLAG='gema_auth_demo_orgs_v2';
+      if(!localStorage.getItem(MIGFLAG)){
+        var orgs=_getOrgs()||[];
+        DEFAULT_ORGS.forEach(function(defOrg){
+          if(defOrg.id==='org_default') return;
+          if(!orgs.find(function(o){return o.id===defOrg.id;})){
+            orgs.push(defOrg);
+          }
+        });
+        var users=_getUsers()||[];
+        var USER_ORG_MAP={
+          'user_unternehmer_1':'org_meier_sanitaer',
+          'user_unternehmer_2':'org_steiner_sanitaer',
+          'user_architekt_1':'org_arch_muster',
+          'user_lief_bwt':'org_bwt',
+          'user_lief_gruenbeck':'org_gruenbeck',
+          'user_lief_judo':'org_judo'
+        };
+        users.forEach(function(u){
+          if(USER_ORG_MAP[u.id] && u.orgId==='org_default'){
+            u.orgId=USER_ORG_MAP[u.id];
+          }
+        });
+        try{localStorage.setItem(STORAGE_ORGS,JSON.stringify(orgs));}catch(e){}
+        try{localStorage.setItem(STORAGE_USERS,JSON.stringify(users));}catch(e){}
+        try{localStorage.setItem(MIGFLAG,'1');}catch(e){}
+      }
+    } catch(e) {}
+    // ── Migration: org.kategorie (Einzel) -> org.kategorien (Array) ──
+    // Die Unternehmens-Kategorien sind jetzt Mehrfach-Auswahl. Alte Orgs
+    // haben noch das Einzel-Feld 'kategorie' — wir spiegeln es einmalig
+    // in ein Array 'kategorien', ohne das Legacy-Feld zu loeschen.
+    // Ebenfalls werden die neuen Kategorien (inkl. gruppe-Metadaten)
+    // nachgepflegt, falls im localStorage noch die alte Liste steht.
+    try {
+      var MIGFLAG2='gema_auth_org_kategorien_v1';
+      if(!localStorage.getItem(MIGFLAG2)){
+        // 1. Alle Orgs: kategorien aus kategorie befuellen
+        var orgs2=_getOrgs()||[];
+        var anyChange=false;
+        orgs2.forEach(function(o){
+          if(!o.kategorien || !o.kategorien.length){
+            o.kategorien = o.kategorie ? [o.kategorie] : [];
+            anyChange=true;
+          }
+        });
+        if(anyChange){
+          try{localStorage.setItem(STORAGE_ORGS,JSON.stringify(orgs2));}catch(e){}
+        }
+        // 2. Kategorien-Liste: neue Kategorien + gruppe-Metadaten
+        //    nachpflegen, falls die alte Liste ohne gruppe drin ist
+        var cats=_getOrgCats()||[];
+        var newCats = cats.slice();
+        var updatedExisting=false;
+        // Fuer jede Default-Kategorie: wenn fehlt → hinzufuegen; wenn da
+        // aber ohne 'gruppe' → gruppe ergaenzen.
+        DEFAULT_ORG_CATS.forEach(function(defCat){
+          var ex = newCats.find(function(c){return c.id===defCat.id;});
+          if(!ex){
+            newCats.push(defCat);
+            updatedExisting=true;
+          } else if(!ex.gruppe && defCat.gruppe){
+            ex.gruppe = defCat.gruppe;
+            if(!ex.icon && defCat.icon) ex.icon = defCat.icon;
+            updatedExisting=true;
+          }
+        });
+        if(updatedExisting){
+          try{localStorage.setItem(STORAGE_ORG_CATS,JSON.stringify(newCats));}catch(e){}
+        }
+        try{localStorage.setItem(MIGFLAG2,'1');}catch(e){}
+      }
+    } catch(e) {}
   }
 
   // ── Permissions ────────────────────────────────────────────────────
@@ -469,10 +640,41 @@
   }
 
   // ── Public API ─────────────────────────────────────────────────────
+  // ── Kategorie-Helpers ────────────────────────────────────────────────
+  // Gibt die Gruppe einer Kategorie zurueck ('gebaeudetechnik', 'lieferant',
+  // 'bau', 'andere'). Unbekannte Kategorien landen in 'andere'.
+  function _kategorieGruppe(catId){
+    var cats = _getOrgCats() || [];
+    var c = cats.find(function(x){return x.id===catId;});
+    return (c && c.gruppe) || 'andere';
+  }
+  // Prueft, ob eine Kategorie zu einer aktuellen Auswahl (Array of IDs)
+  // hinzugefuegt werden darf. Regeln:
+  //   - 'lieferant' ist exklusiv gegenueber 'gebaeudetechnik' (und umge-
+  //     kehrt). Wer liefert, plant/fuehrt nicht aus.
+  //   - Innerhalb 'gebaeudetechnik' sind beliebig viele Kategorien
+  //     kombinierbar (ein Installateur kann auch Planer sein).
+  //   - 'bau' und 'andere' sind mit allem kompatibel.
+  function _isKategorieKompatibel(catId, currentIds){
+    var ownGruppe = _kategorieGruppe(catId);
+    var selected = currentIds || [];
+    if(ownGruppe === 'lieferant'){
+      // Lieferant darf nicht mit Gebaeudetechnik kombiniert werden
+      return !selected.some(function(id){return _kategorieGruppe(id)==='gebaeudetechnik';});
+    }
+    if(ownGruppe === 'gebaeudetechnik'){
+      // Gebaeudetechnik darf nicht mit Lieferant kombiniert werden
+      return !selected.some(function(id){return _kategorieGruppe(id)==='lieferant';});
+    }
+    return true;
+  }
+
   w.GemaAuth={
     getModules:function(){return MODULES;},
     getOrgs:_getOrgs,
     getOrgCats:_getOrgCats,
+    getKategorieGruppe:_kategorieGruppe,
+    isKategorieKompatibel:_isKategorieKompatibel,
     getUsers:_getUsers,
     getRoles:_getRoles,
     getSession:_getSession,
@@ -557,18 +759,70 @@
     saveRoles:function(r){try{localStorage.setItem(STORAGE_ROLES,JSON.stringify(r));return true;}catch(e){return false;}},
 
     // ── Einladungssystem ──
+    // Sucht eine existierende Org anhand des Firmennamens (case-
+    // insensitive, Trimming) oder legt eine neue mit minimalen Default-
+    // Werten an. Verhindert, dass Fremdfirmen bei inviteLieferant/
+    // inviteBeteiligter in 'org_default' einsortiert werden.
+    //
+    // kategorie: 'lieferant'|'architekt'|'sanitaerinstallateur'|...
+    // kontakt:   { email, telefon } — wird beim Neu-Anlegen uebernommen
+    // adminUserId: wird beim Neu-Anlegen als erster Org-Admin gesetzt
+    //
+    // Gibt immer eine gueltige orgId zurueck.
+    ensureOrgForFirma:function(firma, kategorie, kontakt, adminUserId){
+      firma = (firma||'').trim();
+      if(!firma) return 'org_default';
+      var orgs = _getOrgs() || [];
+      var norm = firma.toLowerCase();
+      // Suche in bestehenden Orgs (ignoriere org_default, um Treffer auf
+      // "Jaeggi Vollmer GmbH" aus Versehen zu vermeiden).
+      var found = orgs.find(function(o){
+        return o.id!=='org_default' && o.name && o.name.toLowerCase().trim()===norm;
+      });
+      if(found) return found.id;
+      // Neue Org anlegen mit minimalen Default-Werten.
+      var newId = 'org_'+Date.now()+'_'+Math.random().toString(36).substring(2,6);
+      var k = kontakt || {};
+      orgs.push({
+        id:newId,
+        name:firma,
+        logo:null,
+        kategorie:kategorie||'sonstiges',
+        rechtsform:'',
+        adresse:{strasse:'',plz:'',ort:'',kanton:'',land:'CH'},
+        kontakt:{email:k.email||'',telefon:k.telefon||'',website:''},
+        settings:{waehrung:'CHF',land:'CH',sichtbarkeit:'organisation',abteilungenAktiv:false},
+        abteilungen:[],
+        lizenzen:{typ:'pool',maxUser:5,aktiveUser:1,aboStart:new Date().toISOString().split('T')[0],aboEnde:'',gewerke:[]},
+        admins:adminUserId?[adminUserId]:[],
+        active:true,
+        autoCreated:true, // Marker: wurde per Einladung angelegt
+        createdAt:new Date().toISOString()
+      });
+      try { localStorage.setItem(STORAGE_ORGS, JSON.stringify(orgs)); } catch(e) {}
+      return newId;
+    },
+
     inviteLieferant:function(opts){
-      // Erstellt einen Login-Light User für einen Lieferanten
+      // Erstellt einen Login-Light User für einen Lieferanten.
+      // Wenn opts.orgId gesetzt ist, wird dieser genutzt; sonst wird
+      // anhand opts.firma eine existierende Org gefunden oder eine
+      // neue Lieferanten-Org angelegt. Nur als absoluter Fallback (kein
+      // opts.orgId, kein opts.firma) wird org_default genommen.
       var users=_getUsers()||[];
       var token='inv_'+Date.now()+'_'+Math.random().toString(36).substring(2,8);
       var userId='user_lief_'+Date.now();
+      var resolvedOrgId = opts.orgId
+        || (opts.firma
+            ? w.GemaAuth.ensureOrgForFirma(opts.firma, 'lieferant', {email:opts.email, telefon:opts.tel}, userId)
+            : 'org_default');
       var user={
         id:userId,
         username:opts.email||token,
         name:opts.firma||opts.person||'Lieferant',
         password:null, // Wird beim ersten Login gesetzt
         roleIds:['role_lieferant'],
-        orgId:opts.orgId||'org_default',
+        orgId:resolvedOrgId,
         active:true,
         createdAt:new Date().toISOString(),
         profile:{
@@ -609,13 +863,28 @@
       var token='inv_'+Date.now()+'_'+Math.random().toString(36).substring(2,8);
       var roleId=opts.roleId||'role_unternehmer';
       var userId='user_'+roleId.replace('role_','')+'_'+Date.now();
+      // Kategorie fuer die Org automatisch aus der Rolle ableiten, damit
+      // die neue Firma im Produktkatalog/Unternehmensfilter richtig
+      // einsortiert wird.
+      var ROLE_TO_KATEGORIE = {
+        'role_lieferant':'lieferant',
+        'role_architekt':'architekt',
+        'role_unternehmer':'sanitaerinstallateur',
+        'role_hlkk_planer':'heizungsplaner',
+        'role_planer':'sanitaerplaner'
+      };
+      var kategorie = ROLE_TO_KATEGORIE[roleId] || 'sonstiges';
+      var resolvedOrgId = opts.orgId
+        || (opts.firma
+            ? w.GemaAuth.ensureOrgForFirma(opts.firma, kategorie, {email:opts.email, telefon:opts.tel}, userId)
+            : 'org_default');
       var user={
         id:userId,
         username:opts.email||token,
         name:opts.person||opts.firma||'Eingeladener',
         password:null,
         roleIds:[roleId],
-        orgId:opts.orgId||'org_default',
+        orgId:resolvedOrgId,
         active:true,
         createdAt:new Date().toISOString(),
         profile:{
@@ -825,6 +1094,17 @@
       var org=orgs.find(function(o){return o.id===orgId;});
       if(!org)return false;
       Object.keys(info).forEach(function(k){org[k]=info[k];});
+      // Kategorie <-> Kategorien synchron halten: wenn der Aufrufer nur
+      // das Einzel-Feld setzt (Legacy), spiegeln wir es in das Array,
+      // damit alle Konsumenten (Multi-Kategorie-Filter) konsistent
+      // bleiben. Wenn der Aufrufer kategorien explizit setzt, ist das
+      // die Quelle der Wahrheit und kategorie wird aufs erste Element
+      // aktualisiert.
+      if(info.kategorien && info.kategorien.length){
+        org.kategorie = info.kategorien[0];
+      } else if(info.kategorie !== undefined){
+        org.kategorien = info.kategorie ? [info.kategorie] : [];
+      }
       return w.GemaAuth.saveOrgs(orgs);
     },
 

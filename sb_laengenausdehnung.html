@@ -315,6 +315,7 @@ function fixLeadingZero(el){
 <script src="gema_db.js"></script>
 <script src="gema_feedback.js"></script>
 <script src="gema_objekte_api.js"></script>
+<script src="gema_varianten.js"></script>
 <script src="gema_pdf.js"></script>
 <script src="gema_autosave.js"></script>
 <link rel="stylesheet" href="gema_responsive.css"/>
@@ -348,6 +349,7 @@ function fixLeadingZero(el){
     <div class="gema-hero-ic">📏</div>
     <div>
       <div class="gema-hero-title">Längenausdehnung</div>
+      <div class="gema-hero-norm" title="Berechnungsgrundlage" style="display:inline-block;font-size:11px;color:rgba(255,255,255,.92);background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:2px 8px;border-radius:6px;margin-top:6px;font-weight:700;letter-spacing:.2px">📖 SIA 385/1 + SN EN 806-3</div>
       <div class="gema-hero-sub">Thermische Ausdehnung Trinkwasser · Kompensatorauslegung · ΔT &amp; Rohrlänge</div>
     </div>
   </div>
@@ -1351,6 +1353,25 @@ document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('laen
   window.addEventListener('gema-objekte-loaded',function(){populateObjektDropdown();if(typeof GemaAutoSave!=='undefined') GemaAutoSave.init('laengenausdehnung');});
   ['metaProjekt','metaBearbeiter','metaDatum'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',saveMeta);});
 })();</script>
+<script src="gema_undo.js"></script>
+<script>
+// ── Undo-Integration (#41) ──
+// Initialisiert den Undo-Stack für dieses Modul und hängt sich automatisch
+// an alle numerischen Inputs. Cmd/Ctrl+Z macht Eingaben rückgängig,
+// Cmd/Ctrl+Shift+Z (oder Cmd/Ctrl+Y) stellt sie wieder her.
+document.addEventListener('DOMContentLoaded', function(){
+  if (typeof GemaUndo === 'undefined') return;
+  GemaUndo.init('sb_laengenausdehnung', { max: 50 });
+  // Alle Zahleneingaben auto-attachen
+  var inputs = document.querySelectorAll('input[inputmode="decimal"], input[type="text"][id^="len"], input[type="text"][id="dt_inp"], input[type="text"][id="k_la"]');
+  GemaUndo.attachTo(inputs);
+  // Nach jedem attachTo auch neu hinzugefügte Zeilen (wenn dynamisch) erfassen
+  // — durch periodisches Re-Attach (safe: idempotent via _gemaUndoAttached-Flag).
+  setInterval(function(){
+    try { GemaUndo.attachTo(document.querySelectorAll('input[inputmode="decimal"]')); } catch(e) {}
+  }, 3000);
+});
+</script>
 <script src="gema_scroll.js"></script>
 <script src="gema_mobile_menu.js"></script>
 </body>

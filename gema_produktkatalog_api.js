@@ -433,6 +433,365 @@ KATEGORIEN.formstücke = {
   ]
 };
 
+// Warmwasserspeicher / Boiler
+KATEGORIEN.warmwasser_boiler = {
+  id: 'warmwasser_boiler',
+  name: 'Warmwasserspeicher / Boiler',
+  icon: '🌡️',
+  typenFelder: [
+    { id: 'beheizung', label: 'Beheizung', typ: 'select', optionen: ['Elektro','Wärmepumpe','Solar','Gas','Öl','Kombi (E+WP)','Kombi (E+Solar)','Frischwasserstation'] },
+    { id: 'volumenVon', label: 'Volumen von', typ: 'number', einheit: 'l' },
+    { id: 'volumenBis', label: 'Volumen bis', typ: 'number', einheit: 'l' }
+  ],
+  felder: [
+    { id: 'serie', label: 'Typenbezeichnung / Serie', typ: 'text', gruppe: 'Allgemein', pflicht: true },
+    { id: 'modell', label: 'Modell / Grösse', typ: 'text', gruppe: 'Allgemein', pflicht: true },
+    { id: 'artikelnr', label: 'Artikelnummer', typ: 'text', gruppe: 'Allgemein' },
+    { id: 'beheizung', label: 'Beheizung', typ: 'select', optionen: ['Elektro','Wärmepumpe','Solar','Gas','Öl','Kombi (E+WP)','Kombi (E+Solar)','Frischwasserstation'], gruppe: 'Allgemein', pflicht: true },
+
+    { id: 'volumen', label: 'Speichervolumen', typ: 'number', einheit: 'l', gruppe: 'Leistungsdaten', pflicht: true },
+    { id: 'leistungElektro', label: 'Elektro-Heizleistung', typ: 'number', einheit: 'kW', gruppe: 'Leistungsdaten' },
+    { id: 'leistungWP', label: 'Wärmepumpen-Leistung', typ: 'number', einheit: 'kW', gruppe: 'Leistungsdaten' },
+    { id: 'cop', label: 'COP (A15/W55)', typ: 'number', gruppe: 'Leistungsdaten' },
+    { id: 'tempMax', label: 'Max. Speichertemperatur', typ: 'number', einheit: '°C', gruppe: 'Leistungsdaten' },
+    { id: 'aufheizzeit', label: 'Aufheizzeit (15→55°C)', typ: 'number', einheit: 'h', gruppe: 'Leistungsdaten' },
+    { id: 'verlustzahl', label: 'Verlustzahl ζIS (24h)', typ: 'number', einheit: 'kWh/24h', gruppe: 'Leistungsdaten' },
+    { id: 'energieklasse', label: 'Energieeffizienzklasse (ErP)', typ: 'select', optionen: ['A+','A','B','C','D','E','F'], gruppe: 'Leistungsdaten' },
+
+    { id: 'register', label: 'Anzahl Wärmetauscher', typ: 'select', optionen: ['0','1','2','3'], gruppe: 'Wärmetauscher' },
+    { id: 'registerFlaeche1', label: 'Fläche WT 1', typ: 'number', einheit: 'm²', gruppe: 'Wärmetauscher' },
+    { id: 'registerFlaeche2', label: 'Fläche WT 2', typ: 'number', einheit: 'm²', gruppe: 'Wärmetauscher' },
+
+    { id: 'durchmesser', label: 'Durchmesser (mit Iso)', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen', pflicht: true },
+    { id: 'hoehe', label: 'Höhe', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen', pflicht: true },
+    { id: 'kippmass', label: 'Kippmass', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen' },
+    { id: 'gewichtLeer', label: 'Gewicht leer', typ: 'number', einheit: 'kg', gruppe: 'Abmessungen' },
+
+    { id: 'material', label: 'Behälter-Werkstoff', typ: 'select', optionen: ['Email','Edelstahl','Kunststoff','Stahl beschichtet'], gruppe: 'Material' },
+    { id: 'isolation', label: 'Isolation', typ: 'text', gruppe: 'Material' },
+    { id: 'isolationStaerke', label: 'Isolationsstärke', typ: 'number', einheit: 'mm', gruppe: 'Material' },
+
+    { id: 'svgwNr', label: 'SVGW-Zulassungsnummer', typ: 'text', gruppe: 'Normen' },
+    { id: 'sia385', label: 'Konform SIA 385/2', typ: 'checkbox', gruppe: 'Normen' },
+    { id: 'ce', label: 'CE-Konformität', typ: 'checkbox', gruppe: 'Normen' },
+
+    { id: 'besonderheiten', label: 'Besonderheiten', typ: 'textarea', gruppe: 'Zusatz' },
+    { id: 'zubehoer', label: 'Zubehör (inkl.)', typ: 'textarea', gruppe: 'Zusatz' }
+  ],
+  matchFn: function(produkt, berechnung){
+    let score = 0;
+    const d = produkt.daten || {};
+    const b = berechnung || {};
+    // Volumen (Gewicht 50)
+    if(b.volumen && d.volumen){
+      var ratio = d.volumen / b.volumen;
+      if(ratio >= 1.0 && ratio <= 1.3) score += 50;       // ideal: 0–30% Reserve
+      else if(ratio >= 0.9 && ratio < 1.0) score += 25;   // knapp
+      else if(ratio > 1.3 && ratio <= 1.6) score += 30;   // überdimensioniert
+    }
+    // Beheizungsart Match (Gewicht 30)
+    if(b.beheizung && d.beheizung){
+      if(d.beheizung === b.beheizung) score += 30;
+      else if((b.beheizung==='Wärmepumpe' && d.beheizung.indexOf('WP')>=0)
+           || (b.beheizung==='Solar' && d.beheizung.indexOf('Solar')>=0)) score += 20;
+    }
+    // Wärmetauscher-Anzahl (Gewicht 10)
+    if(b.register && d.register && Number(d.register) >= Number(b.register)) score += 10;
+    // Energieklasse Bonus (Gewicht 10)
+    if(d.energieklasse && (d.energieklasse==='A+' || d.energieklasse==='A')) score += 10;
+    return Math.min(100, score);
+  }
+};
+
+// ── Druckerhoehungsanlage ──
+// Registriert, damit Lieferanten Druckerhoehungs-Anlagen im Produkt-
+// katalog erfassen koennen und die sb_druckerhoehung.html darauf
+// zugreifen kann.
+KATEGORIEN.druckerhoehung = {
+  id: 'druckerhoehung',
+  name: 'Druckerhöhungsanlage',
+  icon: '⬆️',
+  typenFelder: [
+    { id: 'bauart', label: 'Bauart', typ: 'select', optionen: ['VFD (Frequenzgeregelt)','VES (Druckkessel)','Hybrid'] }
+  ],
+  felder: [
+    { id: 'serie', label: 'Typenbezeichnung / Serie', typ: 'text', gruppe: 'Allgemein', pflicht: true },
+    { id: 'modell', label: 'Modell / Grösse', typ: 'text', gruppe: 'Allgemein', pflicht: true },
+    { id: 'artikelnr', label: 'Artikelnummer', typ: 'text', gruppe: 'Allgemein' },
+    { id: 'bauart', label: 'Bauart', typ: 'select', optionen: ['VFD (Frequenzgeregelt)','VES (Druckkessel)','Hybrid'], gruppe: 'Allgemein', pflicht: true },
+    { id: 'pumpenAnzahl', label: 'Anzahl Pumpen', typ: 'number', gruppe: 'Allgemein' },
+
+    { id: 'volumenstromMax', label: 'Max. Volumenstrom QVZ', typ: 'number', einheit: 'l/s', gruppe: 'Leistungsdaten', pflicht: true },
+    { id: 'druckMax', label: 'Max. Förderdruck', typ: 'number', einheit: 'bar', gruppe: 'Leistungsdaten', pflicht: true },
+    { id: 'nachdruckMin', label: 'Min. Nachdruck pN', typ: 'number', einheit: 'bar', gruppe: 'Leistungsdaten' },
+    { id: 'motorleistung', label: 'Motorleistung gesamt', typ: 'number', einheit: 'kW', gruppe: 'Leistungsdaten' },
+    { id: 'kesselvolumen', label: 'Kesselvolumen (VES)', typ: 'number', einheit: 'l', gruppe: 'Leistungsdaten' },
+
+    { id: 'anschlussSaug', label: 'Sauganschluss', typ: 'select', optionen: ['DN 25','DN 32','DN 40','DN 50','DN 65','DN 80','DN 100','DN 125','DN 150'], gruppe: 'Anschlüsse', pflicht: true },
+    { id: 'anschlussDruck', label: 'Druckanschluss', typ: 'select', optionen: ['DN 25','DN 32','DN 40','DN 50','DN 65','DN 80','DN 100','DN 125','DN 150'], gruppe: 'Anschlüsse', pflicht: true },
+
+    { id: 'breite', label: 'Breite', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen' },
+    { id: 'tiefe', label: 'Tiefe', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen' },
+    { id: 'hoehe', label: 'Höhe', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen' },
+    { id: 'gewicht', label: 'Gewicht', typ: 'number', einheit: 'kg', gruppe: 'Abmessungen' },
+
+    { id: 'spannung', label: 'Spannung', typ: 'select', optionen: ['230V/50Hz','400V/50Hz'], gruppe: 'Elektro' },
+    { id: 'schutzart', label: 'Schutzart', typ: 'text', gruppe: 'Elektro' },
+    { id: 'steuerung', label: 'Steuerung', typ: 'text', gruppe: 'Elektro' },
+
+    { id: 'svgwNr', label: 'SVGW-Zulassungsnummer', typ: 'text', gruppe: 'Normen' },
+    { id: 'ce', label: 'CE-Konformität', typ: 'checkbox', gruppe: 'Normen' },
+
+    { id: 'besonderheiten', label: 'Besonderheiten', typ: 'textarea', gruppe: 'Zusatz' }
+  ],
+  matchFn: function(produkt, berechnung){
+    let score = 0;
+    const d = produkt.daten || {};
+    const b = berechnung || {};
+    if(b.volumenstrom && d.volumenstromMax){
+      if(d.volumenstromMax >= b.volumenstrom) score += 50;
+      else if(d.volumenstromMax >= b.volumenstrom * 0.8) score += 25;
+    }
+    if(b.nachdruck && d.druckMax){
+      if(d.druckMax >= b.nachdruck) score += 40;
+      else if(d.druckMax >= b.nachdruck * 0.9) score += 20;
+    }
+    if(b.bauart && d.bauart && d.bauart === b.bauart) score += 10;
+    return Math.min(100, score);
+  }
+};
+
+// ── Frischwasserstation ──
+KATEGORIEN.frischwasserstation = {
+  id: 'frischwasserstation',
+  name: 'Frischwasserstation',
+  icon: '💧',
+  felder: [
+    { id: 'serie', label: 'Typenbezeichnung / Serie', typ: 'text', gruppe: 'Allgemein', pflicht: true },
+    { id: 'modell', label: 'Modell / Grösse', typ: 'text', gruppe: 'Allgemein', pflicht: true },
+    { id: 'artikelnr', label: 'Artikelnummer', typ: 'text', gruppe: 'Allgemein' },
+    { id: 'bauart', label: 'Bauart', typ: 'select', optionen: ['Wandmontage','Standgerät','Kaskade'], gruppe: 'Allgemein', pflicht: true },
+
+    { id: 'leistungNenn', label: 'Nennleistung (kW)', typ: 'number', einheit: 'kW', gruppe: 'Leistungsdaten', pflicht: true },
+    { id: 'zapfleistungPeak', label: 'Peak-Zapfleistung (TWW/TKW)', typ: 'number', einheit: 'l/min', gruppe: 'Leistungsdaten', pflicht: true },
+    { id: 'twwMax', label: 'Max. TWW-Temperatur', typ: 'number', einheit: '°C', gruppe: 'Leistungsdaten' },
+    { id: 'primaerVol', label: 'Primär-Vorlauftemperatur', typ: 'number', einheit: '°C', gruppe: 'Leistungsdaten' },
+    { id: 'waermetauscherFlaeche', label: 'Wärmetauscherfläche', typ: 'number', einheit: 'm²', gruppe: 'Leistungsdaten' },
+
+    { id: 'anschlussPrim', label: 'Primär-Anschluss', typ: 'select', optionen: ['DN 20','DN 25','DN 32','DN 40','DN 50'], gruppe: 'Anschlüsse' },
+    { id: 'anschlussSek', label: 'Sekundär-Anschluss', typ: 'select', optionen: ['DN 15','DN 20','DN 25','DN 32','DN 40'], gruppe: 'Anschlüsse' },
+
+    { id: 'breite', label: 'Breite', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen' },
+    { id: 'tiefe', label: 'Tiefe', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen' },
+    { id: 'hoehe', label: 'Höhe', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen' },
+
+    { id: 'svgwNr', label: 'SVGW-Zulassungsnummer', typ: 'text', gruppe: 'Normen' },
+    { id: 'sia385', label: 'Konform SIA 385/2', typ: 'checkbox', gruppe: 'Normen' },
+    { id: 'ce', label: 'CE-Konformität', typ: 'checkbox', gruppe: 'Normen' },
+
+    { id: 'besonderheiten', label: 'Besonderheiten', typ: 'textarea', gruppe: 'Zusatz' }
+  ],
+  matchFn: function(produkt, berechnung){
+    let score = 0;
+    const d = produkt.daten || {};
+    const b = berechnung || {};
+    if(b.leistung && d.leistungNenn){
+      if(d.leistungNenn >= b.leistung) score += 60;
+      else if(d.leistungNenn >= b.leistung * 0.85) score += 30;
+    }
+    if(b.zapfleistung && d.zapfleistungPeak){
+      if(d.zapfleistungPeak >= b.zapfleistung) score += 40;
+      else if(d.zapfleistungPeak >= b.zapfleistung * 0.85) score += 20;
+    }
+    return Math.min(100, score);
+  }
+};
+
+// ── Fettabscheider (SN EN 1825) ──
+KATEGORIEN.fettabscheider = {
+  id: 'fettabscheider',
+  name: 'Fettabscheider',
+  icon: '🫙',
+  typenFelder: [
+    { id: 'aufstellung', label: 'Aufstellung', typ: 'select', optionen: ['Frostfrei (innen)','Erdeingebaut','Freie Aufstellung'] }
+  ],
+  felder: [
+    { id: 'serie', label: 'Typenbezeichnung / Serie', typ: 'text', gruppe: 'Allgemein', pflicht: true },
+    { id: 'modell', label: 'Modell / Grösse', typ: 'text', gruppe: 'Allgemein', pflicht: true },
+    { id: 'artikelnr', label: 'Artikelnummer', typ: 'text', gruppe: 'Allgemein' },
+    { id: 'aufstellung', label: 'Aufstellung', typ: 'select', optionen: ['Frostfrei (innen)','Erdeingebaut','Freie Aufstellung'], gruppe: 'Allgemein', pflicht: true },
+    { id: 'material', label: 'Material', typ: 'select', optionen: ['PE','GFK','Edelstahl','Beton'], gruppe: 'Allgemein' },
+
+    { id: 'ns', label: 'Nenngrösse NS', typ: 'number', einheit: 'l/s', gruppe: 'Leistungsdaten', pflicht: true },
+    { id: 'schlammraum', label: 'Schlammraum VS', typ: 'number', einheit: 'l', gruppe: 'Leistungsdaten', pflicht: true },
+    { id: 'fettspeicher', label: 'Fettspeicherraum', typ: 'number', einheit: 'l', gruppe: 'Leistungsdaten' },
+    { id: 'gesamtvolumen', label: 'Gesamtvolumen', typ: 'number', einheit: 'l', gruppe: 'Leistungsdaten' },
+
+    { id: 'zulaufDN', label: 'Zulauf DN', typ: 'select', optionen: ['DN 100','DN 125','DN 150','DN 200'], gruppe: 'Anschlüsse' },
+    { id: 'ablaufDN', label: 'Ablauf DN', typ: 'select', optionen: ['DN 100','DN 125','DN 150','DN 200'], gruppe: 'Anschlüsse' },
+
+    { id: 'laenge', label: 'Länge', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen' },
+    { id: 'breite', label: 'Breite', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen' },
+    { id: 'hoehe', label: 'Höhe', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen' },
+    { id: 'gewichtLeer', label: 'Gewicht leer', typ: 'number', einheit: 'kg', gruppe: 'Abmessungen' },
+
+    { id: 'enNorm', label: 'EN-Norm', typ: 'text', gruppe: 'Normen' },
+    { id: 'ce', label: 'CE-Konformität', typ: 'checkbox', gruppe: 'Normen' },
+
+    { id: 'besonderheiten', label: 'Besonderheiten', typ: 'textarea', gruppe: 'Zusatz' }
+  ],
+  matchFn: function(produkt, berechnung){
+    let score = 0;
+    const d = produkt.daten || {};
+    const b = berechnung || {};
+    if(b.ns && d.ns){
+      if(d.ns >= b.ns) score += 70;
+      else if(d.ns >= b.ns * 0.9) score += 35;
+    }
+    if(b.schlammraum && d.schlammraum){
+      if(d.schlammraum >= b.schlammraum) score += 30;
+    }
+    return Math.min(100, score);
+  }
+};
+
+// ── Öl- / Benzinabscheider (SN EN 858) ──
+KATEGORIEN.oelabscheider = {
+  id: 'oelabscheider',
+  name: 'Öl- / Benzinabscheider',
+  icon: '🛢️',
+  typenFelder: [
+    { id: 'klasse', label: 'Klasse', typ: 'select', optionen: ['Klasse I (Koaleszenz)','Klasse II (Schwerkraft)'] }
+  ],
+  felder: [
+    { id: 'serie', label: 'Typenbezeichnung / Serie', typ: 'text', gruppe: 'Allgemein', pflicht: true },
+    { id: 'modell', label: 'Modell / Grösse', typ: 'text', gruppe: 'Allgemein', pflicht: true },
+    { id: 'artikelnr', label: 'Artikelnummer', typ: 'text', gruppe: 'Allgemein' },
+    { id: 'klasse', label: 'Klasse', typ: 'select', optionen: ['Klasse I (Koaleszenz)','Klasse II (Schwerkraft)'], gruppe: 'Allgemein', pflicht: true },
+    { id: 'material', label: 'Material', typ: 'select', optionen: ['PE','GFK','Edelstahl','Beton'], gruppe: 'Allgemein' },
+
+    { id: 'ns', label: 'Nenngrösse NS', typ: 'number', einheit: 'l/s', gruppe: 'Leistungsdaten', pflicht: true },
+    { id: 'schlammraum', label: 'Schlammraum', typ: 'number', einheit: 'l', gruppe: 'Leistungsdaten', pflicht: true },
+    { id: 'oelspeicher', label: 'Öl-Speicherraum', typ: 'number', einheit: 'l', gruppe: 'Leistungsdaten' },
+    { id: 'maxAblauf', label: 'Max. Ablaufkonzentration', typ: 'number', einheit: 'mg/l', gruppe: 'Leistungsdaten' },
+
+    { id: 'zulaufDN', label: 'Zulauf DN', typ: 'select', optionen: ['DN 100','DN 125','DN 150','DN 200','DN 250','DN 300'], gruppe: 'Anschlüsse' },
+    { id: 'ablaufDN', label: 'Ablauf DN', typ: 'select', optionen: ['DN 100','DN 125','DN 150','DN 200','DN 250','DN 300'], gruppe: 'Anschlüsse' },
+
+    { id: 'laenge', label: 'Länge', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen' },
+    { id: 'durchmesser', label: 'Durchmesser', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen' },
+    { id: 'hoehe', label: 'Höhe', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen' },
+
+    { id: 'enNorm', label: 'EN-Norm', typ: 'text', gruppe: 'Normen' },
+    { id: 'ce', label: 'CE-Konformität', typ: 'checkbox', gruppe: 'Normen' },
+
+    { id: 'besonderheiten', label: 'Besonderheiten', typ: 'textarea', gruppe: 'Zusatz' }
+  ],
+  matchFn: function(produkt, berechnung){
+    let score = 0;
+    const d = produkt.daten || {};
+    const b = berechnung || {};
+    if(b.ns && d.ns){
+      if(d.ns >= b.ns) score += 70;
+      else if(d.ns >= b.ns * 0.9) score += 35;
+    }
+    if(b.klasse && d.klasse && d.klasse === b.klasse) score += 30;
+    return Math.min(100, score);
+  }
+};
+
+// ── Schlammsammler / Absetzbecken ──
+KATEGORIEN.schlammsammler = {
+  id: 'schlammsammler',
+  name: 'Schlammsammler',
+  icon: '🪨',
+  felder: [
+    { id: 'serie', label: 'Typenbezeichnung / Serie', typ: 'text', gruppe: 'Allgemein', pflicht: true },
+    { id: 'modell', label: 'Modell / Grösse', typ: 'text', gruppe: 'Allgemein', pflicht: true },
+    { id: 'artikelnr', label: 'Artikelnummer', typ: 'text', gruppe: 'Allgemein' },
+    { id: 'bauform', label: 'Bauform', typ: 'select', optionen: ['Rund','Rechteckig','Schachtform'], gruppe: 'Allgemein' },
+    { id: 'material', label: 'Material', typ: 'select', optionen: ['PE','GFK','Beton','Edelstahl'], gruppe: 'Allgemein' },
+
+    { id: 'volumen', label: 'Nutzvolumen', typ: 'number', einheit: 'l', gruppe: 'Leistungsdaten', pflicht: true },
+    { id: 'durchmesser', label: 'Innendurchmesser D', typ: 'number', einheit: 'mm', gruppe: 'Leistungsdaten' },
+    { id: 'absetzflaeche', label: 'Absetzfläche', typ: 'number', einheit: 'm²', gruppe: 'Leistungsdaten' },
+    { id: 'verweilzeit', label: 'Mindest-Verweilzeit', typ: 'number', einheit: 'min', gruppe: 'Leistungsdaten' },
+
+    { id: 'zulaufDN', label: 'Zulauf DN', typ: 'select', optionen: ['DN 100','DN 125','DN 150','DN 200','DN 250','DN 300'], gruppe: 'Anschlüsse' },
+    { id: 'ablaufDN', label: 'Ablauf DN', typ: 'select', optionen: ['DN 100','DN 125','DN 150','DN 200','DN 250','DN 300'], gruppe: 'Anschlüsse' },
+
+    { id: 'laenge', label: 'Länge', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen' },
+    { id: 'hoehe', label: 'Höhe', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen' },
+
+    { id: 'ce', label: 'CE-Konformität', typ: 'checkbox', gruppe: 'Normen' },
+    { id: 'besonderheiten', label: 'Besonderheiten', typ: 'textarea', gruppe: 'Zusatz' }
+  ],
+  matchFn: function(produkt, berechnung){
+    let score = 0;
+    const d = produkt.daten || {};
+    const b = berechnung || {};
+    if(b.volumen && d.volumen){
+      if(d.volumen >= b.volumen) score += 70;
+      else if(d.volumen >= b.volumen * 0.9) score += 35;
+    }
+    if(b.durchmesser && d.durchmesser){
+      if(d.durchmesser >= b.durchmesser) score += 30;
+    }
+    return Math.min(100, score);
+  }
+};
+
+// ── Thermische Solaranlage (Kollektoren) ──
+KATEGORIEN.thermische_solaranlage = {
+  id: 'thermische_solaranlage',
+  name: 'Thermische Solaranlage',
+  icon: '☀️',
+  typenFelder: [
+    { id: 'kollektortyp', label: 'Kollektortyp', typ: 'select', optionen: ['Flachkollektor','Röhrenkollektor (Vakuum)','Luftkollektor'] }
+  ],
+  felder: [
+    { id: 'serie', label: 'Typenbezeichnung / Serie', typ: 'text', gruppe: 'Allgemein', pflicht: true },
+    { id: 'modell', label: 'Modell / Grösse', typ: 'text', gruppe: 'Allgemein', pflicht: true },
+    { id: 'artikelnr', label: 'Artikelnummer', typ: 'text', gruppe: 'Allgemein' },
+    { id: 'kollektortyp', label: 'Kollektortyp', typ: 'select', optionen: ['Flachkollektor','Röhrenkollektor (Vakuum)','Luftkollektor'], gruppe: 'Allgemein', pflicht: true },
+
+    { id: 'bruttoflaeche', label: 'Bruttofläche', typ: 'number', einheit: 'm²', gruppe: 'Leistungsdaten', pflicht: true },
+    { id: 'aperturflaeche', label: 'Aperturfläche', typ: 'number', einheit: 'm²', gruppe: 'Leistungsdaten' },
+    { id: 'absorberflaeche', label: 'Absorberfläche', typ: 'number', einheit: 'm²', gruppe: 'Leistungsdaten' },
+    { id: 'eta0', label: 'Optischer Wirkungsgrad η₀', typ: 'number', gruppe: 'Leistungsdaten' },
+    { id: 'a1', label: 'a1 (linear)', typ: 'number', einheit: 'W/m²K', gruppe: 'Leistungsdaten' },
+    { id: 'a2', label: 'a2 (quadratisch)', typ: 'number', einheit: 'W/m²K²', gruppe: 'Leistungsdaten' },
+    { id: 'ertragJahr', label: 'Jahresertrag (CH Mittelland)', typ: 'number', einheit: 'kWh/m²·a', gruppe: 'Leistungsdaten' },
+    { id: 'stagnationsT', label: 'Stagnationstemperatur', typ: 'number', einheit: '°C', gruppe: 'Leistungsdaten' },
+
+    { id: 'absorberMat', label: 'Absorber-Material', typ: 'select', optionen: ['Kupfer','Aluminium','Stahl'], gruppe: 'Material' },
+    { id: 'absorberBeschicht', label: 'Absorberbeschichtung', typ: 'text', gruppe: 'Material' },
+
+    { id: 'laenge', label: 'Länge', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen' },
+    { id: 'breite', label: 'Breite', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen' },
+    { id: 'hoehe', label: 'Höhe', typ: 'number', einheit: 'mm', gruppe: 'Abmessungen' },
+    { id: 'gewicht', label: 'Gewicht', typ: 'number', einheit: 'kg', gruppe: 'Abmessungen' },
+
+    { id: 'solarKeymark', label: 'Solar Keymark', typ: 'checkbox', gruppe: 'Normen' },
+    { id: 'en12975', label: 'EN 12975', typ: 'checkbox', gruppe: 'Normen' },
+    { id: 'ce', label: 'CE-Konformität', typ: 'checkbox', gruppe: 'Normen' },
+
+    { id: 'besonderheiten', label: 'Besonderheiten', typ: 'textarea', gruppe: 'Zusatz' }
+  ],
+  matchFn: function(produkt, berechnung){
+    let score = 0;
+    const d = produkt.daten || {};
+    const b = berechnung || {};
+    if(b.flaeche && d.bruttoflaeche){
+      var ratio = d.bruttoflaeche / b.flaeche;
+      if(ratio >= 0.9 && ratio <= 1.2) score += 70;
+      else if(ratio >= 0.8 && ratio < 0.9) score += 35;
+    }
+    if(b.kollektortyp && d.kollektortyp && d.kollektortyp === b.kollektortyp) score += 30;
+    return Math.min(100, score);
+  }
+};
+
 // ── Public API ──
 function getKategorien(){ return Object.values(KATEGORIEN); }
 function getKategorie(id){ return KATEGORIEN[id] || null; }
@@ -744,6 +1103,7 @@ function addDokument(produktId, dok){
     name: dok.name || '',
     typ: dok.typ || 'datenblatt',
     format: dok.format || 'pdf',
+    sprache: dok.sprache || '', // #38: DE/FR/IT/EN
     datum: new Date().toISOString().split('T')[0],
     groesse: dok.groesse || 0,
     hochgeladenVon: _getUsername(),
@@ -953,6 +1313,104 @@ function addLog(produkt, aktion, detail){
   if(produkt.log.length > 50) produkt.log.length = 50;
 }
 
+// ═══════════════════════════════════════════════
+// STAMMLIEFERANTEN (#31) — Favoriten & Büro-Stamm
+// ═══════════════════════════════════════════════
+// Zwei Ebenen kombiniert:
+//  1. Persönliche Favoriten (pro User) — localStorage
+//  2. Büro-Stamm (pro Organisation) — localStorage, gepflegt von Admin/Planer
+// Sortierung für Listen: [Persönliche Favs] → [Büro-Stamm] → [Rest].
+const SK_FAVS       = 'gema_lieferanten_favs_v1';     // { [userId]: [liefId, ...] }
+const SK_ORG_STAMM  = 'gema_lieferanten_orgstamm_v1'; // { [orgId]:  [liefId, ...] }
+
+function _getUserContext(){
+  var ctx = { userId: 'anonymous', orgId: 'org_default', canEditOrgStamm: false };
+  try {
+    if (typeof GemaAuth !== 'undefined') {
+      var u = GemaAuth.getCurrentUser();
+      if (u) {
+        ctx.userId = u.id || ctx.userId;
+        ctx.orgId  = u.orgId || ctx.orgId;
+        // Admins und Planer dürfen Büro-Stamm pflegen
+        var roles = u.roleIds || [];
+        ctx.canEditOrgStamm = roles.indexOf('role_admin') >= 0 || roles.indexOf('role_planer') >= 0;
+        if (typeof GemaAuth.isOrgAdmin === 'function' && GemaAuth.isOrgAdmin(u.id)) ctx.canEditOrgStamm = true;
+      }
+    }
+  } catch(e) {}
+  return ctx;
+}
+
+function _loadMap(key){
+  try { var r = localStorage.getItem(key); if (r) return JSON.parse(r) || {}; } catch(e) {}
+  return {};
+}
+function _saveMap(key, map){
+  try { localStorage.setItem(key, JSON.stringify(map || {})); } catch(e) {}
+}
+
+function getFavoriten(){
+  var ctx = _getUserContext();
+  var map = _loadMap(SK_FAVS);
+  return (map[ctx.userId] || []).slice();
+}
+function isFavorit(liefId){
+  return getFavoriten().indexOf(liefId) >= 0;
+}
+function toggleFavorit(liefId){
+  if (!liefId) return false;
+  var ctx = _getUserContext();
+  var map = _loadMap(SK_FAVS);
+  var list = (map[ctx.userId] || []).slice();
+  var i = list.indexOf(liefId);
+  if (i >= 0) list.splice(i, 1); else list.push(liefId);
+  map[ctx.userId] = list;
+  _saveMap(SK_FAVS, map);
+  return i < 0; // true wenn jetzt Favorit
+}
+
+function getOrgStamm(){
+  var ctx = _getUserContext();
+  var map = _loadMap(SK_ORG_STAMM);
+  return (map[ctx.orgId] || []).slice();
+}
+function isOrgStamm(liefId){
+  return getOrgStamm().indexOf(liefId) >= 0;
+}
+function canEditOrgStamm(){
+  return _getUserContext().canEditOrgStamm;
+}
+function toggleOrgStamm(liefId){
+  if (!liefId) return false;
+  var ctx = _getUserContext();
+  if (!ctx.canEditOrgStamm) return null; // Nicht berechtigt
+  var map = _loadMap(SK_ORG_STAMM);
+  var list = (map[ctx.orgId] || []).slice();
+  var i = list.indexOf(liefId);
+  if (i >= 0) list.splice(i, 1); else list.push(liefId);
+  map[ctx.orgId] = list;
+  _saveMap(SK_ORG_STAMM, map);
+  return i < 0;
+}
+
+// Sortiert eine Lieferantenliste nach Stamm-Priorität:
+// 1. Persönliche Favoriten (alphabetisch)
+// 2. Büro-Stammlieferanten (alphabetisch)
+// 3. Alle übrigen (alphabetisch)
+// Mutiert die Eingabe nicht, sondern gibt eine neue Liste zurück.
+function sortWithStamm(list){
+  var favs  = {}; getFavoriten().forEach(function(id){ favs[id] = true; });
+  var stamm = {}; getOrgStamm().forEach(function(id){ stamm[id] = true; });
+  var byName = function(a, b){ return (a.firma || '').localeCompare(b.firma || '', 'de'); };
+  var tierFav  = [], tierStamm = [], tierRest = [];
+  (list || []).forEach(function(l){
+    if (favs[l.id])  tierFav.push(l);
+    else if (stamm[l.id]) tierStamm.push(l);
+    else tierRest.push(l);
+  });
+  return tierFav.sort(byName).concat(tierStamm.sort(byName)).concat(tierRest.sort(byName));
+}
+
 // ── Init ──
 load();
 // Async: fetch from Supabase after page load (updates localStorage if newer data exists)
@@ -987,6 +1445,15 @@ window.GemaProdukte = {
   deleteLieferant,
   searchLieferanten,
   quickCreateLieferant,
+  // Stammlieferanten (#31): Favoriten + Büro-Stamm
+  getFavoriten,
+  isFavorit,
+  toggleFavorit,
+  getOrgStamm,
+  isOrgStamm,
+  canEditOrgStamm,
+  toggleOrgStamm,
+  sortWithStamm,
   // Vormerkungen
   addVormerkung,
   getVormerkungen,

@@ -69,6 +69,10 @@ textarea.fc{resize:vertical;min-height:60px;line-height:1.5}
 .prod-serie{font-size:14px;font-weight:700;flex:1;min-width:0}
 .prod-modell{font-size:12px;color:var(--mut);margin-top:2px}
 .prod-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.prod-cmp-btn{font-family:inherit;font-size:11px;font-weight:700;padding:5px 11px;border-radius:7px;border:1.5px solid var(--brd2);background:var(--sur);color:var(--txt2);cursor:pointer;white-space:nowrap;transition:.15s}
+.prod-cmp-btn:hover{background:var(--acc-bg);border-color:#bfdbfe;color:var(--acc)}
+.prod-cmp-btn.active{background:var(--acc);border-color:var(--acc);color:#fff}
+.prod-cmp-btn.active:hover{background:#1d4ed8}
 .tag{display:inline-flex;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700}
 .t-gy{background:var(--bg2);color:var(--mut)}.t-bl{background:var(--acc-bg);color:var(--acc)}.t-gr{background:var(--grn-bg);color:var(--grn)}.t-rd{background:var(--red-bg);color:var(--red)}
 
@@ -136,10 +140,25 @@ input::placeholder,textarea::placeholder{color:#cbd5e1!important}
     <div class="kat-tabs" id="katTabs"></div>
 
     <div class="card">
-      <div class="card-hd">
-        <h3 id="listTitle">Alle Produkte</h3>
-        <input class="fc" id="searchInp" placeholder="Suchen..." style="max-width:220px" oninput="renderList()"/>
+      <div class="card-hd" style="flex-wrap:wrap;gap:8px">
+        <h3 id="listTitle" style="flex:1">Alle Produkte</h3>
+        <input class="fc" id="searchInp" placeholder="Suchen..." style="max-width:200px" oninput="renderList()"/>
+        <select class="fc" id="filterKanton" style="max-width:140px" onchange="renderList()">
+          <option value="">Alle Kantone</option>
+        </select>
+        <select class="fc" id="filterStatus" style="max-width:160px" onchange="renderList()">
+          <option value="">Alle Status</option>
+          <option value="verifiziert">✓ Verifiziert</option>
+          <option value="nicht_verifiziert">⚠ Unverifiziert</option>
+          <option value="entwurf">📝 Entwurf</option>
+        </select>
+        <select class="fc" id="filterPremium" style="max-width:140px" onchange="renderList()">
+          <option value="">Alle Lieferanten</option>
+          <option value="premium">★ Nur Premium</option>
+          <option value="basis">Basis</option>
+        </select>
       </div>
+      <div id="filterStats" style="padding:6px 14px;font-size:11.5px;color:var(--mut);border-bottom:1px solid var(--brd)"></div>
       <div id="listBody" style="max-height:60vh;overflow-y:auto"></div>
     </div>
   </div>
@@ -185,14 +204,29 @@ input::placeholder,textarea::placeholder{color:#cbd5e1!important}
 
         <!-- Documents -->
         <div class="card">
-          <div class="card-hd"><h3>Dokumente & Bilder</h3></div>
+          <div class="card-hd"><h3>📄 Datenblätter & Dokumente</h3></div>
           <div class="card-bd">
             <div id="docList"></div>
-            <div style="margin-top:10px">
-              <div class="g2">
-                <select class="fc" id="docTyp"><option value="datenblatt">Datenblatt (PDF)</option><option value="bild">Produktbild</option><option value="zertifikat">Zertifikat</option><option value="schema">Schema / Zeichnung</option></select>
-                <div style="display:flex;gap:6px"><input type="file" class="fc" id="docFile" accept=".pdf,.jpg,.png,.svg" style="padding:6px"/><button class="btn btn-s btn-sm" onclick="addDoc()">+</button></div>
+            <div style="margin-top:12px;padding-top:12px;border-top:1.5px dashed var(--brd);background:var(--bg);margin-left:-20px;margin-right:-20px;margin-bottom:-20px;padding:12px 20px;border-radius:0 0 var(--r-lg) var(--r-lg)">
+              <div style="font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">+ Neues Dokument hochladen</div>
+              <div class="g3">
+                <select class="fc" id="docTyp" title="Dokumenttyp">
+                  <option value="datenblatt">📄 Datenblatt (PDF)</option>
+                  <option value="anleitung">📘 Montageanleitung</option>
+                  <option value="zertifikat">🏅 Zertifikat (SVGW, KTI, …)</option>
+                  <option value="schema">📐 Schema / Zeichnung</option>
+                  <option value="bild">🖼 Produktbild</option>
+                </select>
+                <select class="fc" id="docSprache" title="Sprache">
+                  <option value="de">🇩🇪 Deutsch</option>
+                  <option value="fr">🇫🇷 Français</option>
+                  <option value="it">🇮🇹 Italiano</option>
+                  <option value="en">🇬🇧 English</option>
+                  <option value="">— Keine Sprache —</option>
+                </select>
+                <div style="display:flex;gap:6px"><input type="file" class="fc" id="docFile" accept=".pdf,.jpg,.jpeg,.png,.svg" style="padding:6px"/><button class="btn btn-s btn-sm" onclick="addDoc()">+ Upload</button></div>
               </div>
+              <div style="font-size:10px;color:var(--mut);margin-top:4px">PDF, JPG, PNG, SVG · max. 10 MB · Speicherung aktuell lokal als Data-URL</div>
             </div>
           </div>
         </div>
@@ -212,6 +246,7 @@ input::placeholder,textarea::placeholder{color:#cbd5e1!important}
 <script src="gema_feedback.js"></script>
 <script src="gema_pdf.js"></script>
 <script src="gema_produktkatalog_api.js"></script>
+<script src="gema_vergleich.js"></script>
 <script>
 function fixLeadingZero(el){let v=el.value.trim();if(!v)return;if(v.startsWith('.'))v='0'+v;if(v.startsWith('-.'))v='-0'+v.substring(1);const n=parseFloat(v);if(!isNaN(n))el.value=n;}
 const E=s=>typeof s==='string'?s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):'';
@@ -250,23 +285,67 @@ function switchKat(id){
   renderList();
 }
 
+// ── Filter Population ──
+function _populateProdFilters(){
+  // Kantone aus Lieferanten-Adressen
+  const kSel = document.getElementById('filterKanton');
+  if(kSel && kSel.options.length <= 1){
+    const kSet = {};
+    GemaProdukte.getAllLieferanten().forEach(l => {
+      const k = (l.adresse||{}).kanton;
+      if(k) kSet[k] = true;
+    });
+    Object.keys(kSet).sort().forEach(k => {
+      const o = document.createElement('option');
+      o.value = k; o.textContent = k;
+      kSel.appendChild(o);
+    });
+  }
+}
+
 // ── Product List ──
 function renderList(){
-  const q=(document.getElementById('searchInp')?.value||'').toLowerCase();
+  _populateProdFilters();
+  const q  = (document.getElementById('searchInp')?.value||'').toLowerCase();
+  const fk = document.getElementById('filterKanton')?.value || '';
+  const fs = document.getElementById('filterStatus')?.value || '';
+  const fp = document.getElementById('filterPremium')?.value || '';
   const kat=GemaProdukte.getKategorie(currentKat);
-  document.getElementById('listTitle').textContent=(kat?.name||'Produkte')+' ('+GemaProdukte.getProdukte(currentKat).length+')';
+  const total = GemaProdukte.getProdukte(currentKat).length;
 
   let prods=GemaProdukte.getProdukte(currentKat);
   if(q) prods=prods.filter(p=>(p.daten?.serie||'').toLowerCase().includes(q)||(p.daten?.modell||'').toLowerCase().includes(q)||(p.lieferantFirma||'').toLowerCase().includes(q));
+  if(fs) prods = prods.filter(p => p.status === fs);
+  if(fk || fp){
+    prods = prods.filter(p => {
+      const lief = p.lieferantId ? GemaProdukte.getLieferant(p.lieferantId) : null;
+      if(fk && (!lief || (lief.adresse||{}).kanton !== fk)) return false;
+      if(fp === 'premium' && !(lief && lief.premium && lief.premium.aktiv)) return false;
+      if(fp === 'basis' && (lief && lief.premium && lief.premium.aktiv)) return false;
+      return true;
+    });
+  }
+  document.getElementById('listTitle').textContent = (kat?.name||'Produkte')+' ('+prods.length+' / '+total+')';
+  const stats = document.getElementById('filterStats');
+  if(stats){
+    const active = [];
+    if(q) active.push('"'+q+'"');
+    if(fk) active.push(fk);
+    if(fs) active.push(fs);
+    if(fp) active.push(fp);
+    stats.textContent = active.length ? 'Aktive Filter: '+active.join(' · ') : '';
+  }
 
   if(!prods.length){
-    document.getElementById('listBody').innerHTML='<div style="padding:40px;text-align:center;color:var(--mut)">Noch keine Produkte erfasst.<br>Klicke «+ Neues Produkt» um zu starten.</div>';
+    document.getElementById('listBody').innerHTML='<div style="padding:40px;text-align:center;color:var(--mut)">'+(total===0?'Noch keine Produkte erfasst.<br>Klicke «+ Neues Produkt» um zu starten.':'Keine Produkte erfüllen die aktiven Filter.')+'</div>';
     return;
   }
 
   document.getElementById('listBody').innerHTML=prods.map(p=>{
     const st=GemaProdukte.STATUS_LABELS[p.status]||{};
     const badgeCls=p.status==='verifiziert'?'badge-verified':p.status==='nicht_verifiziert'?'badge-unverified':'badge-draft';
+    const inCart = (typeof GemaVergleich !== 'undefined') && GemaVergleich.has(p.id, currentKat);
+    const cartBtn = `<button class="prod-cmp-btn${inCart?' active':''}" onclick="event.stopPropagation();toggleVergleich('${E(p.id)}')" title="${inCart?'Aus Vergleich entfernen':'Zum Vergleich hinzufügen'}">${inCart?'⚖ ✓':'⚖ Vergleichen'}</button>`;
     return `<div class="prod-row" onclick="openProdukt('${E(p.id)}')">
       <div style="flex:1;min-width:0">
         <div class="prod-serie">${E(p.daten?.serie||'—')} ${E(p.daten?.modell||'')}</div>
@@ -275,10 +354,19 @@ function renderList(){
       <div class="prod-meta">
         ${p.daten?.anschluss?'<span class="tag t-gy">'+E(p.daten.anschluss)+'</span>':''}
         <span class="badge ${badgeCls}">${E(st.label||p.status)}</span>
+        ${cartBtn}
       </div>
     </div>`;
   }).join('');
 }
+
+// ── Vergleichs-Toggle (#32) ──
+function toggleVergleich(produktId){
+  if (typeof GemaVergleich === 'undefined') return;
+  var added = GemaVergleich.toggle(produktId, currentKat);
+  renderList(); // Re-render um Button-Status zu aktualisieren
+}
+window.toggleVergleich = toggleVergleich;
 
 // ── Open/Create ──
 function startCreate(){
@@ -442,35 +530,73 @@ function saveProdukt(){
   toast('Gespeichert');
 }
 
-// ── Documents ──
+// ── Documents (#38: Datenblätter, Anleitungen, Zertifikate, …) ──
+// Gruppierung nach Typ in fester Reihenfolge: Datenblätter zuerst, dann
+// Montageanleitungen, Zertifikate, Schemata, Bilder. Jede Gruppe bekommt
+// einen farbigen Header und zeigt Sprach-Flag + Dateigrösse pro Eintrag.
+var DOC_TYPEN = [
+  { id:'datenblatt', label:'Datenblätter',      icon:'📄', cls:'t-bl' },
+  { id:'anleitung',  label:'Montageanleitungen', icon:'📘', cls:'t-bl' },
+  { id:'zertifikat', label:'Zertifikate',        icon:'🏅', cls:'t-gr' },
+  { id:'schema',     label:'Schemata / Zeichnungen', icon:'📐', cls:'t-gy' },
+  { id:'bild',       label:'Produktbilder',      icon:'🖼', cls:'t-gy' }
+];
+var DOC_SPRACHEN = { de:'🇩🇪 DE', fr:'🇫🇷 FR', it:'🇮🇹 IT', en:'🇬🇧 EN' };
+function _fmtBytes(b){
+  if (!b) return '';
+  if (b < 1024) return b + ' B';
+  if (b < 1024 * 1024) return Math.round(b / 1024) + ' KB';
+  return (b / 1024 / 1024).toFixed(1) + ' MB';
+}
 function renderDocs(){
   const p=currentProdukt;if(!p)return;
   const docs=GemaProdukte.getDokumente(p.id);
-  if(!docs.length){document.getElementById('docList').innerHTML='<p style="color:var(--mut);font-size:13px">Noch keine Dokumente.</p>';return;}
-  document.getElementById('docList').innerHTML=docs.map(d=>{
-    const hasData=!!d.dataUrl;
-    const previewBtn=hasData?`<button class="btn btn-s btn-sm" onclick="previewDoc('${E(d.id)}')">👁</button>`:'';
-    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--brd)">
-      <span class="tag ${d.typ==='datenblatt'?'t-bl':d.typ==='zertifikat'?'t-gr':'t-gy'}">${E(d.typ)}</span>
-      <span style="flex:1;font-size:13px">${E(d.name)}</span>
-      <span style="font-size:11px;color:var(--mut)">${d.hochgeladenVon?E(d.hochgeladenVon)+' · ':''}${d.datum||''}</span>
-      ${previewBtn}
-      <button class="btn btn-d btn-sm" onclick="rmDoc('${E(d.id)}')">✕</button>
-    </div>`;
-  }).join('');
+  const box=document.getElementById('docList');
+  if(!docs.length){
+    box.innerHTML='<div style="padding:18px;text-align:center;color:var(--mut);background:var(--bg);border-radius:var(--r-sm)"><div style="font-size:24px;margin-bottom:4px">📄</div><div style="font-size:13px">Noch keine Dokumente hochgeladen.</div><div style="font-size:11px;margin-top:2px">Datenblätter, Anleitungen und Zertifikate direkt beim Produkt verfügbar.</div></div>';
+    return;
+  }
+  // Gruppieren
+  var byTyp={};
+  docs.forEach(function(d){var t=d.typ||'datenblatt';(byTyp[t]=byTyp[t]||[]).push(d);});
+  var html='';
+  DOC_TYPEN.forEach(function(typInfo){
+    var list=byTyp[typInfo.id];if(!list||!list.length)return;
+    html+='<div style="margin-bottom:10px">'
+      +'<div style="font-size:10px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.06em;padding:6px 0 4px;border-bottom:1px solid var(--brd);margin-bottom:4px">'
+      + typInfo.icon+' '+typInfo.label+' <span style="color:var(--mut2);font-weight:600">('+list.length+')</span>'
+      +'</div>';
+    list.forEach(function(d){
+      var hasData=!!d.dataUrl;
+      var spr=d.sprache?(DOC_SPRACHEN[d.sprache]||d.sprache):'';
+      var size=_fmtBytes(d.groesse);
+      var previewBtn=hasData?'<button class="btn btn-s btn-sm" onclick="previewDoc(\''+E(d.id)+'\')" title="Vorschau">👁</button>':'';
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--brd)">'
+        + (spr?'<span class="tag t-gy" style="font-size:10px">'+spr+'</span>':'')
+        + '<span style="flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+E(d.name)+'</span>'
+        + (size?'<span style="font-size:11px;color:var(--mut)">'+size+'</span>':'')
+        + '<span style="font-size:11px;color:var(--mut)">'+(d.hochgeladenVon?E(d.hochgeladenVon)+' · ':'')+(d.datum||'')+'</span>'
+        + previewBtn
+        + '<button class="btn btn-d btn-sm" onclick="rmDoc(\''+E(d.id)+'\')" title="Entfernen">✕</button>'
+        + '</div>';
+    });
+    html+='</div>';
+  });
+  box.innerHTML=html;
 }
 
 function addDoc(){
   const fi=document.getElementById('docFile');
   const typ=document.getElementById('docTyp').value;
+  const sprache=(document.getElementById('docSprache')||{value:''}).value;
   if(!fi.files?.length){toast('Datei wählen','error');return;}
   const file=fi.files[0];
-  if(file.size>5*1024*1024){toast('Max. 5 MB','error');return;}
+  if(file.size>10*1024*1024){toast('Max. 10 MB','error');return;}
   const reader=new FileReader();
   reader.onload=function(){
     const fmt=file.name.split('.').pop().toLowerCase();
     GemaProdukte.addDokument(currentProdukt.id,{
-      name:file.name, typ:typ, format:fmt,
+      name:file.name, typ:typ, format:fmt, sprache:sprache,
       groesse:file.size, dataUrl:reader.result
     });
     currentProdukt=GemaProdukte.getProdukt(currentProdukt.id);

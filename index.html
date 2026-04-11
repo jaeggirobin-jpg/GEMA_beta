@@ -82,10 +82,10 @@ body {
 .nav-pill.primary { background: var(--accent); border-color: var(--accent-dk); color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,.25); }
 .nav-pill.primary:hover { background: var(--accent-dk); }
 
-/* ── HERO ── */
+/* ── HERO (kompakter Banner als Hauptseiten-Signatur) ── */
 .hero {
   background: linear-gradient(160deg, #0f172a 0%, #1e3a5f 55%, #0c4a2e 100%);
-  padding: 72px 24px 80px;
+  padding: 22px 24px 24px;
   position: relative;
   overflow: hidden;
 }
@@ -104,44 +104,45 @@ body {
 .hero-inner {
   max-width: 1340px; margin: 0 auto;
   position: relative; z-index: 1;
-  display: flex; align-items: center; justify-content: space-between; gap: 40px; flex-wrap: wrap;
+  display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;
 }
-.hero-text { flex: 1; min-width: 280px; }
+.hero-text { flex: 1; min-width: 260px; }
 .hero-eyebrow {
-  display: inline-flex; align-items: center; gap: 8px;
+  display: inline-flex; align-items: center; gap: 6px;
   background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
-  border-radius: 999px; padding: 5px 14px; margin-bottom: 22px;
-  font-size: 12px; font-weight: 700; color: rgba(255,255,255,.8);
+  border-radius: 999px; padding: 3px 10px; margin-bottom: 8px;
+  font-size: 10px; font-weight: 700; color: rgba(255,255,255,.8);
   letter-spacing: .5px; text-transform: uppercase;
 }
-.hero-eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
+.hero-eyebrow .dot { width: 5px; height: 5px; border-radius: 50%; background: #4ade80; }
 .hero h1 {
-  font-size: clamp(32px, 5vw, 52px); font-weight: 900; color: #fff;
-  letter-spacing: -1.5px; line-height: 1.08; margin-bottom: 18px;
+  font-size: clamp(20px, 2.5vw, 28px); font-weight: 900; color: #fff;
+  letter-spacing: -0.6px; line-height: 1.1; margin: 0 0 4px;
 }
 .hero h1 span { color: #60a5fa; }
 .hero p {
-  font-size: 17px; color: rgba(255,255,255,.65); line-height: 1.65; max-width: 520px;
-  margin-bottom: 32px;
+  font-size: 13px; color: rgba(255,255,255,.65); line-height: 1.4; max-width: 620px;
+  margin: 0 0 10px;
 }
 .hero-stats {
-  display: flex; gap: 28px; flex-wrap: wrap;
+  display: flex; gap: 6px 18px; flex-wrap: wrap; align-items: center;
+  font-size: 11.5px; color: rgba(255,255,255,.55); font-weight: 600;
 }
-.hero-stat { text-align: left; }
-.hero-stat-num { font-size: 28px; font-weight: 900; color: #fff; line-height: 1; }
-.hero-stat-lbl { font-size: 12px; color: rgba(255,255,255,.5); margin-top: 3px; }
+.hero-stat { display: inline-flex; align-items: baseline; gap: 4px; }
+.hero-stat-num { font-size: 14px; font-weight: 900; color: #fff; line-height: 1; }
+.hero-stat-sep { color: rgba(255,255,255,.25); padding: 0 2px; }
 .hero-badges {
-  display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;
+  display: flex; flex-wrap: wrap; gap: 6px; flex-shrink: 0; max-width: 420px; justify-content: flex-end;
 }
 .hero-badge {
-  display: flex; align-items: center; gap: 12px;
-  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
-  border-radius: 12px; padding: 14px 18px; min-width: 220px;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14);
+  border-radius: 999px; padding: 5px 10px 5px 8px;
   backdrop-filter: blur(8px);
 }
-.hero-badge-icon { font-size: 24px; flex-shrink: 0; }
-.hero-badge-text { font-size: 12.5px; color: rgba(255,255,255,.8); line-height: 1.4; }
-.hero-badge-text strong { color: #fff; display: block; font-size: 13.5px; margin-bottom: 2px; }
+.hero-badge-icon { font-size: 13px; flex-shrink: 0; line-height: 1; }
+.hero-badge-text { font-size: 11px; color: rgba(255,255,255,.85); line-height: 1.2; font-weight: 600; }
+.hero-badge-text strong { color: #fff; font-weight: 800; }
 
 /* ── FILTER BAR ── */
 .filter-bar {
@@ -220,7 +221,7 @@ body {
   height: 3px; width: 100%; flex-shrink: 0;
 }
 .mod-card-top {
-  padding: 18px 44px 14px 20px;
+  padding: 18px 20px 14px 20px;
   display: flex; align-items: flex-start; justify-content: space-between; gap: 10px;
 }
 .mod-icon-box {
@@ -305,18 +306,27 @@ body {
 .lbl-hyg   { color: #16a34a; }
 .cnt-hyg   { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
 
-/* ── SEARCH ── */
+/* ── SEARCH (eigene Zeile unterhalb der Filter-Bar, gleiche Breite) ── */
+.search-bar {
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 24px; position: sticky; top: 108px; z-index: 89;
+  box-shadow: 0 2px 8px rgba(0,0,0,.03);
+}
+.search-bar-inner {
+  max-width: 1340px; margin: 0 auto;
+  padding: 10px 0;
+}
 .search-wrap {
-  position: relative; margin-left: auto; flex-shrink: 0;
+  position: relative; flex: 1;
 }
 .search-inp {
-  padding: 7px 12px 7px 34px; border: 1.5px solid var(--border2);
-  border-radius: 9px; font-size: 13px; font-family: inherit;
-  background: var(--surface); color: var(--text); width: 210px;
+  width: 100%; padding: 9px 14px 9px 38px; border: 1.5px solid var(--border2);
+  border-radius: 10px; font-size: 13.5px; font-family: inherit;
+  background: var(--surface); color: var(--text);
   outline: none; transition: .15s;
 }
 .search-inp:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
-.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 14px; pointer-events: none; }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 15px; pointer-events: none; }
 
 /* ── EMPTY STATE ── */
 .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
@@ -333,20 +343,22 @@ body {
 
 /* ── RESPONSIVE ── */
 @media(max-width:900px) {
-  .hero { padding: 48px 20px 56px; }
+  .hero { padding: 18px 20px 20px; }
   .hero-badges { display: none; }
   .mod-grid { grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); }
 }
 @media(max-width:600px) {
   .mod-grid { grid-template-columns: 1fr; }
-  .hero h1 { font-size: 28px; }
+  .hero h1 { font-size: 20px; }
   .nav-tagline { display: none; }
 }
 
-/* FAVORITEN */
-.fav-btn{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:8px;border:none;background:transparent;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:.35;transition:.2s;z-index:2;line-height:1;padding:0}
-.fav-btn:hover{opacity:.8;background:var(--amber-bg,#fffbeb);transform:scale(1.15)}
-.fav-btn.active{opacity:1;color:#f59e0b;filter:drop-shadow(0 0 5px rgba(245,158,11,.6))}
+/* FAVORITEN — Stern sitzt als letztes Item im .mod-badges-Flex-Layout,
+   dadurch kann er nicht mehr mit anderen Badges ueberlappen (auch auf
+   schmalen Displays wie iPhone). */
+.fav-btn{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;border:none;background:transparent;font-size:16px;cursor:pointer;opacity:.35;transition:.15s;line-height:1;padding:0;flex-shrink:0;margin-left:2px}
+.fav-btn:hover{opacity:.85;background:var(--amber-bg,#fffbeb);transform:scale(1.12)}
+.fav-btn.active{opacity:1;color:#f59e0b;filter:drop-shadow(0 0 4px rgba(245,158,11,.55))}
 .mod-card{position:relative}
 
 /* Admin accent */
@@ -382,7 +394,7 @@ body {
     <div style="flex:1;"></div>
     <div class="g-nav-right">
       <a class="g-nav-btn no-print" href="sys_unternehmen.html" title="Unternehmen verwalten" id="navOrgAdmin" style="display:none">🏢</a>
-      <a class="g-nav-btn no-print gema-admin-only" href="sys_admin.html" title="Benutzerverwaltung">👥</a>
+      <a class="g-nav-btn no-print" id="navBtnUsers" href="sys_admin.html" title="Benutzerverwaltung" style="display:none">👥</a>
       <a class="g-nav-btn no-print" href="sys_profil.html" title="Einstellungen">⚙️</a>
       <button class="gema-feedback-btn no-print" onclick="GemaFeedback.start()">🔴 Feedback</button>
       <button class="g-nav-btn no-print" onclick="GemaAuth.logout()" title="Abmelden">Abmelden</button>
@@ -398,46 +410,30 @@ body {
     <div class="hero-text">
       <div class="hero-eyebrow">
         <span class="dot"></span>
-        Für die Gebäudetechnik von morgen
+        Modulübersicht
       </div>
-      <h1>Alle Module.<br><span>Ein System.</span></h1>
-      <p>GEMA ist modular aufgebaut und wächst laufend. Von Sanitärberechnungen über Hygienemanagement bis zu Terminplanung – alles in einem integrierten Tool.</p>
+      <h1>Alle Module. <span>Ein System.</span></h1>
+      <p>Modulare Suite für die Gebäudetechnik — von Sanitärberechnungen über Hygiene-Management bis zur Terminplanung.</p>
       <div class="hero-stats">
-        <div class="hero-stat">
-          <div class="hero-stat-num">25</div>
-          <div class="hero-stat-lbl">Module geplant</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hero-stat-num">6</div>
-          <div class="hero-stat-lbl">Kategorien</div>
-        </div>
-        <div class="hero-stat">
-          <div class="hero-stat-num">17</div>
-          <div class="hero-stat-lbl">Bereits aktiv</div>
-        </div>
+        <span class="hero-stat"><span class="hero-stat-num">25</span> Module geplant</span>
+        <span class="hero-stat-sep">·</span>
+        <span class="hero-stat"><span class="hero-stat-num">6</span> Kategorien</span>
+        <span class="hero-stat-sep">·</span>
+        <span class="hero-stat"><span class="hero-stat-num">17</span> bereits aktiv</span>
       </div>
     </div>
     <div class="hero-badges">
       <div class="hero-badge">
-        <div class="hero-badge-icon">🏗️</div>
-        <div class="hero-badge-text">
-          <strong>Gewerksübergreifend</strong>
-          Sanitär, Heizung, Lüftung, Elektro
-        </div>
+        <span class="hero-badge-icon">🏗️</span>
+        <span class="hero-badge-text"><strong>Gewerksübergreifend</strong></span>
       </div>
       <div class="hero-badge">
-        <div class="hero-badge-icon">📐</div>
-        <div class="hero-badge-text">
-          <strong>Normkonform</strong>
-          SIA, SVGW, SWKI, EN-Normen
-        </div>
+        <span class="hero-badge-icon">📐</span>
+        <span class="hero-badge-text"><strong>Normkonform</strong> SIA/SVGW</span>
       </div>
       <div class="hero-badge">
-        <div class="hero-badge-icon">☁️</div>
-        <div class="hero-badge-text">
-          <strong>Cloud-basiert</strong>
-          Jederzeit, überall verfügbar
-        </div>
+        <span class="hero-badge-icon">☁️</span>
+        <span class="hero-badge-text"><strong>Cloud</strong> CH-Hosting</span>
       </div>
     </div>
   </div>
@@ -446,8 +442,6 @@ body {
 <!-- ── FILTER BAR ── -->
 <div class="filter-bar">
   <div class="filter-inner">
-    <button class="filter-btn active" data-filter="all">Alle Module <span class="count" id="cnt-all">26</span></button>
-    <div class="filter-sep"></div>
     <button class="filter-btn fav-filter-btn" data-filter="fav" id="favFilterBtn" style="display:none">⭐ Favoriten <span class="count" id="cnt-fav">0</span></button>
     <button class="filter-btn" data-filter="plan">📋 Projektmanagement <span class="count" id="cnt-plan">9</span></button>
     <button class="filter-btn" data-filter="san">💧 Sanitär <span class="count" id="cnt-san">2</span></button>
@@ -459,13 +453,18 @@ body {
     <button class="filter-btn" data-filter="infra">🏭 Infrastruktur <span class="count">2</span></button>
     <button class="filter-btn" data-filter="ausb">🎓 Ausbildung <span class="count">2</span></button>
     <button class="filter-btn" data-filter="admin">⚙️ Admin <span class="count">1</span></button>
-    <div class="filter-sep" style="margin-left:auto;"></div>
+  </div>
+</div>
+
+<!-- Eigene Suchleiste unter der Kategorie-Filter-Bar, gleiche Breite -->
+<div class="search-bar">
+  <div class="search-bar-inner">
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
       <input class="search-inp" type="text" id="searchInp" placeholder="Modul suchen…" oninput="filterModules()"/>
     </div>
   </div>
-  </div>
+</div>
 
 <!-- ── MAIN CONTENT ── -->
 <main class="main" id="mainContent">
@@ -1187,13 +1186,20 @@ const addStarButtons = () => {
   document.querySelectorAll('a.mod-card').forEach(card => {
     const key = card.getAttribute('href') || '';
     if (!key || card.closest('#fav')) return; // skip fav-section clones
+    // Nicht nochmal hinzufuegen, falls der Stern bereits existiert
+    // (z.B. durch wiederholtes Aufrufen nach Re-Rendering).
+    if (card.querySelector('.fav-btn')) return;
     const btn = document.createElement('button');
     btn.className = 'fav-btn' + (favs.has(key) ? ' active' : '');
     btn.dataset.key = key;
     btn.title = favs.has(key) ? 'Aus Favoriten entfernen' : 'Als Favorit markieren';
     btn.textContent = '★';
     btn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); toggleFav(key); };
-    card.appendChild(btn);
+    // Stern in die Badges-Zeile einhaengen, damit er Teil des Flex-
+    // Layouts ist und nicht mehr mit Badges ueberlappen kann.
+    const badges = card.querySelector('.mod-badges');
+    if (badges) badges.appendChild(btn);
+    else card.appendChild(btn); // Fallback fuer Cards ohne Badges
   });
 };
 
@@ -1257,8 +1263,10 @@ function filterModules() {
   });
 
   if (q) {
+    // Bei aktiver Suche gibt es keine aktive Kategorie — die Filter-
+    // Buttons werden zurueckgesetzt, Treffer kommen direkt aus der
+    // Such-Funktion.
     filterBtns.forEach(b => b.classList.remove('active'));
-    document.querySelector('[data-filter="all"]').classList.add('active');
   }
 }
 
@@ -1267,6 +1275,16 @@ function filterModules() {
   if(typeof GemaAuth==='undefined') return;
   var user=GemaAuth.getCurrentUser();
   if(!user) return;
+  // Button "Benutzerverwaltung" (👥) oben rechts: nur sichtbar fuer
+  // GEMA-Super-Admin (role_admin) oder Unternehmens-Admin (in org.admins).
+  // GemaAuth.isOrgAdmin() deckt beides ab.
+  try {
+    var isOrgA = (typeof GemaAuth.isOrgAdmin==='function') && GemaAuth.isOrgAdmin(user.id);
+    if(isOrgA){
+      var navBtn=document.getElementById('navBtnUsers');
+      if(navBtn) navBtn.style.display='';
+    }
+  } catch(e) {}
   var isAdmin=user.roleIds&&user.roleIds.indexOf('role_admin')>=0;
   if(isAdmin) return; // Admin sieht alles
 
@@ -1318,24 +1336,6 @@ function filterModules() {
   });
 })();
 
-// ── ENTRANCE ANIMATIONS ───────────────────────────────────
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.style.opacity = '1';
-      entry.target.style.transform = 'translateY(0)';
-    }
-  });
-}, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
-
-document.querySelectorAll('.mod-card').forEach((card, i) => {
-  if(card.style.display==='none') return;
-  card.style.opacity = '0';
-  card.style.transform = 'translateY(16px)';
-  card.style.transition = `opacity .4s ${i * 0.04}s ease, transform .4s ${i * 0.04}s ease`;
-  observer.observe(card);
-});
-
 // ── INIT ──────────────────────────────────────────────────
 addStarButtons();
 buildFavGrid();
@@ -1374,5 +1374,39 @@ window.addEventListener('online',function(){
 });
 </script>
 <script src="gema_mobile_menu.js"></script>
+<script src="gema_coachmarks.js"></script>
+<script>
+// ── Onboarding-Coachmarks (#29) — Startseite ──
+document.addEventListener('DOMContentLoaded',function(){
+  if(typeof GemaCoachmarks==='undefined')return;
+  var steps=[
+    {
+      selector:'.filter-bar',
+      title:'Willkommen bei GEMA',
+      text:'GEMA bündelt alle Werkzeuge für Sanitäringenieurwesen und Bauprojektmanagement in einer Suite. Die Modul-Kategorien oben helfen dir, schnell das Richtige zu finden.',
+      placement:'bottom',icon:'👋'
+    },
+    {
+      selector:'.filter-btn[data-filter="plan"]',
+      title:'Projektmanagement zuerst',
+      text:'Lege dein erstes Bauvorhaben in «Objekte & Beteiligte» an. Alle Berechnungen und Ausschreibungen beziehen sich später auf dieses Objekt.',
+      placement:'bottom',icon:'🏗'
+    },
+    {
+      selector:'.filter-btn[data-filter="san"]',
+      title:'Sanitärberechnungen',
+      text:'LU-Zusammenstellung ist die zentrale Datenquelle: Verbraucher einmal erfassen, Ergebnisse fliessen automatisch in Druckerhöhung, Osmose und Enthärtung.',
+      placement:'bottom',icon:'💧'
+    },
+    {
+      selector:'.search-inp',
+      title:'Schnelle Modulsuche',
+      text:'Über 40 Module — tippe hier einfach ein Stichwort (z.B. «Enthärtung» oder «Ausschreibung»), um das passende Werkzeug zu finden.',
+      placement:'bottom',icon:'🔍'
+    }
+  ];
+  GemaCoachmarks.init('index',steps,{delay:1200});
+});
+</script>
 </body>
 </html>

@@ -74,6 +74,17 @@ textarea.fc{resize:vertical;min-height:60px;line-height:1.5}
 .b-test{background:var(--amb-bg);color:var(--amb);border:1px solid #fde68a}
 .b-abgelaufen{background:var(--red-bg);color:var(--red);border:1px solid #fecaca}
 .b-oa{background:#fff7ed;color:#ea580c;border:1px solid #fed7aa}
+/* Stammlieferanten (#31) */
+.b-fav{background:#fef3c7;color:#92400e;border:1px solid #fbbf24}
+.b-stamm{background:#ecfeff;color:#0e7490;border:1px solid #a5f3fc}
+.lief-stars{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.lief-star-btn{width:30px;height:30px;border-radius:8px;border:1.5px solid var(--brd);background:var(--sur);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:.15s;padding:0;line-height:1}
+.lief-star-btn:hover{background:var(--bg2);border-color:var(--brd2);transform:scale(1.08)}
+.lief-star-btn.active{background:#fef3c7;border-color:#fbbf24;color:#92400e}
+.lief-star-btn.stamm.active{background:#ecfeff;border-color:#22d3ee;color:#0e7490}
+.fb{padding:5px 12px;border-radius:8px;border:1.5px solid var(--brd2);background:var(--sur);color:var(--txt2);font-size:11.5px;font-weight:700;cursor:pointer;transition:.15s;white-space:nowrap}
+.fb:hover{background:var(--bg2)}
+.fb.active{background:var(--acc);border-color:var(--acc);color:#fff}
 
 /* Editor overlay */
 .editor-overlay{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);backdrop-filter:blur(4px)}
@@ -120,24 +131,48 @@ textarea.fc{resize:vertical;min-height:60px;line-height:1.5}
   <!-- KPIs -->
   <div class="kpi-row" id="kpis"></div>
 
+  <!-- Stamm-Filter (#31) -->
+  <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap">
+    <span style="font-size:11px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-right:4px">Stamm:</span>
+    <button class="fb active" data-stamm="all" onclick="setStammFilter('all',this)">Alle</button>
+    <button class="fb" data-stamm="fav" onclick="setStammFilter('fav',this)">⭐ Meine Favoriten <span id="cntFav" style="opacity:.7;margin-left:3px">0</span></button>
+    <button class="fb" data-stamm="stamm" onclick="setStammFilter('stamm',this)">🏢 Büro-Stamm <span id="cntStamm" style="opacity:.7;margin-left:3px">0</span></button>
+    <span style="font-size:11px;color:var(--mut);margin-left:6px">Favoriten und Büro-Stamm erscheinen in allen Listen oben.</span>
+  </div>
+
   <!-- Toolbar -->
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-    <input class="fc" id="search" type="search" placeholder="Lieferant suchen…" style="max-width:280px" oninput="renderList()"/>
-    <select class="fc" id="filterStatus" style="max-width:160px" onchange="renderList()">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+    <input class="fc" id="search" type="search" placeholder="Lieferant suchen…" style="max-width:240px" oninput="renderList()"/>
+    <select class="fc" id="filterStatus" style="max-width:140px" onchange="renderList()">
       <option value="">Alle Status</option>
       <option value="aktiv">Aktiv</option>
       <option value="inaktiv">Inaktiv</option>
     </select>
-    <select class="fc" id="filterAbo" style="max-width:160px" onchange="renderList()">
+    <select class="fc" id="filterAbo" style="max-width:140px" onchange="renderList()">
       <option value="">Alle Abos</option>
       <option value="basis">Basis</option>
       <option value="premium">Premium</option>
       <option value="enterprise">Enterprise</option>
       <option value="testphase">Testphase</option>
     </select>
+    <select class="fc" id="filterKanton" style="max-width:140px" onchange="renderList()">
+      <option value="">Alle Kantone</option>
+    </select>
+    <select class="fc" id="filterKategorie" style="max-width:200px" onchange="renderList()">
+      <option value="">Alle Kategorien</option>
+    </select>
+    <select class="fc" id="filterPhase" style="max-width:170px" onchange="renderList()" title="Filter nach SIA-Phase (basierend auf Lieferanten-Tags)">
+      <option value="">Alle SIA-Phasen</option>
+      <option value="vorprojekt">SIA 32 · Vorprojekt</option>
+      <option value="bauprojekt">SIA 33 · Bauprojekt</option>
+      <option value="ausschreibung">SIA 41 · Ausschreibung</option>
+      <option value="ausfuehrung">SIA 51-53 · Ausführung</option>
+    </select>
+    <button class="btn btn-g btn-sm" onclick="resetFilters()" title="Filter zurücksetzen">↻ Reset</button>
     <div style="flex:1"></div>
     <button class="btn btn-p" onclick="openNew()">+ Neuer Lieferant</button>
   </div>
+  <div id="filterStats" style="font-size:11.5px;color:var(--mut);margin-bottom:14px;min-height:14px"></div>
 
   <!-- List -->
   <div class="card">
@@ -281,39 +316,159 @@ function renderKPIs(){
     '<div class="kpi"><div class="kpi-val" style="color:#ea580c">'+oaOffen+'</div><div class="kpi-lbl">Offene Anfragen</div></div>';
 }
 
+// ── Filter-Dropdowns initialisieren ──
+// Wird aus den effektiv vorhandenen Lieferanten-Daten dynamisch befüllt.
+function populateFilters(){
+  var all = GemaProdukte.getAllLieferanten();
+  // Kantone aus Adressen sammeln
+  var kSet = {};
+  all.forEach(function(l){
+    var k = (l.adresse||{}).kanton;
+    if(k) kSet[k] = true;
+  });
+  var kSel = document.getElementById('filterKanton');
+  if(kSel && kSel.options.length <= 1){
+    Object.keys(kSet).sort().forEach(function(k){
+      var o = document.createElement('option');
+      o.value = k; o.textContent = k;
+      kSel.appendChild(o);
+    });
+  }
+  // Kategorien aus Produktkatalog-Registry
+  var katSel = document.getElementById('filterKategorie');
+  if(katSel && katSel.options.length <= 1 && typeof GemaProdukte.getKategorien === 'function'){
+    GemaProdukte.getKategorien().forEach(function(kat){
+      var o = document.createElement('option');
+      o.value = kat.id;
+      o.textContent = (kat.icon ? kat.icon+' ' : '') + kat.name;
+      katSel.appendChild(o);
+    });
+  }
+}
+
+function resetFilters(){
+  ['search','filterStatus','filterAbo','filterKanton','filterKategorie','filterPhase'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  renderList();
+}
+window.resetFilters = resetFilters;
+
+// SIA-Phase → typische Lieferanten-Kategorien Mapping
+// Welche Lieferanten sind in welcher Phase relevant?
+var PHASE_KATEGORIE_MAP = {
+  vorprojekt:    ['enthaertung','osmose','warmwasser_boiler','hebeanlage','rohrsystem'], // Konzept: Hauptkomponenten
+  bauprojekt:    ['enthaertung','osmose','warmwasser_boiler','hebeanlage','zirkulation','rohrsystem','formstuecke'], // Detail: alles
+  ausschreibung: ['enthaertung','osmose','warmwasser_boiler','hebeanlage','zirkulation','rohrsystem','formstuecke','armaturen'], // Vollständig
+  ausfuehrung:   ['rohrsystem','formstuecke','armaturen','zirkulation'] // Montage: Verbrauchsmaterial
+};
+
+// Welche Kategorien führt ein Lieferant tatsächlich? (Premium-Kategorien + Produkt-Kategorien)
+function _liefKategorien(l){
+  var kats = {};
+  if(l.premium && Array.isArray(l.premium.kategorien)){
+    l.premium.kategorien.forEach(function(k){ kats[k] = true; });
+  }
+  try {
+    if(typeof GemaProdukte.getProdukte === 'function' && typeof GemaProdukte.getKategorien === 'function'){
+      GemaProdukte.getKategorien().forEach(function(kat){
+        var has = GemaProdukte.getProdukte(kat.id).some(function(p){ return p.lieferantId === l.id; });
+        if(has) kats[kat.id] = true;
+      });
+    }
+  } catch(e){}
+  return Object.keys(kats);
+}
+
+// ── Stamm-Filter State (#31) ──
+var _stammFilter = 'all'; // 'all' | 'fav' | 'stamm'
+function setStammFilter(val, btn){
+  _stammFilter = val;
+  document.querySelectorAll('[data-stamm]').forEach(function(b){ b.classList.remove('active'); });
+  if(btn) btn.classList.add('active');
+  renderList();
+}
+window.setStammFilter = setStammFilter;
+
 // ── List ──
 function renderList(){
+  populateFilters();
   var all = GemaProdukte.getAllLieferanten();
-  var q = (document.getElementById('search').value||'').toLowerCase();
+  var q  = (document.getElementById('search').value||'').toLowerCase();
   var fs = document.getElementById('filterStatus').value;
   var fa = document.getElementById('filterAbo').value;
+  var fk = document.getElementById('filterKanton').value;
+  var fc = document.getElementById('filterKategorie').value;
+  var fp = document.getElementById('filterPhase').value;
+
+  var phaseAllow = fp ? (PHASE_KATEGORIE_MAP[fp] || []) : null;
+  // Stamm-Sets für Filter und Icons (#31)
+  var favIds = {}; GemaProdukte.getFavoriten().forEach(function(id){ favIds[id] = true; });
+  var stammIds = {}; GemaProdukte.getOrgStamm().forEach(function(id){ stammIds[id] = true; });
+  // Counts für die Filter-Pills
+  var elFav = document.getElementById('cntFav'); if(elFav) elFav.textContent = GemaProdukte.getFavoriten().length;
+  var elStamm = document.getElementById('cntStamm'); if(elStamm) elStamm.textContent = GemaProdukte.getOrgStamm().length;
 
   var list = all.filter(function(l){
     if(q && l.firma.toLowerCase().indexOf(q)<0 && (l.kontaktPerson||'').toLowerCase().indexOf(q)<0 && (l.email||'').toLowerCase().indexOf(q)<0) return false;
     if(fs && l.status !== fs) return false;
     if(fa === 'testphase' && (!l.abo || l.abo.status !== 'testphase')) return false;
     if(fa && fa !== 'testphase' && (!l.abo || l.abo.typ !== fa)) return false;
+    if(fk && (l.adresse||{}).kanton !== fk) return false;
+    var liefKats = (fc || phaseAllow) ? _liefKategorien(l) : null;
+    if(fc && liefKats.indexOf(fc) < 0) return false;
+    if(phaseAllow && !liefKats.some(function(k){ return phaseAllow.indexOf(k) >= 0; })) return false;
+    if(_stammFilter === 'fav' && !favIds[l.id]) return false;
+    if(_stammFilter === 'stamm' && !stammIds[l.id]) return false;
     return true;
   });
+  // Sortierung: persönliche Favoriten → Büro-Stamm → Rest (alphabetisch)
+  list = GemaProdukte.sortWithStamm(list);
+
+  // Filter-Stats Zeile
+  var stats = document.getElementById('filterStats');
+  if(stats){
+    var activeFilters = [];
+    if(q) activeFilters.push('Suche: "'+q+'"');
+    if(fs) activeFilters.push('Status: '+fs);
+    if(fa) activeFilters.push('Abo: '+fa);
+    if(fk) activeFilters.push('Kanton: '+fk);
+    if(fc) activeFilters.push('Kategorie: '+fc);
+    if(fp) activeFilters.push('Phase: '+fp);
+    stats.textContent = list.length+' / '+all.length+' Lieferanten' + (activeFilters.length ? '  ·  Filter: '+activeFilters.join(' · ') : '');
+  }
 
   if(!list.length){
     document.getElementById('listBody').innerHTML='<div style="padding:40px;text-align:center;color:var(--mut)"><div style="font-size:32px;margin-bottom:8px">📦</div><div>Keine Lieferanten gefunden.</div><div style="margin-top:12px"><button class="btn btn-p btn-sm" onclick="openNew()">+ Neuer Lieferant</button></div></div>';
     return;
   }
 
+  var canStamm = GemaProdukte.canEditOrgStamm();
   document.getElementById('listBody').innerHTML = list.map(function(l){
     var aboTyp = (l.abo||{}).typ || 'basis';
     var aboStatus = (l.abo||{}).status || 'aktiv';
     var isPrem = l.premium && l.premium.aktiv;
     var oaCount = 0;
     try { oaCount = GemaProdukte.getOffertanfragenCount(l.id); } catch(e){}
+    var isFav = !!favIds[l.id];
+    var isStamm = !!stammIds[l.id];
+    // Stern-Buttons (#31): persönlicher Favorit + (wenn berechtigt) Büro-Stamm
+    var stars =
+      '<div class="lief-stars">' +
+        '<button class="lief-star-btn'+(isFav?' active':'')+'" title="'+(isFav?'Favorit entfernen':'Als persönlichen Favoriten markieren')+'" onclick="event.stopPropagation();toggleFavLief(\''+E(l.id)+'\')">'+(isFav?'⭐':'☆')+'</button>' +
+        (canStamm ? '<button class="lief-star-btn stamm'+(isStamm?' active':'')+'" title="'+(isStamm?'Aus Büro-Stamm entfernen':'Als Büro-Stamm markieren (für alle Kollegen)')+'" onclick="event.stopPropagation();toggleStammLief(\''+E(l.id)+'\')">🏢</button>' : '') +
+      '</div>';
     return '<div class="lief-row" onclick="openLieferant(\''+E(l.id)+'\')">' +
+      stars +
       '<div class="lief-logo">'+(l.logo?'<img src="'+E(l.logo)+'"/>':E(l.firma.charAt(0)))+'</div>'+
       '<div class="lief-info">' +
         '<div class="lief-firma">'+E(l.firma)+(l.rechtsform?' '+E(l.rechtsform):'')+'</div>' +
         '<div class="lief-meta">'+E(l.kontaktPerson||'')+' · '+E(l.email||'')+' · '+E((l.adresse||{}).ort||'')+'</div>' +
       '</div>' +
       '<div class="lief-badges">' +
+        (isFav?'<span class="badge b-fav">⭐ Favorit</span>':'') +
+        (isStamm?'<span class="badge b-stamm">🏢 Büro-Stamm</span>':'') +
         '<span class="badge '+(l.status==='aktiv'?'b-aktiv':'b-inaktiv')+'">'+(l.status==='aktiv'?'● Aktiv':'● Inaktiv')+'</span>' +
         '<span class="badge '+(aboTyp==='premium'?'b-premium':aboTyp==='enterprise'?'b-enterprise':'b-basis')+'">'+aboTyp.charAt(0).toUpperCase()+aboTyp.slice(1)+'</span>' +
         (aboStatus==='testphase'?'<span class="badge b-test">Testphase</span>':'') +
@@ -324,6 +479,29 @@ function renderList(){
     '</div>';
   }).join('');
 }
+
+// ── Stamm-Toggles (#31) ──
+function toggleFavLief(id){
+  var nowFav = GemaProdukte.toggleFavorit(id);
+  toast(nowFav ? '⭐ Zu Favoriten hinzugefügt' : 'Favorit entfernt');
+  renderList();
+}
+window.toggleFavLief = toggleFavLief;
+
+function toggleStammLief(id){
+  if(!GemaProdukte.canEditOrgStamm()){
+    toast('Nur Admin und Planer können Büro-Stammlieferanten pflegen.', 'error');
+    return;
+  }
+  var nowStamm = GemaProdukte.toggleOrgStamm(id);
+  if(nowStamm === null){
+    toast('Keine Berechtigung für Büro-Stamm.', 'error');
+    return;
+  }
+  toast(nowStamm ? '🏢 Als Büro-Stamm markiert — für alle Kollegen sichtbar' : 'Aus Büro-Stamm entfernt');
+  renderList();
+}
+window.toggleStammLief = toggleStammLief;
 
 // ── Editor ──
 function openNew(){
@@ -565,6 +743,113 @@ renderKPIs();
 renderList();
 </script>
 <script>document.addEventListener('DOMContentLoaded', function(){if(typeof GemaFeedback!=='undefined')GemaFeedback.init('lieferanten', 'Lieferanten-Verwaltung');});</script>
+<script src="gema_coachmarks.js"></script>
+<script>
+// ── Onboarding-Coachmarks (#34) ──
+// Führt Erstnutzer durch das Lieferanten-Dashboard: KPIs, Stamm-Filter,
+// Filter-Toolbar, Neuer-Lieferant-Button und die Stern/Haus-Toggles.
+// Die Editor-Tabs werden über einen separaten Coach beim ersten Öffnen
+// eines Lieferanten angezeigt.
+(function(){
+  function startCoach(){
+    if(typeof GemaCoachmarks==='undefined')return;
+    if(GemaCoachmarks.isDone('sys_lieferanten'))return;
+    // Warten bis KPIs gerendert sind
+    var tries=0;
+    var timer=setInterval(function(){
+      tries++;
+      var kpis=document.getElementById('kpis');
+      if((kpis&&kpis.children.length)||tries>20){
+        clearInterval(timer);
+        var canStamm = (typeof GemaProdukte!=='undefined' && GemaProdukte.canEditOrgStamm) ? GemaProdukte.canEditOrgStamm() : false;
+        var steps=[
+          {
+            selector:'#kpis',
+            title:'Lieferanten-Übersicht auf einen Blick',
+            text:'Oben siehst du die wichtigsten Kennzahlen: Anzahl Lieferanten, aktive, Premium-Partner, laufende Testphasen und offene Offertanfragen.',
+            placement:'bottom',icon:'📊'
+          },
+          {
+            selector:'[data-stamm="fav"]',
+            title:'Stamm-Filter: ⭐ Meine Favoriten, 🏢 Büro-Stamm',
+            text:'Markiere die Lieferanten, mit denen du am häufigsten arbeitest — sie erscheinen dann immer zuoberst in allen Listen. Persönliche Favoriten (⭐) sind nur für dich, Büro-Stamm (🏢) für dein ganzes Team.',
+            placement:'bottom',icon:'⭐'
+          },
+          {
+            selector:'#filterKategorie',
+            title:'Filter nach Kategorie, Region & SIA-Phase',
+            text:'Wähle Lieferanten passend zur aktuellen Projektphase: Im Bauprojekt brauchst du alle Komponenten, in der Ausführung nur noch Rohre und Armaturen. Kombiniere mit Kanton-Filter für regionale Nähe.',
+            placement:'bottom',icon:'🎯'
+          },
+          {
+            selector:'.btn-p',
+            title:'Neuen Lieferanten anlegen',
+            text:'Klick hier, um einen neuen Lieferanten zu erfassen. Du kannst Firma, Kontakt, Adresse, Abo-Status und Premium-Platzierung setzen. Produkte und Offertanfragen werden später verlinkt.',
+            placement:'bottom',icon:'➕'
+          },
+          {
+            selector:'.lief-star-btn',
+            title:'Sofort als Favorit markieren',
+            text:canStamm
+              ? 'Der gelbe Stern (☆/⭐) markiert persönliche Favoriten — nur für dich sichtbar. Das Haus-Symbol (🏢) setzt den Lieferanten als Büro-Stamm für dein ganzes Team. Favoriten und Büro-Stamm werden in Listen automatisch oben angezeigt.'
+              : 'Der gelbe Stern markiert persönliche Favoriten — nur für dich sichtbar. Favoriten werden in Listen automatisch oben angezeigt. Das Büro-Stamm-Symbol (🏢) sehen nur Admins und Planer.',
+            placement:'right',icon:'⭐'
+          }
+        ];
+        GemaCoachmarks.init('sys_lieferanten',steps,{delay:300});
+      }
+    },150);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startCoach);
+  else setTimeout(startCoach,600);
+
+  // Zweiter Coach: Editor-Tabs beim ersten Öffnen eines Lieferanten erklären.
+  // Wir hooken uns in openLieferant() ein und zeigen nach kurzer Verzögerung
+  // einen zweiten Walkthrough.
+  var _editorCoachDone = false;
+  var _origOpen = null;
+  document.addEventListener('DOMContentLoaded', function(){
+    if(typeof window.openLieferant !== 'function')return;
+    _origOpen = window.openLieferant;
+    window.openLieferant = function(id){
+      _origOpen(id);
+      if(_editorCoachDone)return;
+      if(typeof GemaCoachmarks==='undefined')return;
+      if(GemaCoachmarks.isDone('sys_lieferanten_editor'))return;
+      _editorCoachDone = true;
+      setTimeout(function(){
+        var editorSteps = [
+          {
+            selector:'#edTabs .tab:nth-child(1)',
+            title:'Tab «Profil» — Grunddaten',
+            text:'Firma, Rechtsform, UID, Kontaktperson, Adresse und Beschreibung. Alle Basisdaten des Lieferanten.',
+            placement:'bottom',icon:'👤'
+          },
+          {
+            selector:'#edTabs .tab:nth-child(2)',
+            title:'Tab «Abo & Premium»',
+            text:'Abo-Typ (Basis/Premium/Enterprise), Status, Testphase, Mahnungen. Hier steuerst du die Monetarisierung und schaltest Premium-Platzierungen frei.',
+            placement:'bottom',icon:'⭐'
+          },
+          {
+            selector:'#edTabs .tab:nth-child(3)',
+            title:'Tab «Produkte»',
+            text:'Alle Produkte dieses Lieferanten auf einen Blick. Details werden im Produktkatalog gepflegt.',
+            placement:'bottom',icon:'📦'
+          },
+          {
+            selector:'#edTabs .tab:nth-child(4)',
+            title:'Tab «Offertanfragen»',
+            text:'Alle eingegangenen Anfragen aus Berechnungen der Planer. Status, Antworten und Verlauf siehst du hier auf einen Blick.',
+            placement:'bottom',icon:'📨'
+          }
+        ];
+        GemaCoachmarks.init('sys_lieferanten_editor', editorSteps, {delay:400});
+      }, 500);
+    };
+  });
+})();
+</script>
 <script src="gema_mobile_menu.js"></script>
 </body>
 </html>
