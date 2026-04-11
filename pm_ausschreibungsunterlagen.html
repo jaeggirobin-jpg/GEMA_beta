@@ -708,7 +708,12 @@ let S={
   ],
   verteilungen:[],
   anfragen:[
-    {id:'anf-1',ausId:'aus-demo-1',installateurId:'inst-1',status:'interessiert',datum:'2026-03-21T10:00:00Z',antwortDatum:'2026-03-21T14:00:00Z',nachricht:''},
+    // Demo zeigt einen realistischen Zwischenstand: ein Unternehmer hat
+    // abgelehnt, einer wartet noch auf Antwort. Keine interessierten
+    // Antworten — das Badge «Interesse-Anfragen» bleibt bei 0, bis der
+    // User selbst eine Anfrage bekommt, auf die jemand mit Interesse
+    // antwortet (und die noch nicht verteilt ist).
+    {id:'anf-1',ausId:'aus-demo-1',installateurId:'inst-1',status:'abgelehnt',datum:'2026-03-21T10:00:00Z',antwortDatum:'2026-03-21T14:00:00Z',nachricht:'Kapazitäten aktuell ausgelastet'},
     {id:'anf-2',ausId:'aus-demo-1',installateurId:'inst-2',status:'angefragt',datum:'2026-03-21T10:00:00Z',antwortDatum:null,nachricht:''}
   ],
   nettoAnfragen:[],
@@ -767,6 +772,20 @@ function ld(){try{let r;try{r=localStorage.getItem(SK)}catch(e){r=_m[SK]||null}i
   if(!S.verteilungen)S.verteilungen=[];if(!S.anfragen)S.anfragen=[];if(!S.nettoAnfragen)S.nettoAnfragen=[];
   if(!S.marktplatzOfferten)S.marktplatzOfferten=[];if(!S.einreichungen)S.einreichungen=[];
   if(!S.emails)S.emails=[];if(!S.log)S.log=[];
+  // Migration: bestehender Demo-State hatte anf-1 als 'interessiert'
+  // ohne zugehoerige Verteilung, wodurch das Badge «Interesse-Anfragen»
+  // initial 1 zeigte. Neu setzen wir anf-1 auf 'abgelehnt' (wenn noch
+  // nicht vom User veraendert), damit die Demo mit einem sauberen 0
+  // startet. Läuft nur einmal pro Browser (via Flag).
+  if(!S._migratedAnfDemo){
+    var af = S.anfragen.find(function(x){return x.id==='anf-1';});
+    if (af && af.status==='interessiert' && af.ausId==='aus-demo-1' && af.installateurId==='inst-1'){
+      af.status='abgelehnt';
+      if(!af.nachricht) af.nachricht='Kapazitäten aktuell ausgelastet';
+    }
+    S._migratedAnfDemo = true;
+    try { sv(); } catch(e) {}
+  }
   // Set active ausschreibung
   if(!S.ausschreibung&&S.ausschreibungen.length)S.ausschreibung=S.ausschreibungen[0];
   // Load per-object BKP data
@@ -1031,9 +1050,20 @@ function buildTabs(){
   var ausIdMap=scopedAusIds();
   const nE=S.einreichungen.filter(function(e){return e.ausId===S.activeAusId && ausIdMap[e.ausId];}).length;
   if(S.currentRole==='planer'){
-    // Interesse-Anfragen: nur solche die zu einer Ausschreibung des
-    // aktiven Projekts gehoeren UND den Status 'interessiert' haben.
-    const nAnf=S.anfragen.filter(function(x){return x.status==='interessiert' && ausIdMap[x.ausId];}).length;
+    // Interesse-Anfragen-Badge: zaehlt nur offene Aktionen — also
+    // Unternehmer die Interesse bekundet haben, die der Planer aber
+    // noch nicht verteilt hat. Sobald verteilt ist, verschwindet der
+    // Eintrag aus dem Badge (Aktion erledigt). Abgelehnte und erst
+    // angefragte Einträge zählen nicht als offene Aktion im Sinne
+    // dieses Badges.
+    const nAnf=S.anfragen.filter(function(x){
+      if (x.status !== 'interessiert') return false;
+      if (!ausIdMap[x.ausId]) return false;
+      // Noch keine Verteilung fuer dieses Paar (Ausschreibung, Unternehmer)?
+      return !S.verteilungen.some(function(v){
+        return v.ausId===x.ausId && v.installateurId===x.installateurId;
+      });
+    }).length;
     var curA_=S.ausschreibungen.find(function(a){return a.id===S.activeAusId;});
     var isCrbx=curA_&&curA_.typ==='crbx';
     t=[{id:'pub',ic:'◫',l:'Übersicht'},{id:'paus',ic:'📋',l:'Ausschreibungen',bg:scoped.length},{id:'pbkp',ic:'☑',l:'BKP-Checkliste'},{id:'pcrbx',ic:'📦',l:'CRBX-Abgleich',disabled:!isCrbx},{id:'pdet',ic:'📝',l:'Detail'},{id:'panf',ic:'🤝',l:'Interesse-Anfragen',bg:nAnf},{id:'pvrt',ic:'📤',l:'Verteilen'},{id:'pein',ic:'💰',l:'Offerten',bg:nE},{id:'pvgl',ic:'📊',l:'Vergleich'},{id:'pvga',ic:'📋',l:'Vergabeantrag'},{id:'pber',ic:'🔬',l:'Berechnungen'},{id:'pbet',ic:'👥',l:'Beteiligte'}];
