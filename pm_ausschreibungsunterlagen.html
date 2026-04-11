@@ -88,6 +88,10 @@ input,select,textarea,button{font-family:inherit}
 .ac{background:var(--sur);border:1.5px solid var(--brd);border-radius:var(--r);padding:16px 18px;margin-bottom:10px;transition:.12s}.ac:hover{box-shadow:var(--sh-sm);border-color:var(--acc-bd)}
 .ac.is-active{border-color:var(--acc);background:var(--acc-bg);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
 .ac.is-active::before{content:'✓ Aktuell geöffnet';display:inline-block;font-size:10px;font-weight:800;color:var(--acc);background:#fff;padding:2px 8px;border-radius:999px;border:1.5px solid var(--acc);margin-bottom:6px;letter-spacing:.03em;text-transform:uppercase}
+/* Filter/Sort selects in Ausschreibungsliste */
+.aus-filter-sel{padding:6px 10px;border:1.5px solid var(--brd2);border-radius:8px;font-size:12px;font-weight:600;font-family:inherit;background:var(--sur);color:var(--txt);cursor:pointer;outline:none;transition:.12s}
+.aus-filter-sel:hover{border-color:var(--acc-bd)}
+.aus-filter-sel:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
 /* Abo plan */
 .abo-plan{border:2px solid var(--brd);border-radius:var(--r);padding:20px;text-align:center;transition:.2s;cursor:pointer;position:relative}.abo-plan:hover{border-color:var(--acc-bd);box-shadow:var(--sh)}.abo-plan.active{border-color:var(--acc);background:var(--acc-bg)}.abo-plan .pn{font-size:16px;font-weight:800;margin-bottom:4px}.abo-plan .pp{font-size:28px;font-weight:800;color:var(--acc);margin-bottom:4px}.abo-plan .ps{font-size:12px;color:var(--mut)}.abo-plan .pk{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;background:var(--grn);color:#fff;display:none;align-items:center;justify-content:center;font-size:12px;font-weight:800}.abo-plan.active .pk{display:flex}
 /* Abo gate overlay */
@@ -976,56 +980,206 @@ VIEWS.pub=function(){
   return h;
 };
 
+// ── Filter/Sort-Zustand fuer Ausschreibungsliste ──
+// Persistent in S gespeichert, damit Filter beim Seitenwechsel erhalten
+// bleiben. Werte: q (Suche), status, typ, projekt (objektId), sort.
+function _getAusFilter(){
+  if(!S._ausListFilter) S._ausListFilter = { q:'', status:'', typ:'', projekt:'', sort:'name-asc' };
+  return S._ausListFilter;
+}
+function setAusFilter(key,val){
+  var f=_getAusFilter();
+  f[key]=val;
+  try { save(); } catch(e) {}
+  renderAusList();
+}
+function resetAusFilter(){
+  S._ausListFilter = { q:'', status:'', typ:'', projekt:'', sort:'name-asc' };
+  try { save(); } catch(e) {}
+  // Ganze View neu zeichnen, damit auch die Toolbar-Inputs zurueckgesetzt werden.
+  nav('paus');
+}
+// Liefert alle Objekte (Projekte), die min. eine Ausschreibung haben.
+function _getAusProjekte(){
+  var ids={}, list=[];
+  S.ausschreibungen.forEach(function(a){
+    if(!a.objektId) return;
+    if(ids[a.objektId]) return;
+    ids[a.objektId]=true;
+    var name='';
+    try {
+      if(typeof GemaObjekte!=='undefined'){
+        var o=GemaObjekte.getAll().find(function(x){return x.id===a.objektId;});
+        if(o) name=o.name||'';
+      }
+    } catch(e) {}
+    if(!name) name = a.objekt || '(ohne Name)';
+    list.push({id:a.objektId, name:name});
+  });
+  list.sort(function(a,b){return (a.name||'').localeCompare(b.name||'','de');});
+  return list;
+}
+// Wendet Filter + Sortierung auf S.ausschreibungen an und liefert ein
+// frisches Array. Nicht destruktiv.
+function _filterSortAus(){
+  var f=_getAusFilter();
+  var list = S.ausschreibungen.slice();
+  // Status
+  if(f.status) list = list.filter(function(a){return (a.status||'entwurf')===f.status;});
+  // Typ
+  if(f.typ) list = list.filter(function(a){return (a.typ||'funktional')===f.typ;});
+  // Projekt (Objekt)
+  if(f.projekt) list = list.filter(function(a){return a.objektId===f.projekt;});
+  // Suche
+  if(f.q){
+    var q=f.q.trim().toLowerCase();
+    if(q){
+      list = list.filter(function(a){
+        var hay = [a.name,a.objekt,a.frist,(a.modelle||[a.modell]).join(' ')].join(' ').toLowerCase();
+        return hay.indexOf(q)>=0;
+      });
+    }
+  }
+  // Sortieren
+  var statusOrder = {entwurf:1, aktiv:2, crbx_geprueft:3, vergeben:4};
+  list.sort(function(a,b){
+    switch(f.sort){
+      case 'name-desc':   return (b.name||'').localeCompare(a.name||'','de');
+      case 'frist-asc':   return (a.frist||'9999').localeCompare(b.frist||'9999');
+      case 'frist-desc':  return (b.frist||'0').localeCompare(a.frist||'0');
+      case 'status':      return (statusOrder[a.status]||99) - (statusOrder[b.status]||99);
+      case 'offerten':    {
+        var oA = S.einreichungen.filter(function(e){return e.ausId===a.id;}).length;
+        var oB = S.einreichungen.filter(function(e){return e.ausId===b.id;}).length;
+        return oB - oA;
+      }
+      case 'name-asc':
+      default:            return (a.name||'').localeCompare(b.name||'','de');
+    }
+  });
+  return list;
+}
+// Baut das HTML fuer eine einzelne Card.
+function _renderAusCard(a){
+  var nE=S.einreichungen.filter(function(e){return e.ausId===a.id;}).length;
+  var nV=S.verteilungen.filter(function(v){return v.ausId===a.id;}).length;
+  var nUp=(a.bkp||[]).reduce(function(s,b){return s+(b.unterpositionen||[]).length;},0);
+  var bkpInfo='';
+  if(a.lose&&a.lose.length){
+    var allP=a.lose.reduce(function(s,l){return s.concat(l.positionen||[]);},[]);
+    var ch=allP.filter(function(p){return p.checked;});
+    var er=ch.filter(function(p){return p.status==='erledigt';});
+    if(ch.length) bkpInfo=' · BKP '+er.length+'/'+ch.length;
+  }
+  var isActive=(a.id===S.activeAusId);
+  var statusLbl=a.status==='vergeben'?'Vergeben':a.status==='crbx_geprueft'?'Freigegeben':a.status==='aktiv'?'Aktiv':'Entwurf';
+  var statusCls=a.status==='vergeben'?'t-gr':a.status==='aktiv'||a.status==='crbx_geprueft'?'t-bl':'t-am';
+  return '<div class="ac'+(isActive?' is-active':'')+'" data-aus-id="'+a.id+'" style="cursor:pointer">'
+    + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">'
+    +   '<strong style="font-size:15px">'+E(a.name)+'</strong>'
+    +   '<span class="tag '+(a.typ==='crbx'?'t-pu':'t-ac')+'">'+(a.typ==='crbx'?'CRBX':'Funktional')+'</span>'
+    +   '<span class="tag t-gy">'+(a.modelle||[a.modell]).join(' + ')+'</span>'
+    +   '<span class="ml-a tag '+statusCls+'">'+statusLbl+'</span>'
+    +   '<button class="btn btn-g btn-sm" data-nosel="1" onclick="event.stopPropagation();openSaveVorlageModal(\''+a.id+'\')" style="margin-left:4px;opacity:.4;padding:2px 7px;font-size:10px" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.4" title="Als Vorlage speichern">💾</button>'
+    +   (a.status!=='vergeben'?'<button class="btn btn-d btn-sm" data-nosel="1" onclick="event.stopPropagation();deleteAusschreibung(\''+a.id+'\')" style="margin-left:4px;opacity:.3;padding:2px 7px;font-size:10px" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.3" title="Löschen">✕</button>':'')
+    + '</div>'
+    + '<div style="font-size:12px;color:var(--mut)">'+E(a.objekt||'')+' · Frist: '+(a.frist||'—')+' · '+nUp+' Positionen · '+nV+' verteilt · '+nE+' Offerten'+bkpInfo+'</div>'
+    + '</div>';
+}
+// Re-rendert NUR den Listen-Container und den Treffer-Zaehler, ohne die
+// View komplett neu zu bauen. So bleibt der Fokus auf dem Such-Input
+// erhalten und die Select-Werte gehen nicht verloren.
+function renderAusList(){
+  var cont=document.getElementById('ausListContainer');
+  if(!cont)return;
+  var f=_getAusFilter();
+  var list=_filterSortAus();
+  var total=S.ausschreibungen.length;
+  // Treffer-Zaehler in der Toolbar aktualisieren
+  var cnt=document.getElementById('ausListCount');
+  if(cnt) cnt.textContent = list.length + ' von ' + total;
+  // Inhalt der Liste
+  if(!list.length){
+    cont.innerHTML = '<div class="es" style="padding:32px 16px"><span class="ei">🔍</span><div class="et">Keine Ausschreibung gefunden</div><p>Passe die Filter an oder setze sie zurück.</p><button class="btn btn-g btn-sm" onclick="resetAusFilter()" style="margin-top:8px">Filter zurücksetzen</button></div>';
+    return;
+  }
+  cont.innerHTML = list.map(_renderAusCard).join('');
+}
+
 VIEWS.paus=function(){
   var vlCount=getVisibleVorlagen().length;
   let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:8px;flex-wrap:wrap"><h2 style="font-size:20px;font-weight:700">Ausschreibungen</h2><div style="display:flex;gap:8px"><button class="btn btn-g" onclick="openVorlagenModal()" title="Vorlagen-Bibliothek">📋 Vorlagen${vlCount?' <span style="background:var(--acc);color:#fff;font-size:10px;font-weight:800;padding:1px 6px;border-radius:999px;margin-left:2px">'+vlCount+'</span>':''}</button><button class="btn btn-p" onclick="oM('mNewA')">+ Neue Ausschreibung</button></div></div>`;
-  h+=`<div style="margin-bottom:14px"><input type="text" id="ausSearch" placeholder="Ausschreibung suchen…" oninput="filterAusList()" style="width:100%;padding:10px 14px 10px 38px;border:1.5px solid var(--brd2);border-radius:10px;font-size:13px;font-family:inherit;background:var(--sur) url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%239ca3af%22><circle cx=%2210%22 cy=%2210%22 r=%227%22 stroke=%22%239ca3af%22 stroke-width=%222%22 fill=%22none%22/><line x1=%2215%22 y1=%2215%22 x2=%2221%22 y2=%2221%22 stroke=%22%239ca3af%22 stroke-width=%222%22/></svg>') no-repeat 10px center;background-size:18px;outline:none" onfocus="this.style.borderColor='#1d4ed8'" onblur="this.style.borderColor='var(--brd2)'"/></div>`;
-  if(!S.ausschreibungen.length){h+=`<div class="es"><span class="ei">📋</span><div class="et">Noch keine Ausschreibungen</div><p>Erstelle deine erste Ausschreibung.</p></div>`;return h;}
-  h+=`<div id="ausListContainer">`;
-  h+=S.ausschreibungen.map(a=>{
-    const nE=S.einreichungen.filter(e=>e.ausId===a.id).length;const nV=S.verteilungen.filter(v=>v.ausId===a.id).length;
-    const nUp=(a.bkp||[]).reduce((s,b)=>s+(b.unterpositionen||[]).length,0);
-    var bkpInfo='';if(a.lose&&a.lose.length){var allP=a.lose.reduce(function(s,l){return s.concat(l.positionen||[]);},[]);var ch=allP.filter(function(p){return p.checked;});var er=ch.filter(function(p){return p.status==='erledigt';});if(ch.length)bkpInfo=' · BKP '+er.length+'/'+ch.length;}
-    var isActive=(a.id===S.activeAusId);
-    return `<div class="ac${isActive?' is-active':''}" data-aus-id="${a.id}" style="cursor:pointer">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-        <strong style="font-size:15px">${E(a.name)}</strong>
-        <span class="tag ${a.typ==='crbx'?'t-pu':'t-ac'}">${a.typ==='crbx'?'CRBX':'Funktional'}</span>
-        <span class="tag t-gy">${(a.modelle||[a.modell]).join(' + ')}</span>
-        <span class="ml-a tag ${a.status==='vergeben'?'t-gr':a.status==='aktiv'||a.status==='crbx_geprueft'?'t-bl':'t-am'}">${a.status==='vergeben'?'Vergeben':a.status==='crbx_geprueft'?'Freigegeben':a.status==='aktiv'?'Aktiv':'Entwurf'}</span>
-        <button class="btn btn-g btn-sm" data-nosel="1" onclick="event.stopPropagation();openSaveVorlageModal('${a.id}')" style="margin-left:4px;opacity:.4;padding:2px 7px;font-size:10px" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.4" title="Als Vorlage speichern">💾</button>
-        ${a.status!=='vergeben'?'<button class="btn btn-d btn-sm" data-nosel="1" onclick="event.stopPropagation();deleteAusschreibung(\''+a.id+'\')" style="margin-left:4px;opacity:.3;padding:2px 7px;font-size:10px" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.3" title="Löschen">✕</button>':''}
-      </div>
-      <div style="font-size:12px;color:var(--mut)">${E(a.objekt||'')} · Frist: ${a.frist||'—'} · ${nUp} Positionen · ${nV} verteilt · ${nE} Offerten${bkpInfo}</div>
-    </div>`;
-  }).join('');
-  h+=`</div>`;
-  // Nach dem Rendern Event-Delegation auf den Container haengen. Wir nutzen
-  // einen Microtask, weil innerHTML erst nach dem return gesetzt wird.
+  if(!S.ausschreibungen.length){
+    h+=`<div class="es"><span class="ei">📋</span><div class="et">Noch keine Ausschreibungen</div><p>Erstelle deine erste Ausschreibung.</p></div>`;
+    return h;
+  }
+  var f=_getAusFilter();
+  var projekte=_getAusProjekte();
+  // Such-Input
+  h+='<div style="margin-bottom:10px"><input type="text" id="ausSearch" placeholder="Ausschreibung suchen…" value="'+E(f.q||'').replace(/"/g,'&quot;')+'" oninput="setAusFilter(\'q\',this.value)" style="width:100%;padding:10px 14px 10px 38px;border:1.5px solid var(--brd2);border-radius:10px;font-size:13px;font-family:inherit;background:var(--sur) url(\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22%239ca3af%22><circle cx=%2210%22 cy=%2210%22 r=%227%22 stroke=%22%239ca3af%22 stroke-width=%222%22 fill=%22none%22/><line x1=%2215%22 y1=%2215%22 x2=%2221%22 y2=%2221%22 stroke=%22%239ca3af%22 stroke-width=%222%22/></svg>\') no-repeat 10px center;background-size:18px;outline:none" onfocus="this.style.borderColor=\'#1d4ed8\'" onblur="this.style.borderColor=\'var(--brd2)\'"/></div>';
+  // Filter-/Sort-Toolbar
+  h+='<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding:10px 12px;background:var(--bg2);border:1.5px solid var(--brd);border-radius:10px">';
+  h+= '<span style="font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.05em">Filter</span>';
+  // Status
+  h+= '<select class="aus-filter-sel" onchange="setAusFilter(\'status\',this.value)" title="Nach Status filtern">'
+    +   '<option value=""'+(f.status===''?' selected':'')+'>Alle Status</option>'
+    +   '<option value="entwurf"'+(f.status==='entwurf'?' selected':'')+'>📝 Entwurf</option>'
+    +   '<option value="aktiv"'+(f.status==='aktiv'?' selected':'')+'>▶ Aktiv</option>'
+    +   '<option value="crbx_geprueft"'+(f.status==='crbx_geprueft'?' selected':'')+'>✓ Freigegeben</option>'
+    +   '<option value="vergeben"'+(f.status==='vergeben'?' selected':'')+'>🏆 Vergeben</option>'
+    + '</select>';
+  // Typ
+  h+= '<select class="aus-filter-sel" onchange="setAusFilter(\'typ\',this.value)" title="Nach Typ filtern">'
+    +   '<option value=""'+(f.typ===''?' selected':'')+'>Alle Typen</option>'
+    +   '<option value="funktional"'+(f.typ==='funktional'?' selected':'')+'>Funktional</option>'
+    +   '<option value="crbx"'+(f.typ==='crbx'?' selected':'')+'>CRBX / E1S</option>'
+    + '</select>';
+  // Projekt (Objekt) — nur wenn es mehrere Projekte gibt
+  if(projekte.length>1){
+    h+= '<select class="aus-filter-sel" onchange="setAusFilter(\'projekt\',this.value)" title="Nach Projekt filtern">'
+      +   '<option value=""'+(f.projekt===''?' selected':'')+'>Alle Projekte</option>'
+      +   projekte.map(function(p){return '<option value="'+p.id+'"'+(f.projekt===p.id?' selected':'')+'>'+E(p.name)+'</option>';}).join('')
+      + '</select>';
+  }
+  // Sort
+  h+= '<span style="width:1px;height:22px;background:var(--brd);margin:0 2px"></span>';
+  h+= '<span style="font-size:11px;font-weight:800;color:var(--mut);text-transform:uppercase;letter-spacing:.05em">Sortieren</span>';
+  h+= '<select class="aus-filter-sel" onchange="setAusFilter(\'sort\',this.value)" title="Sortierung waehlen">'
+    +   '<option value="name-asc"'+(f.sort==='name-asc'?' selected':'')+'>Name A → Z</option>'
+    +   '<option value="name-desc"'+(f.sort==='name-desc'?' selected':'')+'>Name Z → A</option>'
+    +   '<option value="frist-asc"'+(f.sort==='frist-asc'?' selected':'')+'>Frist ↑ (naechste)</option>'
+    +   '<option value="frist-desc"'+(f.sort==='frist-desc'?' selected':'')+'>Frist ↓ (spaeteste)</option>'
+    +   '<option value="status"'+(f.sort==='status'?' selected':'')+'>Status (Entwurf → Vergeben)</option>'
+    +   '<option value="offerten"'+(f.sort==='offerten'?' selected':'')+'>Meiste Offerten zuerst</option>'
+    + '</select>';
+  // Treffer-Zaehler + Reset
+  h+= '<span style="flex:1"></span>';
+  h+= '<span style="font-size:11px;color:var(--mut);font-weight:600"><span id="ausListCount">'+S.ausschreibungen.length+' von '+S.ausschreibungen.length+'</span> Ausschreibungen</span>';
+  if(f.q||f.status||f.typ||f.projekt||f.sort!=='name-asc'){
+    h+= '<button class="btn btn-g btn-sm" onclick="resetAusFilter()" style="font-size:11px">✕ Zuruecksetzen</button>';
+  }
+  h+='</div>';
+  // Listen-Container (Inhalt wird via renderAusList() gesetzt)
+  h+='<div id="ausListContainer"></div>';
+  // Nach dem Rendern Event-Delegation haengen + Liste initial fuellen.
   setTimeout(function(){
     var cont=document.getElementById('ausListContainer');
-    if(!cont||cont._delegated)return;
-    cont._delegated=true;
-    cont.addEventListener('click',function(ev){
-      // Button-Klicks mit data-nosel ignorieren (Stop-Propagation reicht nicht,
-      // falls der Event die Delegation trotzdem erreicht).
-      if(ev.target.closest('[data-nosel]'))return;
-      var card=ev.target.closest('.ac[data-aus-id]');
-      if(!card)return;
-      var id=card.getAttribute('data-aus-id');
-      if(id)selectAusschreibung(id);
-    });
+    if(cont && !cont._delegated){
+      cont._delegated=true;
+      cont.addEventListener('click',function(ev){
+        if(ev.target.closest('[data-nosel]'))return;
+        var card=ev.target.closest('.ac[data-aus-id]');
+        if(!card)return;
+        var id=card.getAttribute('data-aus-id');
+        if(id)selectAusschreibung(id);
+      });
+    }
+    renderAusList();
   },0);
   return h;
 };
-function filterAusList(){
-  var q=(document.getElementById('ausSearch')||{}).value||'';
-  q=q.trim().toLowerCase();
-  var items=document.querySelectorAll('#ausListContainer .ac');
-  items.forEach(function(el){
-    el.style.display=(!q||el.textContent.toLowerCase().indexOf(q)>=0)?'':'none';
-  });
-}
+// Alias fuer bestehende Aufrufer — delegiert an das neue Filter-System.
+function filterAusList(){ renderAusList(); }
 
 function deleteAusschreibung(ausId){
   var a=S.ausschreibungen.find(function(x){return x.id===ausId;});
