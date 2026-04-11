@@ -324,6 +324,9 @@ function fixLeadingZero(el){
 <script src="gema_db.js"></script>
 <script src="gema_feedback.js"></script>
 <script src="gema_objekte_api.js"></script>
+<script src="gema_produktkatalog_api.js"></script>
+<script src="gema_offer_request.js"></script>
+<script src="gema_anlagenwahl.js"></script>
 <script src="gema_varianten.js"></script>
 <script src="gema_pdf.js"></script>
 <script src="gema_autosave.js"></script>
@@ -1039,6 +1042,30 @@ document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('ther
   window.addEventListener('gema-objekte-loaded',function(){populateObjektDropdown();if(typeof GemaAutoSave!=='undefined') GemaAutoSave.init('thermische_solaranlage');});
   ['metaProjekt','metaBearbeiter','metaDatum'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('input',saveMeta);});
 })();</script>
+<!-- Anlagen-Wahl (Produktkatalog) — Kategorie "thermische_solaranlage". -->
+<div class="g-page"><div id="tsAnlagenWahl"></div></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if (typeof GemaAnlagenwahl === 'undefined') return;
+  GemaAnlagenwahl.init({
+    container: '#tsAnlagenWahl',
+    kategorie: 'thermische_solaranlage',
+    titel: 'Thermische Solaranlagen',
+    accent: '#d97706',
+    getBerechnungswerte: function(){
+      function _n(id){ var el=document.getElementById(id); return el ? parseFloat((el.textContent||'').replace(',','.')) || 0 : 0; }
+      return {
+        flaeche: _n('k_area_chosen') || _n('k_area_req_ww')
+      };
+    },
+    getProjekt: function(){
+      var name=(document.getElementById('metaProjekt')||{}).value||'';
+      var objektId=''; try{ if(typeof GemaObjekte!=='undefined') objektId=GemaObjekte.getActiveId()||''; }catch(e){}
+      return { name: name, ort:'', objektId: objektId };
+    }
+  });
+});
+</script>
 <script src="gema_scroll.js"></script>
 <script src="gema_mobile_menu.js"></script>
 </body>

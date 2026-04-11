@@ -570,6 +570,8 @@ function fixLeadingZero(el){
 <script src="gema_db.js"></script>
 <script src="gema_feedback.js"></script>
 <script src="gema_objekte_api.js"></script>
+<script src="gema_offer_request.js"></script>
+<script src="gema_anlagenwahl.js"></script>
 <script src="gema_varianten.js"></script>
 <script src="gema_autosave.js"></script>
 <script src="gema_pdf.js"></script>
@@ -1587,6 +1589,32 @@ document.querySelectorAll('.g-tab').forEach(btn => {
 document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('abwasserhebeanlage', 'Abwasserhebeanlage');});
 </script>
 <script>if(typeof GemaAutoSave!=='undefined') GemaAutoSave.init('abwasserhebeanlage');</script>
+<!-- Anlagen-Wahl (Produktkatalog) — Kategorie "hebeanlage". -->
+<div class="g-page"><div id="aheAnlagenWahl"></div></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if (typeof GemaAnlagenwahl === 'undefined') return;
+  GemaAnlagenwahl.init({
+    container: '#aheAnlagenWahl',
+    kategorie: 'hebeanlage',
+    titel: 'Abwasserhebeanlagen',
+    accent: '#1d4ed8',
+    getBerechnungswerte: function(){
+      function _n(id){ var el=document.getElementById(id); return el ? parseFloat((el.textContent||'').replace(',','.')) || 0 : 0; }
+      return {
+        foerdermenge: _n('k_q') || _n('k_qnew'),
+        foerderhoehe: _n('k_ht'),
+        volumen: _n('v_nutz')
+      };
+    },
+    getProjekt: function(){
+      var name=(document.getElementById('metaProjekt')||{}).value||'';
+      var objektId=''; try{ if(typeof GemaObjekte!=='undefined') objektId=GemaObjekte.getActiveId()||''; }catch(e){}
+      return { name: name, ort:'', objektId: objektId };
+    }
+  });
+});
+</script>
 <script src="gema_scroll.js"></script>
 <script src="gema_mobile_menu.js"></script>
 </body>

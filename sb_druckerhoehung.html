@@ -536,6 +536,9 @@ input::placeholder,textarea::placeholder{color:#cbd5e1!important}
 <script src="gema_pdf.js"></script>
 <script src="gema_autosave.js"></script>
 <script src="gema_lu_api.js"></script>
+<script src="gema_produktkatalog_api.js"></script>
+<script src="gema_offer_request.js"></script>
+<script src="gema_anlagenwahl.js"></script>
 <link rel="stylesheet" href="gema_responsive.css"/>
 </head>
 <body>
@@ -1331,6 +1334,34 @@ document.querySelectorAll('.g-tab').forEach(btn => {
 
 // GEMA Feedback init
 document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('druckerhoehung', 'Druckerhöhungsanlage');});
+</script>
+
+<!-- Anlagen-Wahl (Produktkatalog) — rendert Lieferanten-Pills + Typen-
+     Grid + Offertanfrage-Dialog fuer die Kategorie "druckerhoehung".
+     Sobald Lieferanten Produkte erfassen, erscheinen sie hier. -->
+<div class="g-page"><div id="dheAnlagenWahl"></div></div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  if (typeof GemaAnlagenwahl === 'undefined') return;
+  GemaAnlagenwahl.init({
+    container: '#dheAnlagenWahl',
+    kategorie: 'druckerhoehung',
+    titel: 'Druckerhöhungsanlagen',
+    accent: '#2563eb',
+    getBerechnungswerte: function(){
+      function _txt(id){ var el=document.getElementById(id); return el ? parseFloat((el.textContent||'').replace(',', '.')) || 0 : 0; }
+      var vz = _txt('vfd_out_vz') || _txt('ves_out_vz');
+      var pN = _txt('vfd_out_pN') || _txt('ves_out_pN');
+      var bauart = document.getElementById('vfd_out_vz') && document.getElementById('vfd_out_vz').textContent!=='–' ? 'VFD (Frequenzgeregelt)' : 'VES (Druckkessel)';
+      return { volumenstrom: vz, nachdruck: pN, bauart: bauart };
+    },
+    getProjekt: function(){
+      var name=(document.getElementById('metaProjekt')||{}).value||'';
+      var objektId=''; try{ if(typeof GemaObjekte!=='undefined') objektId=GemaObjekte.getActiveId()||''; }catch(e){}
+      return { name: name, ort:'', objektId: objektId };
+    }
+  });
+});
 </script>
 <script>
 // ── PROJECT META (auto-save) ──
