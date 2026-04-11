@@ -1328,24 +1328,6 @@ function filterModules() {
   });
 })();
 
-// ── ENTRANCE ANIMATIONS ───────────────────────────────────
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.style.opacity = '1';
-      entry.target.style.transform = 'translateY(0)';
-    }
-  });
-}, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
-
-document.querySelectorAll('.mod-card').forEach((card, i) => {
-  if(card.style.display==='none') return;
-  card.style.opacity = '0';
-  card.style.transform = 'translateY(16px)';
-  card.style.transition = `opacity .4s ${i * 0.04}s ease, transform .4s ${i * 0.04}s ease`;
-  observer.observe(card);
-});
-
 // ── INIT ──────────────────────────────────────────────────
 addStarButtons();
 buildFavGrid();
