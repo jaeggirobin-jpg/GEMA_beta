@@ -99,7 +99,7 @@
 
   // ── Default Org + User ─────────────────────────────────────────────
   var DEFAULT_ORGS = [{
-    id:'org_default', name:'Jäggi Vollmer GmbH', logo:null, kategorie:'sanitaerplaner',
+    id:'org_default', name:'Jäggi Vollmer GmbH', logo:null, kategorie:'sanitaerplaner', kategorien:['sanitaerplaner','heizungsplaner','lueftungsplaner'],
     rechtsform:'GmbH',
     adresse:{strasse:'Rheinfelderstrasse 10',plz:'4058',ort:'Basel',kanton:'BS',land:'CH'},
     kontakt:{email:'info@jaeggivollmer.ch',telefon:'061 692 03 11',website:''},
@@ -115,7 +115,7 @@
   },
   // ── Installateur-Firmen (eigenstaendige Unternehmen) ──
   {
-    id:'org_meier_sanitaer', name:'Meier Sanitär AG', logo:null, kategorie:'sanitaerinstallateur',
+    id:'org_meier_sanitaer', name:'Meier Sanitär AG', logo:null, kategorie:'sanitaerinstallateur', kategorien:['sanitaerinstallateur'],
     rechtsform:'AG',
     adresse:{strasse:'Industriestrasse 12',plz:'4133',ort:'Pratteln',kanton:'BL',land:'CH'},
     kontakt:{email:'info@meiersanitaer.ch',telefon:'061 333 44 55',website:''},
@@ -127,7 +127,7 @@
     createdAt:'2025-03-15T08:00:00Z'
   },
   {
-    id:'org_steiner_sanitaer', name:'Steiner Sanitär GmbH', logo:null, kategorie:'sanitaerinstallateur',
+    id:'org_steiner_sanitaer', name:'Steiner Sanitär GmbH', logo:null, kategorie:'sanitaerinstallateur', kategorien:['sanitaerinstallateur','heizungsinstallateur'],
     rechtsform:'GmbH',
     adresse:{strasse:'Dorfstrasse 45',plz:'8004',ort:'Zürich',kanton:'ZH',land:'CH'},
     kontakt:{email:'info@steinersanitaer.ch',telefon:'044 222 33 44',website:''},
@@ -140,7 +140,7 @@
   },
   // ── Architektur-Büro ──
   {
-    id:'org_arch_muster', name:'Architektur Muster AG', logo:null, kategorie:'architekt',
+    id:'org_arch_muster', name:'Architektur Muster AG', logo:null, kategorie:'architekt', kategorien:['architekt'],
     rechtsform:'AG',
     adresse:{strasse:'Freie Strasse 88',plz:'4051',ort:'Basel',kanton:'BS',land:'CH'},
     kontakt:{email:'info@archmuster.ch',telefon:'061 555 66 77',website:''},
@@ -153,7 +153,7 @@
   },
   // ── Lieferanten-Firmen (eigenstaendige Hersteller) ──
   {
-    id:'org_bwt', name:'BWT', logo:null, kategorie:'lieferant',
+    id:'org_bwt', name:'BWT', logo:null, kategorie:'lieferant', kategorien:['lieferant'],
     rechtsform:'AG',
     adresse:{strasse:'Hauptstrasse 192',plz:'4147',ort:'Aesch',kanton:'BL',land:'CH'},
     kontakt:{email:'info@bwt.ch',telefon:'061 755 88 99',website:'www.bwt.ch'},
@@ -165,7 +165,7 @@
     createdAt:'2025-01-15T10:00:00Z'
   },
   {
-    id:'org_gruenbeck', name:'Grünbeck', logo:null, kategorie:'lieferant',
+    id:'org_gruenbeck', name:'Grünbeck', logo:null, kategorie:'lieferant', kategorien:['lieferant'],
     rechtsform:'GmbH',
     adresse:{strasse:'Industriestrasse 35',plz:'8604',ort:'Volketswil',kanton:'ZH',land:'CH'},
     kontakt:{email:'info@gruenbeck.ch',telefon:'044 820 33 44',website:'www.gruenbeck.ch'},
@@ -177,7 +177,7 @@
     createdAt:'2025-06-01T08:00:00Z'
   },
   {
-    id:'org_judo', name:'Judo', logo:null, kategorie:'lieferant',
+    id:'org_judo', name:'Judo', logo:null, kategorie:'lieferant', kategorien:['lieferant'],
     rechtsform:'GmbH',
     adresse:{strasse:'Bernstrasse 22',plz:'3011',ort:'Bern',kanton:'BE',land:'CH'},
     kontakt:{email:'info@judo.ch',telefon:'031 920 11 22',website:'www.judo.ch'},
@@ -189,21 +189,37 @@
     createdAt:'2026-03-01T09:00:00Z'
   }];
 
+  // Unternehmens-Kategorien. Jede Kategorie gehoert einer Gruppe an:
+  //   - 'gebaeudetechnik' = Planer / Installateure aller Gewerke. Beliebig
+  //     untereinander kombinierbar (ein Installateur kann auch Planer sein).
+  //   - 'lieferant'       = Lieferanten / Hersteller. Exklusiv gegenueber
+  //     'gebaeudetechnik' (wer liefert, plant/fuehrt nicht aus).
+  //   - 'bau'             = Architekt, GU, Bauherr. Kombinierbar mit allen.
+  //   - 'andere'          = Behoerde, Immobilien, Sonstiges. Kombinierbar.
   var DEFAULT_ORG_CATS = [
-    {id:'sanitaerplaner',     name:'Sanitärplaner',          icon:'💧'},
-    {id:'sanitaerinstallateur',name:'Sanitärinstallateur',   icon:'🔧'},
-    {id:'heizungsplaner',     name:'Heizungsplaner',         icon:'🔥'},
-    {id:'heizungsinstallateur',name:'Heizungsinstallateur',  icon:'♨️'},
-    {id:'lueftungsplaner',    name:'Lüftungsplaner',         icon:'🌀'},
-    {id:'elektroplaner',      name:'Elektroplaner',          icon:'⚡'},
-    {id:'architekt',          name:'Architekt / Generalplaner', icon:'🏛'},
-    {id:'bauherr',            name:'Bauherr / Investor',     icon:'🏗'},
-    {id:'generalunternehmer', name:'Generalunternehmer',     icon:'👷'},
-    {id:'lieferant',          name:'Lieferant / Hersteller', icon:'🏭'},
-    {id:'brandschutz',        name:'Brandschutz / Sprinkler',icon:'🔥'},
-    {id:'immobilien',         name:'Immobilienverwaltung',   icon:'🏢'},
-    {id:'behoerde',           name:'Behörde / Fachstelle',   icon:'🏛'},
-    {id:'sonstiges',          name:'Sonstiges',              icon:'📦'},
+    // ── Planung & Ausführung (Gebäudetechnik) ──
+    {id:'sanitaerplaner',       name:'Sanitärplaner',          icon:'💧', gruppe:'gebaeudetechnik'},
+    {id:'sanitaerinstallateur', name:'Sanitärinstallateur',    icon:'🔧', gruppe:'gebaeudetechnik'},
+    {id:'heizungsplaner',       name:'Heizungsplaner',         icon:'🔥', gruppe:'gebaeudetechnik'},
+    {id:'heizungsinstallateur', name:'Heizungsinstallateur',   icon:'♨️', gruppe:'gebaeudetechnik'},
+    {id:'lueftungsplaner',      name:'Lüftungsplaner',         icon:'🌀', gruppe:'gebaeudetechnik'},
+    {id:'lueftungsinstallateur',name:'Lüftungsinstallateur',   icon:'💨', gruppe:'gebaeudetechnik'},
+    {id:'klima_kaeltetechnik',  name:'Klima-/Kältetechnik',    icon:'❄️', gruppe:'gebaeudetechnik'},
+    {id:'elektroplaner',        name:'Elektroplaner',          icon:'⚡', gruppe:'gebaeudetechnik'},
+    {id:'elektroinstallateur',  name:'Elektroinstallateur',    icon:'🔌', gruppe:'gebaeudetechnik'},
+    {id:'msr_gebaeudeautomation',name:'MSR / Gebäudeautomation',icon:'🎛️', gruppe:'gebaeudetechnik'},
+    {id:'brandschutz',          name:'Brandschutz / Sprinkler',icon:'🚒', gruppe:'gebaeudetechnik'},
+    {id:'aufzugsbau',           name:'Aufzugsbau / Lifttechnik',icon:'🛗', gruppe:'gebaeudetechnik'},
+    // ── Bau / Projektbeteiligte ──
+    {id:'architekt',            name:'Architekt / Generalplaner',icon:'🏛', gruppe:'bau'},
+    {id:'bauherr',              name:'Bauherr / Investor',     icon:'🏗', gruppe:'bau'},
+    {id:'generalunternehmer',   name:'Generalunternehmer',     icon:'👷', gruppe:'bau'},
+    // ── Lieferant (exklusiv gegenueber Gebaeudetechnik) ──
+    {id:'lieferant',            name:'Lieferant / Hersteller', icon:'🏭', gruppe:'lieferant'},
+    // ── Andere ──
+    {id:'immobilien',           name:'Immobilienverwaltung',   icon:'🏢', gruppe:'andere'},
+    {id:'behoerde',             name:'Behörde / Fachstelle',   icon:'🏛', gruppe:'andere'},
+    {id:'sonstiges',            name:'Sonstiges',              icon:'📦', gruppe:'andere'}
   ];
 
   var DEFAULT_USERS = [
@@ -321,6 +337,51 @@
         try{localStorage.setItem(STORAGE_ORGS,JSON.stringify(orgs));}catch(e){}
         try{localStorage.setItem(STORAGE_USERS,JSON.stringify(users));}catch(e){}
         try{localStorage.setItem(MIGFLAG,'1');}catch(e){}
+      }
+    } catch(e) {}
+    // ── Migration: org.kategorie (Einzel) -> org.kategorien (Array) ──
+    // Die Unternehmens-Kategorien sind jetzt Mehrfach-Auswahl. Alte Orgs
+    // haben noch das Einzel-Feld 'kategorie' — wir spiegeln es einmalig
+    // in ein Array 'kategorien', ohne das Legacy-Feld zu loeschen.
+    // Ebenfalls werden die neuen Kategorien (inkl. gruppe-Metadaten)
+    // nachgepflegt, falls im localStorage noch die alte Liste steht.
+    try {
+      var MIGFLAG2='gema_auth_org_kategorien_v1';
+      if(!localStorage.getItem(MIGFLAG2)){
+        // 1. Alle Orgs: kategorien aus kategorie befuellen
+        var orgs2=_getOrgs()||[];
+        var anyChange=false;
+        orgs2.forEach(function(o){
+          if(!o.kategorien || !o.kategorien.length){
+            o.kategorien = o.kategorie ? [o.kategorie] : [];
+            anyChange=true;
+          }
+        });
+        if(anyChange){
+          try{localStorage.setItem(STORAGE_ORGS,JSON.stringify(orgs2));}catch(e){}
+        }
+        // 2. Kategorien-Liste: neue Kategorien + gruppe-Metadaten
+        //    nachpflegen, falls die alte Liste ohne gruppe drin ist
+        var cats=_getOrgCats()||[];
+        var newCats = cats.slice();
+        var updatedExisting=false;
+        // Fuer jede Default-Kategorie: wenn fehlt → hinzufuegen; wenn da
+        // aber ohne 'gruppe' → gruppe ergaenzen.
+        DEFAULT_ORG_CATS.forEach(function(defCat){
+          var ex = newCats.find(function(c){return c.id===defCat.id;});
+          if(!ex){
+            newCats.push(defCat);
+            updatedExisting=true;
+          } else if(!ex.gruppe && defCat.gruppe){
+            ex.gruppe = defCat.gruppe;
+            if(!ex.icon && defCat.icon) ex.icon = defCat.icon;
+            updatedExisting=true;
+          }
+        });
+        if(updatedExisting){
+          try{localStorage.setItem(STORAGE_ORG_CATS,JSON.stringify(newCats));}catch(e){}
+        }
+        try{localStorage.setItem(MIGFLAG2,'1');}catch(e){}
       }
     } catch(e) {}
   }
@@ -579,10 +640,41 @@
   }
 
   // ── Public API ─────────────────────────────────────────────────────
+  // ── Kategorie-Helpers ────────────────────────────────────────────────
+  // Gibt die Gruppe einer Kategorie zurueck ('gebaeudetechnik', 'lieferant',
+  // 'bau', 'andere'). Unbekannte Kategorien landen in 'andere'.
+  function _kategorieGruppe(catId){
+    var cats = _getOrgCats() || [];
+    var c = cats.find(function(x){return x.id===catId;});
+    return (c && c.gruppe) || 'andere';
+  }
+  // Prueft, ob eine Kategorie zu einer aktuellen Auswahl (Array of IDs)
+  // hinzugefuegt werden darf. Regeln:
+  //   - 'lieferant' ist exklusiv gegenueber 'gebaeudetechnik' (und umge-
+  //     kehrt). Wer liefert, plant/fuehrt nicht aus.
+  //   - Innerhalb 'gebaeudetechnik' sind beliebig viele Kategorien
+  //     kombinierbar (ein Installateur kann auch Planer sein).
+  //   - 'bau' und 'andere' sind mit allem kompatibel.
+  function _isKategorieKompatibel(catId, currentIds){
+    var ownGruppe = _kategorieGruppe(catId);
+    var selected = currentIds || [];
+    if(ownGruppe === 'lieferant'){
+      // Lieferant darf nicht mit Gebaeudetechnik kombiniert werden
+      return !selected.some(function(id){return _kategorieGruppe(id)==='gebaeudetechnik';});
+    }
+    if(ownGruppe === 'gebaeudetechnik'){
+      // Gebaeudetechnik darf nicht mit Lieferant kombiniert werden
+      return !selected.some(function(id){return _kategorieGruppe(id)==='lieferant';});
+    }
+    return true;
+  }
+
   w.GemaAuth={
     getModules:function(){return MODULES;},
     getOrgs:_getOrgs,
     getOrgCats:_getOrgCats,
+    getKategorieGruppe:_kategorieGruppe,
+    isKategorieKompatibel:_isKategorieKompatibel,
     getUsers:_getUsers,
     getRoles:_getRoles,
     getSession:_getSession,
@@ -1002,6 +1094,17 @@
       var org=orgs.find(function(o){return o.id===orgId;});
       if(!org)return false;
       Object.keys(info).forEach(function(k){org[k]=info[k];});
+      // Kategorie <-> Kategorien synchron halten: wenn der Aufrufer nur
+      // das Einzel-Feld setzt (Legacy), spiegeln wir es in das Array,
+      // damit alle Konsumenten (Multi-Kategorie-Filter) konsistent
+      // bleiben. Wenn der Aufrufer kategorien explizit setzt, ist das
+      // die Quelle der Wahrheit und kategorie wird aufs erste Element
+      // aktualisiert.
+      if(info.kategorien && info.kategorien.length){
+        org.kategorie = info.kategorien[0];
+      } else if(info.kategorie !== undefined){
+        org.kategorien = info.kategorie ? [info.kategorie] : [];
+      }
       return w.GemaAuth.saveOrgs(orgs);
     },
 

@@ -3305,15 +3305,27 @@ function apSuggest(q){
 
   // 2. Bestehende Organisationen (alle Rollen) — so erkennt man schon
   // existierende Firmen, auch wenn sie noch keinen User oder Katalog-
-  // Eintrag haben. Wir filtern nach passender Kategorie je nach Rolle,
-  // ignorieren aber org_default (Jaeggi Vollmer), um keine Fremd-
+  // Eintrag haben. Wir filtern nach passender Kategorie je nach Rolle.
+  // Orgs haben jetzt ein Array 'kategorien' (Mehrfachauswahl) — ein
+  // Installateurs-Orgs mit ['sanitaerinstallateur','heizungsinstallateur']
+  // taucht bei der Installateur-Suche auf. Fuer Lieferanten akzeptieren
+  // wir ausschliesslich die exakte 'lieferant'-Kategorie.
+  // org_default (Jaeggi Vollmer) wird ignoriert, um keine Fremd-
   // eintraege in die Planer-Org zu bekommen.
-  var KAT_BY_ROLLE = { installateur:'sanitaerinstallateur', lieferant:'lieferant', architekt:'architekt' };
-  var wantKat = KAT_BY_ROLLE[rolle];
+  var KAT_BY_ROLLE = {
+    installateur: ['sanitaerinstallateur','heizungsinstallateur','lueftungsinstallateur','elektroinstallateur','klima_kaeltetechnik'],
+    lieferant:    ['lieferant'],
+    architekt:    ['architekt']
+  };
+  var wantKats = KAT_BY_ROLLE[rolle] || null;
   var orgs=[]; try{ orgs = (typeof GemaAuth!=='undefined' && GemaAuth.getOrgs && GemaAuth.getOrgs()) || []; }catch(e){}
   var orgMatches = orgs.filter(function(o){
     if(o.id==='org_default') return false;
-    if(wantKat && o.kategorie !== wantKat) return false;
+    if(wantKats){
+      var orgCats = (o.kategorien && o.kategorien.length) ? o.kategorien : (o.kategorie ? [o.kategorie] : []);
+      var hit = orgCats.some(function(k){return wantKats.indexOf(k)>=0;});
+      if(!hit) return false;
+    }
     var nameMatch = (o.name||'').toLowerCase().indexOf(q)>=0;
     var ortMatch  = (o.adresse && o.adresse.ort||'').toLowerCase().indexOf(q)>=0;
     return nameMatch || ortMatch;

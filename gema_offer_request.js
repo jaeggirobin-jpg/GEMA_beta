@@ -85,7 +85,10 @@
         var orgs = GemaAuth.getOrgs() || [];
         var orgMatches = orgs.filter(function(o){
           if(o.id === 'org_default') return false;
-          if(o.kategorie !== 'lieferant') return false;
+          // Multi-Kategorie-Check: Array 'kategorien' hat Vorrang, sonst
+          // Fallback auf Legacy-Feld 'kategorie'.
+          var orgCats = (o.kategorien && o.kategorien.length) ? o.kategorien : (o.kategorie ? [o.kategorie] : []);
+          if(orgCats.indexOf('lieferant') < 0) return false;
           var nameMatch = (o.name||'').toLowerCase().indexOf(ql) >= 0;
           var ortMatch  = (o.adresse && o.adresse.ort || '').toLowerCase().indexOf(ql) >= 0;
           return nameMatch || ortMatch;
