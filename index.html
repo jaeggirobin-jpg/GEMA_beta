@@ -440,8 +440,6 @@ body {
 <!-- ── FILTER BAR ── -->
 <div class="filter-bar">
   <div class="filter-inner">
-    <button class="filter-btn active" data-filter="all">Alle Module <span class="count" id="cnt-all">26</span></button>
-    <div class="filter-sep"></div>
     <button class="filter-btn fav-filter-btn" data-filter="fav" id="favFilterBtn" style="display:none">⭐ Favoriten <span class="count" id="cnt-fav">0</span></button>
     <button class="filter-btn" data-filter="plan">📋 Projektmanagement <span class="count" id="cnt-plan">9</span></button>
     <button class="filter-btn" data-filter="san">💧 Sanitär <span class="count" id="cnt-san">2</span></button>
@@ -1256,8 +1254,10 @@ function filterModules() {
   });
 
   if (q) {
+    // Bei aktiver Suche gibt es keine aktive Kategorie — die Filter-
+    // Buttons werden zurueckgesetzt, Treffer kommen direkt aus der
+    // Such-Funktion.
     filterBtns.forEach(b => b.classList.remove('active'));
-    document.querySelector('[data-filter="all"]').classList.add('active');
   }
 }
 
@@ -1372,9 +1372,9 @@ document.addEventListener('DOMContentLoaded',function(){
   if(typeof GemaCoachmarks==='undefined')return;
   var steps=[
     {
-      selector:'.filter-btn[data-filter="all"]',
+      selector:'.filter-bar',
       title:'Willkommen bei GEMA',
-      text:'GEMA bündelt alle Werkzeuge für Sanitäringenieurwesen und Bauprojektmanagement in einer Suite. Die Modul-Kategorien helfen dir, schnell das Richtige zu finden.',
+      text:'GEMA bündelt alle Werkzeuge für Sanitäringenieurwesen und Bauprojektmanagement in einer Suite. Die Modul-Kategorien oben helfen dir, schnell das Richtige zu finden.',
       placement:'bottom',icon:'👋'
     },
     {
