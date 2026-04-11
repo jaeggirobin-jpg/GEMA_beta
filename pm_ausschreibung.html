@@ -78,12 +78,12 @@ body {
 /* ── HERO ── */
 .hero {
   background: linear-gradient(160deg, #0f172a 0%, #1e3a5f 55%, #0c4a2e 100%);
-  padding: 48px 36px;
+  padding: 20px 24px 22px;
   position: relative;
   overflow: hidden;
-  border-radius: 20px;
-  margin-bottom: 24px;
-  box-shadow: 0 16px 48px rgba(0,0,0,.13), 0 4px 16px rgba(0,0,0,.06);
+  border-radius: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.1);
 }
 .hero::before {
   content: '';
@@ -100,44 +100,46 @@ body {
 .hero-inner {
   max-width: 1340px; margin: 0 auto;
   position: relative; z-index: 1;
-  display: flex; align-items: center; justify-content: space-between; gap: 40px; flex-wrap: wrap;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
 }
-.hero-text { flex: 1; min-width: 280px; }
+.hero-text { flex: 1; min-width: 260px; }
 .hero-eyebrow {
-  display: inline-flex; align-items: center; gap: 8px;
+  display: inline-flex; align-items: center; gap: 6px;
   background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
-  border-radius: 999px; padding: 5px 14px; margin-bottom: 22px;
-  font-size: 12px; font-weight: 700; color: rgba(255,255,255,.8);
+  border-radius: 999px; padding: 3px 10px; margin-bottom: 8px;
+  font-size: 10px; font-weight: 700; color: rgba(255,255,255,.8);
   letter-spacing: .5px; text-transform: uppercase;
 }
-.hero-eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
+.hero-eyebrow .dot { width: 5px; height: 5px; border-radius: 50%; background: #4ade80; }
 .hero h1 {
-  font-size: clamp(32px, 5vw, 52px); font-weight: 900; color: #fff;
-  letter-spacing: -1.5px; line-height: 1.08; margin-bottom: 18px;
+  font-size: clamp(20px, 2.5vw, 28px); font-weight: 900; color: #fff;
+  letter-spacing: -0.6px; line-height: 1.1; margin: 0 0 4px;
 }
 .hero h1 span { color: #60a5fa; }
 .hero p {
-  font-size: 17px; color: rgba(255,255,255,.65); line-height: 1.65; max-width: 520px;
-  margin-bottom: 32px;
+  font-size: 13px; color: rgba(255,255,255,.65); line-height: 1.4; max-width: 620px;
+  margin: 0 0 10px;
 }
 .hero-stats {
-  display: flex; gap: 28px; flex-wrap: wrap;
+  display: flex; gap: 6px 18px; flex-wrap: wrap; align-items: center;
+  font-size: 11.5px; color: rgba(255,255,255,.55); font-weight: 600;
 }
-.hero-stat { text-align: left; }
-.hero-stat-num { font-size: 28px; font-weight: 900; color: #fff; line-height: 1; }
-.hero-stat-lbl { font-size: 12px; color: rgba(255,255,255,.5); margin-top: 3px; }
+.hero-stat { display: inline-flex; align-items: baseline; gap: 4px; }
+.hero-stat-num { font-size: 14px; font-weight: 900; color: #fff; line-height: 1; }
+.hero-stat-lbl { font-size: 11px; color: rgba(255,255,255,.55); }
+.hero-stat-sep { color: rgba(255,255,255,.25); padding: 0 2px; }
 .hero-badges {
-  display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;
+  display: flex; flex-wrap: wrap; gap: 6px; flex-shrink: 0; max-width: 420px; justify-content: flex-end;
 }
 .hero-badge {
-  display: flex; align-items: center; gap: 12px;
-  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
-  border-radius: 12px; padding: 14px 18px; min-width: 220px;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14);
+  border-radius: 999px; padding: 5px 10px 5px 8px;
   backdrop-filter: blur(8px);
 }
-.hero-badge-icon { font-size: 24px; flex-shrink: 0; }
-.hero-badge-text { font-size: 12.5px; color: rgba(255,255,255,.8); line-height: 1.4; }
-.hero-badge-text strong { color: #fff; display: block; font-size: 13.5px; margin-bottom: 2px; }
+.hero-badge-icon { font-size: 13px; flex-shrink: 0; line-height: 1; }
+.hero-badge-text { font-size: 11px; color: rgba(255,255,255,.85); line-height: 1.2; font-weight: 600; }
+.hero-badge-text strong { color: #fff; font-weight: 800; }
 
 /* ── FILTER BAR ── */
 .filter-bar {
@@ -321,7 +323,7 @@ body {
 
 /* ── RESPONSIVE ── */
 @media(max-width:900px) {
-  .hero { padding: 36px 20px 40px; }
+  .hero { padding: 16px 18px 18px; }
   .hero-badges { display: none; }
   .mod-grid { grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); }
 }
@@ -387,18 +389,20 @@ body {
   <div class="hero-inner">
     <div class="hero-text">
       <div class="hero-eyebrow"><span class="dot" style="background:#fbbf24;"></span> Ausschreibung &amp; Kalkulation</div>
-      <h1>Von der Offerte<br><span>zur Schlussrechnung.</span></h1>
-      <p>Module fuer die gesamte Ausschreibungsphase &#8212; Leistungsverzeichnisse, Vergabe, Kostenkontrolle und Nachtragsmanagement. Normkonform nach SIA und NPK.</p>
+      <h1>Von der Offerte <span>zur Schlussrechnung.</span></h1>
+      <p>Module fuer die gesamte Ausschreibungsphase &#8212; LV, Vergabe, Kostenkontrolle und Nachtragsmanagement. Normkonform nach SIA und NPK.</p>
       <div class="hero-stats">
-        <div class="hero-stat"><div class="hero-stat-num">7</div><div class="hero-stat-lbl">Module total</div></div>
-        <div class="hero-stat"><div class="hero-stat-num" style="color:#fcd34d;">1</div><div class="hero-stat-lbl">Bereits aktiv</div></div>
-        <div class="hero-stat"><div class="hero-stat-num">6</div><div class="hero-stat-lbl">In Entwicklung</div></div>
+        <span class="hero-stat"><span class="hero-stat-num">7</span> Module total</span>
+        <span class="hero-stat-sep">&middot;</span>
+        <span class="hero-stat"><span class="hero-stat-num" style="color:#fcd34d;">1</span> bereits aktiv</span>
+        <span class="hero-stat-sep">&middot;</span>
+        <span class="hero-stat"><span class="hero-stat-num">6</span> in Entwicklung</span>
       </div>
     </div>
     <div class="hero-badges">
-      <div class="hero-badge"><div class="hero-badge-icon">&#128203;</div><div class="hero-badge-text"><strong>LV nach NPK</strong>Normgerechte Leistungsverzeichnisse</div></div>
-      <div class="hero-badge"><div class="hero-badge-icon">&#128176;</div><div class="hero-badge-text"><strong>SIA 118 konform</strong>Werkvertrag bis Schlussrechnung</div></div>
-      <div class="hero-badge"><div class="hero-badge-icon">&#128202;</div><div class="hero-badge-text"><strong>Vergabematrix</strong>Angebote vergleichen und auswerten</div></div>
+      <div class="hero-badge"><span class="hero-badge-icon">&#128203;</span><span class="hero-badge-text"><strong>LV nach NPK</strong></span></div>
+      <div class="hero-badge"><span class="hero-badge-icon">&#128176;</span><span class="hero-badge-text"><strong>SIA 118</strong></span></div>
+      <div class="hero-badge"><span class="hero-badge-icon">&#128202;</span><span class="hero-badge-text"><strong>Vergabematrix</strong></span></div>
     </div>
   </div>
 </section>

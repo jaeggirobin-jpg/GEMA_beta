@@ -396,13 +396,13 @@ body {
 /* ── HERO ── */
 .hero {
   background: linear-gradient(160deg, #0f172a 0%, #1e3a5f 55%, #0c4a2e 100%);
-  border-radius: 20px;
-  padding: 48px 36px;
+  border-radius: 16px;
+  padding: 20px 24px 22px;
   position: relative;
   overflow: hidden;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   color: #fff;
-  box-shadow: 0 16px 48px rgba(0,0,0,.13), 0 4px 16px rgba(0,0,0,.06);
+  box-shadow: 0 8px 24px rgba(0,0,0,.1);
 }
 .hero::before {
   content: '';
@@ -418,40 +418,45 @@ body {
 }
 .hero-inner {
   position: relative; z-index: 1;
-  display: flex; align-items: center; justify-content: space-between; gap: 36px; flex-wrap: wrap;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
 }
 .hero-text { flex: 1; min-width: 260px; }
 .hero-eyebrow {
-  display: inline-flex; align-items: center; gap: 8px;
+  display: inline-flex; align-items: center; gap: 6px;
   background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
-  border-radius: 999px; padding: 5px 14px; margin-bottom: 18px;
-  font-size: 12px; font-weight: 700; color: rgba(255,255,255,.8);
+  border-radius: 999px; padding: 3px 10px; margin-bottom: 8px;
+  font-size: 10px; font-weight: 700; color: rgba(255,255,255,.8);
   letter-spacing: .5px; text-transform: uppercase;
 }
-.hero-eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
+.hero-eyebrow .dot { width: 5px; height: 5px; border-radius: 50%; background: #4ade80; }
 .hero h1 {
-  font-size: clamp(28px, 4vw, 42px); font-weight: 900; color: #fff;
-  letter-spacing: -1px; line-height: 1.1; margin-bottom: 14px;
+  font-size: clamp(20px, 2.5vw, 28px); font-weight: 900; color: #fff;
+  letter-spacing: -0.6px; line-height: 1.1; margin: 0 0 4px;
 }
 .hero h1 span { color: #60a5fa; }
 .hero p {
-  font-size: 15px; color: rgba(255,255,255,.65); line-height: 1.65; max-width: 480px;
-  margin-bottom: 24px;
+  font-size: 13px; color: rgba(255,255,255,.65); line-height: 1.4; max-width: 620px;
+  margin: 0 0 10px;
 }
-.hero-stats { display: flex; gap: 28px; flex-wrap: wrap; }
-.hero-stat-num { font-size: 26px; font-weight: 900; color: #fff; line-height: 1; }
-.hero-stat-lbl { font-size: 11.5px; color: rgba(255,255,255,.5); margin-top: 3px; }
-.hero-badges { display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+.hero-stats {
+  display: flex; gap: 6px 18px; flex-wrap: wrap; align-items: center;
+  font-size: 11.5px; color: rgba(255,255,255,.55); font-weight: 600;
+}
+.hero-stat { display: inline-flex; align-items: baseline; gap: 4px; }
+.hero-stat-num { font-size: 14px; font-weight: 900; color: #fff; line-height: 1; }
+.hero-stat-lbl { font-size: 11px; color: rgba(255,255,255,.55); }
+.hero-stat-sep { color: rgba(255,255,255,.25); padding: 0 2px; }
+.hero-badges { display: flex; flex-wrap: wrap; gap: 6px; flex-shrink: 0; max-width: 420px; justify-content: flex-end; }
 .hero-badge {
-  display: flex; align-items: center; gap: 12px;
-  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
-  border-radius: 12px; padding: 12px 16px; min-width: 200px;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14);
+  border-radius: 999px; padding: 5px 10px 5px 8px;
   backdrop-filter: blur(8px);
 }
-.hero-badge-icon { font-size: 22px; flex-shrink: 0; }
-.hero-badge-text { font-size: 12px; color: rgba(255,255,255,.8); line-height: 1.4; }
-.hero-badge-text strong { color: #fff; display: block; font-size: 13px; margin-bottom: 1px; }
-@media (max-width: 800px) { .hero-badges { flex-direction: row; flex-wrap: wrap; } .hero-badge { min-width: 160px; } }
+.hero-badge-icon { font-size: 13px; flex-shrink: 0; line-height: 1; }
+.hero-badge-text { font-size: 11px; color: rgba(255,255,255,.85); line-height: 1.2; font-weight: 600; }
+.hero-badge-text strong { color: #fff; font-weight: 800; }
+@media (max-width: 800px) { .hero-badges { display: none; } .hero { padding: 16px 18px 18px; } }
 
 /* ── WORKFLOW BAR ── */
 .workflow {
@@ -610,54 +615,23 @@ input::placeholder{color:#cbd5e1 !important;}
       <div class="hero-text">
         <div class="hero-eyebrow">
           <span class="dot"></span>
-          Sanitärtechnik · Berechnungsmodule
+          Sanitärberechnungen
         </div>
-        <h1>Alle Berechnungen.<br><span>Ein System.</span></h1>
+        <h1>Alle Berechnungen. <span>Ein System.</span></h1>
         <p>Druckdispositiv, Abwasser, Niederschlag, Warmwasser, Abscheider und mehr — normkonform nach Schweizer Standards.</p>
         <div class="hero-stats">
-          <div class="hero-stat">
-            <div class="hero-stat-num">21</div>
-            <div class="hero-stat-lbl">Module</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-num">4</div>
-            <div class="hero-stat-lbl">Kategorien</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-num">∞</div>
-            <div class="hero-stat-lbl">Projekte</div>
-          </div>
+          <span class="hero-stat"><span class="hero-stat-num">21</span> Module</span>
+          <span class="hero-stat-sep">·</span>
+          <span class="hero-stat"><span class="hero-stat-num">4</span> Kategorien</span>
+          <span class="hero-stat-sep">·</span>
+          <span class="hero-stat"><span class="hero-stat-num">∞</span> Projekte</span>
         </div>
       </div>
       <div class="hero-badges">
-        <div class="hero-badge">
-          <div class="hero-badge-icon">📐</div>
-          <div class="hero-badge-text">
-            <strong>SIA 385/1+2</strong>
-            Warmwasser · Speicher · Zirkulation
-          </div>
-        </div>
-        <div class="hero-badge">
-          <div class="hero-badge-icon">💧</div>
-          <div class="hero-badge-text">
-            <strong>SVGW W3 · SN EN 806</strong>
-            Kaltwasser · Druck · Versorgung
-          </div>
-        </div>
-        <div class="hero-badge">
-          <div class="hero-badge-icon">🌧️</div>
-          <div class="hero-badge-text">
-            <strong>SIA 592 · SN EN 12056</strong>
-            Abwasser · Niederschlag · Entwässerung
-          </div>
-        </div>
-        <div class="hero-badge">
-          <div class="hero-badge-icon">🇨🇭</div>
-          <div class="hero-badge-text">
-            <strong>Hosting Schweiz</strong>
-            Daten werden in der Schweiz gehostet
-          </div>
-        </div>
+        <div class="hero-badge"><span class="hero-badge-icon">📐</span><span class="hero-badge-text"><strong>SIA 385</strong></span></div>
+        <div class="hero-badge"><span class="hero-badge-icon">💧</span><span class="hero-badge-text"><strong>SVGW W3</strong> · EN 806</span></div>
+        <div class="hero-badge"><span class="hero-badge-icon">🌧️</span><span class="hero-badge-text"><strong>SIA 592</strong> · EN 12056</span></div>
+        <div class="hero-badge"><span class="hero-badge-icon">🇨🇭</span><span class="hero-badge-text"><strong>CH-Hosting</strong></span></div>
       </div>
     </div>
   </section>
