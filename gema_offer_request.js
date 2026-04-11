@@ -248,6 +248,16 @@
     ov.querySelector('#_gorClose').addEventListener('click', close);
     ov.querySelector('#_gorCancel').addEventListener('click', close);
     ov.addEventListener('click', function(ev){ if(ev.target === ov) close(); });
+    // Vorbelegung aus opts.vorbelegung: Nachricht + Frist aus einem
+    // zuvor laufenden Katalog-Dialog uebernehmen, damit der User nichts
+    // doppelt eingeben muss, wenn er mitten im Flow auf "anderen
+    // Lieferanten" wechselt.
+    if (opts.vorbelegung) {
+      try {
+        if (opts.vorbelegung.nachricht != null) ov.querySelector('#_gorMsg').value = opts.vorbelegung.nachricht;
+        if (opts.vorbelegung.frist != null)     ov.querySelector('#_gorFrist').value = opts.vorbelegung.frist;
+      } catch(e) {}
+    }
     var firmaInput = ov.querySelector('#_gorFirma');
     firmaInput.addEventListener('input', function(){
       _state.katalogId = ''; _state.orgId = ''; // bei manueller Bearbeitung Auswahl zuruecksetzen

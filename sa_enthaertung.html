@@ -784,7 +784,6 @@ function fixLeadingZero(el){
     <div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--border,#e5e7eb);background:var(--bg,#f4f6fb)">
       <h3 style="font-size:15px;font-weight:800;flex:1">🔍 Passende Enthärtungsanlagen</h3>
       <span id="matchInfo" style="font-size:12px;color:var(--muted,#6b7280)"></span>
-      <button onclick="_openExternalOffer()" style="padding:7px 14px;border-radius:8px;border:1.5px solid #f59e0b;background:#fff;color:#b45309;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap" title="Offerte an einen Lieferanten schicken, der (noch) nicht im System hinterlegt ist">📨 Externe Offerte</button>
     </div>
     <div style="padding:16px 20px">
       <div style="font-size:12px;color:var(--muted,#6b7280);margin-bottom:8px">Lieferant</div>
@@ -1656,6 +1655,13 @@ document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('enth
   }
 
   // ── Offertanfrage ──
+  // Der Dialog bietet zwei Wege:
+  //  1. Anfrage an die aktuell im Modal gewaehlte Katalog-Anlage
+  //     (klassischer Flow, wie bisher).
+  //  2. Switch "→ Anderen / neuen Lieferanten anfragen" oben im Dialog —
+  //     schliesst den Katalog-Dialog und oeffnet GemaOfferRequest mit
+  //     denselben Berechnungswerten, dort tippt der Planer die Firma
+  //     per Autocomplete oder legt sie neu an.
   window._pkOfferteAnfragen = function(){
     if(!_selProdId) return;
     var p = GemaProdukte.getProdukt(_selProdId);
@@ -1673,6 +1679,10 @@ document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('enth
           '<div style="font-size:12px;color:var(--muted,#6b7280);margin-top:4px">'+p.lieferantFirma+' · '+(d.serie||'')+' '+(d.modell||'')+'</div>' +
         '</div>' +
         '<div style="padding:16px 20px;display:flex;flex-direction:column;gap:10px">' +
+          '<button id="_oaSwitchExtern" type="button" style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;border-radius:10px;border:1.5px dashed #fde68a;background:#fffbeb;color:#92400e;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;text-align:left" title="Nicht diese Anlage? Anfrage an einen anderen oder neuen Lieferanten senden.">' +
+            '<span>Anderen / neuen Lieferanten anfragen</span>' +
+            '<span style="font-size:14px">→</span>' +
+          '</button>' +
           '<div><label style="font-size:12px;font-weight:700;color:var(--muted,#6b7280);display:block;margin-bottom:4px">Projekt / Bauvorhaben</label>' +
             '<input type="text" id="_oaProjekt" value="'+projekt.replace(/"/g,'&quot;')+'" style="width:100%;padding:8px 10px;border:1.5px solid var(--border2,#cdd4e4);border-radius:8px;font-size:13px;font-family:inherit"/></div>' +
           '<div><label style="font-size:12px;font-weight:700;color:var(--muted,#6b7280);display:block;margin-bottom:4px">Frist (Tage)</label>' +
@@ -1684,11 +1694,33 @@ document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('enth
         '</div>' +
         '<div style="padding:14px 20px;border-top:1.5px solid var(--border,#e2e8f0);display:flex;gap:8px;justify-content:flex-end">' +
           '<button id="_oaCancel" style="padding:8px 16px;border-radius:8px;border:1.5px solid var(--border2,#cdd4e4);background:var(--surface,#fff);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--text)">Abbrechen</button>' +
-          '<button id="_oaSend" style="padding:8px 16px;border-radius:8px;border:none;background:#f59e0b;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📨 Anfrage senden</button>' +
+          '<button id="_oaSend" style="padding:8px 16px;border-radius:8px;border:none;background:#f59e0b;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">📨 Anfrage an '+p.lieferantFirma+' senden</button>' +
         '</div>' +
       '</div>';
     document.body.appendChild(overlay);
     overlay.querySelector('#_oaCancel').addEventListener('click', function(){ overlay.remove(); });
+    overlay.querySelector('#_oaSwitchExtern').addEventListener('click', function(){
+      // Wechsel in den externen Modus: Katalog-Dialog schliessen, den
+      // wiederverwendbaren GemaOfferRequest-Dialog oeffnen, vorbelegt mit
+      // den Berechnungswerten der Enthaertung und dem bereits eingegebenen
+      // Projektnamen/Nachricht/Frist.
+      if (typeof GemaOfferRequest === 'undefined') { alert('Offerten-Modul nicht geladen'); return; }
+      var vorab = {
+        projekt: document.getElementById('_oaProjekt')?.value || projekt,
+        nachricht: document.getElementById('_oaMsg')?.value || '',
+        frist: parseInt(document.getElementById('_oaFrist')?.value,10) || 14
+      };
+      overlay.remove();
+      document.getElementById('prodModal').style.display = 'none';
+      GemaOfferRequest.open({
+        kategorie:'enthaertung',
+        titel:'Enthärtungsanlage',
+        produktName:'Enthärtungsanlage (Planung)',
+        berechnungswerte: _enthaertungBerechnungswerte(),
+        projekt:{ name: vorab.projekt, ort:'', objektId: objektId },
+        vorbelegung:{ nachricht: vorab.nachricht, frist: vorab.frist }
+      });
+    });
     overlay.querySelector('#_oaSend').addEventListener('click', function(){
       var oa = GemaProdukte.createOffertanfrage({
         lieferantId: p.lieferantId,
@@ -1709,13 +1741,11 @@ document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('enth
     });
   };
 
-  // ── Externe Offertanfrage (Lieferant NICHT im System) ──
-  // Liest die aktuellen Berechnungswerte der Enthaertungsberechnung aus
-  // dem DOM und oeffnet das wiederverwendbare GemaOfferRequest-Modal.
-  // Der Lieferant wird beim Senden ueber die Firma-Autocomplete zuge-
-  // ordnet oder als neue Org angelegt (siehe gema_offer_request.js).
-  window._openExternalOffer = function(){
-    if (typeof GemaOfferRequest === 'undefined') { alert('Offerten-Modul nicht geladen'); return; }
+  // Liefert die aktuellen Berechnungs-Eingaben fuer die Offertanfrage,
+  // damit der externe Modus die gleichen Werte mitsendet wie der Katalog-
+  // Modus. Wird sowohl von _pkOfferteAnfragen (externer Switch) als auch
+  // von externen Einstiegen genutzt.
+  function _enthaertungBerechnungswerte(){
     var nenndurchfluss = '';
     var elN = document.getElementById('ve_total_ls');
     if (elN) {
@@ -1724,21 +1754,12 @@ document.addEventListener('DOMContentLoaded', function(){GemaFeedback.init('enth
     }
     var hrFh = (document.getElementById('hr_fh') || {}).value || '';
     var hwFh = (document.getElementById('hw_fh') || {}).value || '';
-    var projektName = (document.getElementById('metaProjekt') || {}).value || '';
-    var objektId = '';
-    try { if (typeof GemaObjekte !== 'undefined') objektId = GemaObjekte.getActiveId() || ''; } catch(e) {}
-    GemaOfferRequest.open({
-      kategorie: 'enthaertung',
-      titel: 'Enthärtungsanlage',
-      produktName: 'Enthärtungsanlage (Planung)',
-      berechnungswerte: {
-        durchfluss: nenndurchfluss || '—',
-        haerte_roh: hrFh ? hrFh + ' °fH' : '',
-        haerte_ziel: hwFh ? hwFh + ' °fH' : ''
-      },
-      projekt: { name: projektName, ort: '', objektId: objektId }
-    });
-  };
+    return {
+      durchfluss: nenndurchfluss || '—',
+      haerte_roh: hrFh ? hrFh + ' °fH' : '',
+      haerte_ziel: hwFh ? hwFh + ' °fH' : ''
+    };
+  }
 
   // Init
   document.addEventListener('DOMContentLoaded', function(){
