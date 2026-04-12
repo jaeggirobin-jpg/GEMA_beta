@@ -602,9 +602,10 @@ function renderObjekte(){
         <span>👷 ${betCount} Beteiligte</span>
         ${o.gemeinde?'<span>📍 '+esc(o.gemeinde)+'</span>':''}
       </div>
-      <div style="margin-top:8px;display:flex;gap:6px" class="no-print">
+      <div style="margin-top:8px;display:flex;gap:6px;align-items:center" class="no-print">
         <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();openObjektModal('${esc(o.id)}')">✏ Bearbeiten</button>
-        ${isActive?'<span style="font-size:11px;color:var(--acc);font-weight:700;padding:3px 0">● Aktives Objekt</span>':'<button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();setActive(\''+esc(o.id)+'\')">Als aktiv setzen</button>'}
+        <button class="btn btn-ghost btn-xs" style="color:#dc2626" onclick="event.stopPropagation();deleteObjektById('${esc(o.id)}')">🗑 Löschen</button>
+        ${isActive?'<span style="font-size:11px;color:var(--acc);font-weight:700;padding:3px 0;margin-left:auto">● Aktives Objekt</span>':'<button class="btn btn-ghost btn-xs" style="margin-left:auto" onclick="event.stopPropagation();setActive(\''+esc(o.id)+'\')">Als aktiv setzen</button>'}
       </div>
     </div>`;
   }).join('');
@@ -612,8 +613,9 @@ function renderObjekte(){
 window.renderObjekte=renderObjekte;
 
 function selectObjekt(id){
+  // Klick auf ein Objekt setzt es als aktiv — oeffnet NICHT mehr
+  // automatisch den Beteiligte-Tab, wie der User gewuenscht hat.
   setActive(id);
-  switchTab('beteiligte',document.querySelector('[onclick*="beteiligte"]'));
 }
 window.selectObjekt=selectObjekt;
 
@@ -724,20 +726,32 @@ function saveObjekt(){
 window.saveObjekt=saveObjekt;
 
 function deleteObjekt(){
-  const id=$('objEditId').value;if(!id)return;
-  const kinder=_mem.objekte.filter(o=>o.parentObjektId===id);
-  let msg='Objekt und alle zugehörigen Beteiligten löschen?';
-  if(kinder.length)msg+='\n\n'+kinder.length+' Sub-Objekt'+(kinder.length!==1?'e':'')+' werden zu eigenständigen Objekten (Parent-Verknüpfung wird entfernt, die Sub-Objekte selbst bleiben erhalten).';
+  // Aus dem Modal heraus — liest die ID aus dem Hidden-Field.
+  deleteObjektById($('objEditId').value);
+}
+// Eigene Funktion mit direkter ID, damit der Loeschen-Button
+// auch direkt auf der Card funktioniert (ohne offenes Modal).
+function deleteObjektById(id){
+  if(!id)return;
+  var obj=_mem.objekte.find(function(o){return o.id===id;});
+  if(!obj)return;
+  var kinder=_mem.objekte.filter(function(o){return o.parentObjektId===id;});
+  var betCount=_mem.beteiligte.filter(function(b){return b.objektId===id;}).length;
+  // Beschreibender Bestaetigungs-Dialog
+  var msg='Soll das Projekt «' + (obj.name||'Ohne Name') + '» wirklich gelöscht werden?';
+  if(betCount>0) msg+='\n\n' + betCount + ' Beteiligte' + (betCount!==1?' werden':' wird') + ' ebenfalls entfernt.';
+  if(kinder.length) msg+='\n' + kinder.length + ' Sub-Objekt' + (kinder.length!==1?'e':'') + ' werden zu eigenständigen Objekten (bleiben erhalten).';
   if(!confirm(msg))return;
   // Kinder entkoppeln, damit sie nicht zu Waisen werden
-  _mem.objekte.forEach(o=>{if(o.parentObjektId===id)o.parentObjektId='';});
-  _mem.objekte=_mem.objekte.filter(x=>x.id!==id);
-  _mem.beteiligte=_mem.beteiligte.filter(b=>b.objektId!==id);
+  _mem.objekte.forEach(function(o){if(o.parentObjektId===id)o.parentObjektId='';});
+  _mem.objekte=_mem.objekte.filter(function(x){return x.id!==id;});
+  _mem.beteiligte=_mem.beteiligte.filter(function(b){return b.objektId!==id;});
   if(_mem.activeObjektId===id)_mem.activeObjektId=_mem.objekte[0]?.id||null;
-  save();closeModal('objModal');renderObjekte();updateBadges();
-  toast('🗑 Objekt gelöscht');
+  save();try{closeModal('objModal');}catch(e){}renderObjekte();updateBadges();
+  toast('🗑 Objekt «'+(obj.name||'')+' » gelöscht');
 }
 window.deleteObjekt=deleteObjekt;
+window.deleteObjektById=deleteObjektById;
 
 // ── BETEILIGTE ──
 function populateObjFilter(){
