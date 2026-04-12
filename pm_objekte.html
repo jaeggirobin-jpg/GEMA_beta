@@ -183,6 +183,56 @@ input::placeholder,textarea::placeholder{color:#cbd5e1!important}
 
 /* PRINT */
 @media print{.g-nav,.tab-bar,.toolbar,.btn,.modal-bg,.no-print,#gToast{display:none!important}.g-page{padding:0;max-width:100%}.card{box-shadow:none;border:1px solid #ccc}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .g-page{padding:14px 12px 40px}
+  /* Nav — gema_mobile_menu.js kuemmert sich um das Hamburger-Menue,
+     wir passen nur Padding/Gap an. */
+  .g-nav-inner{padding:0 12px;gap:8px}
+  .g-nav-bc{font-size:12px}
+  /* Hero */
+  .hero{padding:14px 16px;margin-bottom:12px}
+  .hero-ic{width:38px;height:38px;font-size:18px}
+  .hero h1{font-size:15px}
+  .hero p{font-size:11px}
+  /* Tabs */
+  .tab-bar{flex-wrap:wrap}
+  .tab-btn{padding:7px 12px;font-size:12px}
+  /* Toolbar */
+  .toolbar{gap:6px}
+  .search-box{max-width:100%;min-width:0;flex:1 1 100%;order:10}
+  .sort-sel{font-size:11px;padding:5px 8px}
+  .btn-primary{padding:6px 12px;font-size:12px}
+  .btn-xs{padding:4px 8px!important;font-size:10px!important}
+  /* Filter-Bar (Status-Buttons) */
+  .filter-bar{gap:4px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+  .filter-bar::-webkit-scrollbar{display:none}
+  .fb{font-size:10.5px;padding:4px 10px;flex-shrink:0}
+  /* Objekt-Grid */
+  .obj-grid{grid-template-columns:1fr;gap:10px}
+  .obj-card{padding:14px}
+  .obj-name{font-size:13px}
+  .obj-meta{flex-direction:column;gap:4px}
+  /* Beteiligte-Tabelle → Karten-Layout auf Mobile */
+  .bet-table, .bet-table thead, .bet-table tbody, .bet-table th, .bet-table td, .bet-table tr{display:block}
+  .bet-table thead{display:none}
+  .bet-table tr{padding:10px 12px;margin-bottom:8px;background:var(--sur);border:1.5px solid var(--brd);border-radius:var(--r-sm)}
+  .bet-table td{padding:4px 0;border-bottom:none;font-size:12px}
+  .bet-table td:first-child{font-weight:700;font-size:13px;padding-bottom:6px;border-bottom:1px solid var(--brd)}
+  .bet-table td:before{content:attr(data-label);display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);margin-bottom:1px}
+  /* Modal */
+  .modal{max-width:100%;border-radius:var(--r-sm) var(--r-sm) 0 0;max-height:96vh}
+  .modal-bd{padding:14px}
+  /* Address Autocomplete */
+  .adr-drop{max-height:180px}
+}
+@media(max-width:400px){
+  .g-page{padding:10px 8px 30px}
+  .hero{padding:12px}
+  .toolbar{flex-direction:column;align-items:stretch}
+  .toolbar .btn-primary{width:100%;justify-content:center}
+}
 </style>
 <link rel="stylesheet" href="gema_responsive.css"/>
 </head>
@@ -816,12 +866,12 @@ function renderBeteiligte(){
       loginCell='<span class="login-status login-none">–</span>';
     }
     return `<tr>
-      <td><span class="rolle-badge ${cls}">${esc(short)}</span></td>
-      <td style="font-weight:600">${esc(b.firma||'–')}</td>
-      <td>${esc(fullname||'–')}${b.funktion?'<br><span style="font-size:11px;color:var(--mut)">'+esc(b.funktion)+'</span>':''}</td>
-      <td style="font-size:12px">${b.email?'<a href="mailto:'+esc(b.email)+'" style="color:var(--acc)">'+esc(b.email)+'</a><br>':''}${esc(b.telefon||b.mobile||'')}</td>
-      <td style="font-size:12px;color:var(--mut)">${esc(obj?.name||'–')}</td>
-      <td class="no-print">${loginCell}</td>
+      <td data-label="Rolle"><span class="rolle-badge ${cls}">${esc(short)}</span></td>
+      <td data-label="Firma" style="font-weight:600">${esc(b.firma||'–')}</td>
+      <td data-label="Name">${esc(fullname||'–')}${b.funktion?'<br><span style="font-size:11px;color:var(--mut)">'+esc(b.funktion)+'</span>':''}</td>
+      <td data-label="Kontakt" style="font-size:12px">${b.email?'<a href="mailto:'+esc(b.email)+'" style="color:var(--acc)">'+esc(b.email)+'</a><br>':''}${esc(b.telefon||b.mobile||'')}</td>
+      <td data-label="Objekt" style="font-size:12px;color:var(--mut)">${esc(obj?.name||'–')}</td>
+      <td data-label="Login" class="no-print">${loginCell}</td>
       <td class="no-print"><div style="display:flex;gap:4px">
         <button class="btn btn-ghost btn-xs" onclick="openBetModal('${esc(b.id)}')">✏</button>
         <button class="btn btn-ghost btn-xs" onclick="deleteBet('${esc(b.id)}')">✕</button>
